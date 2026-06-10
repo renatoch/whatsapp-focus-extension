@@ -66,6 +66,9 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - Foi adicionado botão “Lateral” e atalho `Alt+Shift+L` para mostrar/ocultar a barra lateral apenas no modo full/manual. Ele não aparece no overlay, não aparece no modo busca e não deve funcionar via atalho no modo busca. Ao ocultar manualmente a lateral, o botão permanece visível para permitir reabrir.
 - O experimento `Oculta/Colapso` foi removido após teste prático. O comportamento padrão voltou a ser: selecionar uma conversa na busca esconde a lateral.
 - Quando o WhatsApp está em uma visão aninhada como Arquivadas, o campo de busca nativo pode não existir. O botão Buscar passou a tentar sair da visão aninhada via controle Back/Voltar e, como fallback, eventos `Escape`, antes de refocar a busca.
+- Como o tratamento de todas as telas internas do WhatsApp ainda é incerto, quando a busca não encontra o campo nativo após uma tentativa de saída, a extensão mostra um aviso: por enquanto, modo busca só funciona na lista principal de mensagens.
+- Observação de teste: o alerta não apareceu em alguns casos porque o WhatsApp podia estar em Arquivadas/Configurações ainda com elementos parecidos com busca. A tentativa de saída passou a priorizar o botão global “Conversas/Chats” da lateral esquerda antes de usar Back/Escape.
+- Correção validada: ao entrar no modo busca, a extensão clica primeiro em “Conversas/Chats” quando encontra esse botão global e só depois foca a busca. Isso permite sair de Arquivadas e outras telas internas que ainda expõem um campo de busca contextual.
 
 ## Backlog de produto
 

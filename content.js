@@ -8,6 +8,7 @@
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
+  const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
@@ -16,6 +17,23 @@
   let bypassTimer = null;
   let lastHotCss = "";
   let lastConfigCss = "";
+
+  function debugLog(_message, _details = undefined) {
+    // Intentionally silent in the prototype build. Keep call sites available for quick debugging.
+  }
+
+  function describeElement(element) {
+    if (!element) return null;
+    return {
+      tag: element.tagName,
+      id: element.id || null,
+      role: element.getAttribute("role"),
+      ariaLabel: element.getAttribute("aria-label"),
+      title: element.getAttribute("title"),
+      text: (element.textContent || "").trim().slice(0, 120),
+      className: String(element.className || "").slice(0, 160),
+    };
+  }
 
   function root() {
     return document.documentElement;
@@ -39,7 +57,14 @@
   }
 
   function setSearchMode() {
+    debugLog("setSearchMode:start", {
+      ready: isWhatsAppReady(),
+      searching: isSearching(),
+      rootClass: root().className,
+    });
+
     if (!isWhatsAppReady()) {
+      debugLog("setSearchMode:not-ready -> overlay");
       setActive({ showOverlay: true });
       return;
     }
@@ -48,7 +73,7 @@
     root().classList.add(ROOT_SEARCHING);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
-    window.setTimeout(focusNativeSearch, 100);
+    window.setTimeout(() => focusNativeSearch({ source: "setSearchMode" }), 100);
   }
 
   function isSearching() {
@@ -110,20 +135,64 @@
     window.setTimeout(() => setActive({ showOverlay: false }), 250);
   }
 
-  function focusNativeSearch({ retriedFromNestedView = false } = {}) {
+  function focusNativeSearch({ retriedFromNestedView = false, source = "unknown" } = {}) {
+    const nested = isNestedListView();
+    debugLog("focusNativeSearch:start", {
+      source,
+      retriedFromNestedView,
+      nested,
+      rootClass: root().className,
+    });
+
+    if (!retriedFromNestedView) {
+      const chatsButton = findMainChatsButton();
+      debugLog("focusNativeSearch:mainChatsButton-before-field", describeElement(chatsButton));
+      if (chatsButton) {
+        chatsButton.click();
+        debugLog("focusNativeSearch:clicked-mainChatsButton-before-field");
+        window.setTimeout(
+          () => focusNativeSearch({ retriedFromNestedView: true, source: "after-main-chats-click" }),
+          260
+        );
+        return;
+      }
+    }
+
+    if (nested && !retriedFromNestedView) {
+      debugLog("focusNativeSearch:nested -> exitNestedListView");
+      exitNestedListView();
+      window.setTimeout(
+        () => focusNativeSearch({ retriedFromNestedView: true, source: "after-exit-nested" }),
+        360
+      );
+      return;
+    }
+
     const field = findNativeSearchField();
+    debugLog("focusNativeSearch:field-result", describeElement(field));
     if (field) {
       field.focus();
       field.click();
+      debugLog("focusNativeSearch:field-focused", describeElement(field));
       return;
     }
 
     // WhatsApp hides the normal search field in nested views such as Archived.
-    // First try the explicit Back/Voltar control; then fall back to Esc events.
+    // Try to return to the main Chats/Conversas tab before giving up.
     if (!retriedFromNestedView) {
+      debugLog("focusNativeSearch:no-field -> exitNestedListView");
       exitNestedListView();
-      window.setTimeout(() => focusNativeSearch({ retriedFromNestedView: true }), 260);
+      window.setTimeout(
+        () => focusNativeSearch({ retriedFromNestedView: true, source: "after-no-field-exit" }),
+        360
+      );
+      return;
     }
+
+    debugLog("focusNativeSearch:failed -> toast");
+    showToast(
+      "Por enquanto, o modo busca só funciona na lista principal de mensagens. Feche Arquivadas, Configurações ou outras telas internas e tente de novo."
+    );
   }
 
   function findNativeSearchField() {
@@ -134,9 +203,19 @@
       '#side [role="textbox"]',
     ];
 
-    return selectors
-      .flatMap((selector) => Array.from(document.querySelectorAll(selector)))
-      .find(isVisibleElement);
+    for (const selector of selectors) {
+      const elements = Array.from(document.querySelectorAll(selector));
+      debugLog("findNativeSearchField:selector", {
+        selector,
+        count: elements.length,
+        visibleCount: elements.filter(isVisibleElement).length,
+        first: describeElement(elements[0]),
+      });
+      const visible = elements.find(isVisibleElement);
+      if (visible) return visible;
+    }
+
+    return undefined;
   }
 
   function isVisibleElement(element) {
@@ -145,26 +224,43 @@
     return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
   }
 
+  function isNestedListView() {
+    const backControl = findBackControl();
+    const title = findNestedViewTitle();
+    const nested = Boolean(backControl) || Boolean(title);
+    debugLog("isNestedListView", {
+      nested,
+      backControl: describeElement(backControl),
+      title: describeElement(title),
+    });
+    return nested;
+  }
+
+  function findNestedViewTitle() {
+    const titles = ["Arquivadas", "Archived", "Configurações", "Settings"];
+    return Array.from(document.querySelectorAll("#side h1, #side h2, #side header span, #side [title]"))
+      .find((element) => titles.some((title) => (element.textContent || element.getAttribute("title") || "").includes(title)));
+  }
+
   function exitNestedListView() {
-    const backSelectors = [
-      '#side [aria-label="Back"]',
-      '#side [aria-label="Voltar"]',
-      '#side [title="Back"]',
-      '#side [title="Voltar"]',
-      '#side [data-icon="back"]',
-      '#side [data-testid="back"]',
-    ];
-
-    const backControl = backSelectors
-      .flatMap((selector) => Array.from(document.querySelectorAll(selector)))
-      .map((element) => element.closest("button") || element.closest('[role="button"]') || element)
-      .find(isVisibleElement);
-
-    if (backControl) {
-      backControl.click();
+    debugLog("exitNestedListView:start");
+    const chatsButton = findMainChatsButton();
+    debugLog("exitNestedListView:chatsButton", describeElement(chatsButton));
+    if (chatsButton) {
+      chatsButton.click();
+      debugLog("exitNestedListView:clicked-chatsButton");
       return;
     }
 
+    const backControl = findBackControl();
+    debugLog("exitNestedListView:backControl", describeElement(backControl));
+    if (backControl) {
+      backControl.click();
+      debugLog("exitNestedListView:clicked-backControl");
+      return;
+    }
+
+    debugLog("exitNestedListView:fallback-escape");
     for (const target of [document.activeElement, document.body, document, window]) {
       if (!target?.dispatchEvent) continue;
       target.dispatchEvent(
@@ -188,6 +284,56 @@
         })
       );
     }
+  }
+
+  function findBackControl() {
+    const backSelectors = [
+      '#side [aria-label="Back"]',
+      '#side [aria-label="Voltar"]',
+      '#side [title="Back"]',
+      '#side [title="Voltar"]',
+      '#side [data-icon="back"]',
+      '#side [data-testid="back"]',
+    ];
+
+    for (const selector of backSelectors) {
+      const elements = Array.from(document.querySelectorAll(selector));
+      debugLog("findBackControl:selector", {
+        selector,
+        count: elements.length,
+        first: describeElement(elements[0]),
+      });
+      const found = elements
+        .map((element) => element.closest("button") || element.closest('[role="button"]') || element)
+        .find(isVisibleElement);
+      if (found) return found;
+    }
+
+    return undefined;
+  }
+
+  function findMainChatsButton() {
+    const labels = ["Conversas", "Chats"];
+    const candidates = Array.from(document.querySelectorAll('button, [role="button"], [aria-label], [title]'));
+    debugLog("findMainChatsButton:candidates", {
+      count: candidates.length,
+      sample: candidates.slice(0, 12).map(describeElement),
+    });
+
+    const found = candidates.find((element) => {
+      if (!isVisibleElement(element)) return false;
+      const text = [
+        element.getAttribute("aria-label"),
+        element.getAttribute("title"),
+        element.textContent,
+      ]
+        .filter(Boolean)
+        .join(" ");
+      return labels.some((label) => text.toLowerCase().includes(label.toLowerCase()));
+    });
+
+    debugLog("findMainChatsButton:found", describeElement(found));
+    return found;
   }
 
   function getOverlay() {
@@ -283,6 +429,24 @@
     button.addEventListener("click", () => toggleSidebar());
 
     getControlsContainer().appendChild(button);
+  }
+
+  function showToast(message) {
+    if (!document.body) return;
+    let toast = document.getElementById(TOAST_ID);
+    if (!toast) {
+      toast = document.createElement("div");
+      toast.id = TOAST_ID;
+      toast.setAttribute("role", "status");
+      document.body.appendChild(toast);
+    }
+
+    toast.textContent = message;
+    toast.hidden = false;
+    window.clearTimeout(showToast.timeoutId);
+    showToast.timeoutId = window.setTimeout(() => {
+      toast.hidden = true;
+    }, 6500);
   }
 
   function getControlsContainer() {
