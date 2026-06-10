@@ -69,9 +69,29 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - Como o tratamento de todas as telas internas do WhatsApp ainda é incerto, quando a busca não encontra o campo nativo após uma tentativa de saída, a extensão mostra um aviso: por enquanto, modo busca só funciona na lista principal de mensagens.
 - Observação de teste: o alerta não apareceu em alguns casos porque o WhatsApp podia estar em Arquivadas/Configurações ainda com elementos parecidos com busca. A tentativa de saída passou a priorizar o botão global “Conversas/Chats” da lateral esquerda antes de usar Back/Escape.
 - Correção validada: ao entrar no modo busca, a extensão clica primeiro em “Conversas/Chats” quando encontra esse botão global e só depois foca a busca. Isso permite sair de Arquivadas e outras telas internas que ainda expõem um campo de busca contextual.
+- “Continuar na conversa aberta” passou a tentar clicar em “Conversas/Chats” antes de esconder o overlay, para normalizar o contexto lateral quando o WhatsApp estava em Arquivadas ou outra tela interna.
+
+## Revisão de privacidade e segurança — análise preliminar
+
+Uma revisão externa preliminar apontou riscos e recomendações para uma eventual versão distribuível/publicável. Não é necessário corrigir tudo no MVP local, mas estes pontos devem orientar uma reconstrução mais robusta.
+
+### Recomendações principais
+
+- Remover ou gatear o hot-refresh antes de qualquer distribuição pública.
+- Remover `focus.css` e `dev-config.json` de `web_accessible_resources` em build final; hoje eles são úteis para desenvolvimento, mas expõem detalhes internos à página.
+- Documentar explicitamente que a extensão tem acesso de leitura/escrita ao DOM do WhatsApp Web, mesmo sem backend.
+- Criar uma máquina de estados mais explícita para evitar ambiguidades entre foco, busca, modo normal, lateral aberta/oculta e escape temporário.
+- Adicionar debounce/guards para cliques rápidos e transições inválidas.
+- Tratar fragilidade de seletores do WhatsApp Web: detecção de falha, fallback e rotina de manutenção.
+- Evitar que código de desenvolvimento vá para uma versão final.
+- Melhorar tratamento de erro quando a busca/campos do WhatsApp não forem encontrados.
+- Avaliar persistência ou semântica do timer “Ver WhatsApp normal por 5 min”.
+- Adicionar ícones, limpar manifest e documentar compatibilidade Chrome/MV3.
+- Fazer nova revisão de privacidade/segurança antes de qualquer distribuição pública.
 
 ## Backlog de produto
 
+- Revisão futura das recomendações de privacidade/segurança registradas acima. A versão completa em HTML/rich text está salva no banco da jornada como memória `37b21a40` — “Análise completa de privacidade e segurança — WhatsApp Focus Mode (HTML)”.
 - Busca limpa por contato sem previews.
 - Whitelist de 2–3 conversas por sessão de foco.
 - Atalho de teclado para voltar ao modo foco.

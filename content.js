@@ -14,12 +14,18 @@
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
   const BYPASS_MS = 5 * 60 * 1000;
   const DEV_REFRESH_MS = 1000;
+  const DEBUG = true;
   let bypassTimer = null;
   let lastHotCss = "";
   let lastConfigCss = "";
 
-  function debugLog(_message, _details = undefined) {
-    // Intentionally silent in the prototype build. Keep call sites available for quick debugging.
+  function debugLog(message, details = undefined) {
+    if (!DEBUG) return;
+    if (details === undefined) {
+      console.log(`[WhatsApp Focus] ${message}`);
+      return;
+    }
+    console.log(`[WhatsApp Focus] ${message}`, details);
   }
 
   function describeElement(element) {
@@ -133,6 +139,35 @@
 
   function enterFocusedConversationSoon() {
     window.setTimeout(() => setActive({ showOverlay: false }), 250);
+  }
+
+  function continueOpenConversation() {
+    debugLog("continueOpenConversation:start", {
+      ready: isWhatsAppReady(),
+      rootClass: root().className,
+      hasOpenConversation: hasOpenConversation(),
+      nativeSearchField: describeElement(findNativeSearchField()),
+      nested: isNestedListView(),
+    });
+
+    const chatsButton = findMainChatsButton();
+    debugLog("continueOpenConversation:mainChatsButton", describeElement(chatsButton));
+    if (chatsButton) {
+      chatsButton.click();
+      debugLog("continueOpenConversation:clicked-mainChatsButton");
+      window.setTimeout(() => {
+        debugLog("continueOpenConversation:after-delay-hide", {
+          rootClass: root().className,
+          nativeSearchField: describeElement(findNativeSearchField()),
+          nested: isNestedListView(),
+        });
+        setActive({ showOverlay: false });
+      }, 260);
+      return;
+    }
+
+    debugLog("continueOpenConversation:no-mainChatsButton -> hide");
+    setActive({ showOverlay: false });
   }
 
   function focusNativeSearch({ retriedFromNestedView = false, source = "unknown" } = {}) {
@@ -320,8 +355,8 @@
       sample: candidates.slice(0, 12).map(describeElement),
     });
 
-    const found = candidates.find((element) => {
-      if (!isVisibleElement(element)) return false;
+    const byLabel = candidates.find((element) => {
+      if (!isVisibleElement(element) || isMirrorControl(element)) return false;
       const text = [
         element.getAttribute("aria-label"),
         element.getAttribute("title"),
@@ -332,8 +367,25 @@
       return labels.some((label) => text.toLowerCase().includes(label.toLowerCase()));
     });
 
-    debugLog("findMainChatsButton:found", describeElement(found));
-    return found;
+    if (byLabel) {
+      debugLog("findMainChatsButton:found-by-label", describeElement(byLabel));
+      return byLabel;
+    }
+
+    const byPosition = candidates
+      .filter((element) => {
+        if (!isVisibleElement(element) || isMirrorControl(element)) return false;
+        const rect = element.getBoundingClientRect();
+        return rect.left >= 0 && rect.left < 120 && rect.top > 35 && rect.top < 135 && rect.width > 24 && rect.height > 24;
+      })
+      .sort((a, b) => a.getBoundingClientRect().top - b.getBoundingClientRect().top)[0];
+
+    debugLog("findMainChatsButton:found-by-position", describeElement(byPosition));
+    return byPosition;
+  }
+
+  function isMirrorControl(element) {
+    return Boolean(element.closest?.("#mirror-whatsapp-focus-controls, #mirror-whatsapp-focus-overlay, #mirror-whatsapp-focus-toast"));
   }
 
   function getOverlay() {
@@ -390,7 +442,7 @@
         setSearchMode();
       }
       if (action === "continue") {
-        setActive({ showOverlay: false });
+        continueOpenConversation();
       }
       if (action === "normal") {
         setNormalTemporarily();
