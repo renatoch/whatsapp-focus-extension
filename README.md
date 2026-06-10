@@ -20,10 +20,8 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e exibe estado de carregamento sem ações clicáveis;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
-- adiciona botão vertical **Buscar outra conversa** na barra lateral esquerda quando uma conversa está focada, mantendo-o visível também durante a busca;
-- adiciona botão **Lateral** para mostrar/ocultar a barra lateral sem entrar no modo busca;
-- adiciona botão de experimento **Oculta/Colapso** para alternar entre esconder a lateral após seleção ou mantê-la reduzida;
-- adiciona atalhos `Alt+Shift+F` para voltar ao modo foco, `Alt+Shift+B` para buscar conversa e `Alt+Shift+L` para mostrar/ocultar lateral;
+- adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
+- adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;
 - recarregar a página sempre volta ao modo foco, sem esperar os 5 minutos.
 
 A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa do WhatsApp em um estado intermediário de menor ruído.
@@ -68,11 +66,9 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 3. Clique em **Buscar conversa**.
 4. A lateral deve aparecer para permitir a busca nativa, com menos previews/badges quando os seletores funcionarem.
 5. Selecione uma conversa; a lateral deve sumir automaticamente depois da seleção.
-6. Clique em **Buscar outra conversa**; a busca deve abrir novamente sem passar pelo overlay.
-7. Clique em **Voltar ao modo foco** para retornar à tela neutra.
-8. Teste `Alt+Shift+B` para buscar conversa, `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral.
-9. Alterne o botão **Oculta/Colapso** e compare o comportamento após selecionar uma conversa na busca.
-9. Clique em **Continuar na conversa aberta**.
+6. Clique em **Voltar ao modo foco** para retornar à tela neutra.
+7. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.
+8. Clique em **Continuar na conversa aberta**.
 10. A conversa, se houver uma aberta, fica visível; a lateral continua escondida.
 11. Clique em **Ver WhatsApp normal por 5 min** para validar a válvula de escape.
 12. Durante o modo normal, clique em **Voltar ao modo foco** para encerrar a liberação antes dos 5 minutos.

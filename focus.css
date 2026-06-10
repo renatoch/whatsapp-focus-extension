@@ -7,69 +7,12 @@ html.mwf-active body {
 }
 
 html.mwf-searching #side,
-html.mwf-sidebar-open #side,
-html.mwf-sidebar-collapsed #side {
+html.mwf-sidebar-open #side {
   display: flex !important;
 }
 
-html.mwf-sidebar-collapsed #side,
-html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"] {
-  position: relative !important;
-  flex: 0 0 96px !important;
-  width: 96px !important;
-  min-width: 96px !important;
-  max-width: 96px !important;
-  overflow: hidden !important;
-  background: linear-gradient(180deg, rgba(0, 168, 132, 0.05), rgba(31, 44, 51, 0.04)) !important;
-  border: 0 !important;
-  outline: 0 !important;
-  box-shadow: none !important;
-}
-
-html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"]::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  right: -8px;
-  bottom: 0;
-  z-index: 2;
-  width: 16px;
-  background: #f7f5f3;
-  pointer-events: none;
-}
-
-html.mwf-sidebar-collapsed #main,
-html.mwf-sidebar-collapsed #main *,
-html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"],
-html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"] * {
-  border-left-color: transparent !important;
-  border-right-color: transparent !important;
-  outline-color: transparent !important;
-}
-
-html.mwf-sidebar-collapsed #side > *,
-html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"] > * {
-  opacity: 0 !important;
-  pointer-events: none !important;
-}
-
-html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"]::after {
-  content: "Lateral colapsada";
-  position: absolute;
-  left: 50%;
-  top: 48%;
-  z-index: 1;
-  color: rgba(31, 44, 51, 0.42);
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 12px;
-  font-weight: 750;
-  letter-spacing: 0.02em;
-  line-height: 1;
-  text-transform: uppercase;
-  writing-mode: vertical-rl;
-  text-orientation: mixed;
-  transform: translate(-50%, -50%) rotate(180deg);
-  pointer-events: none;
+html.mwf-sidebar-hidden #side {
+  display: none !important;
 }
 
 /* Search mode is intentionally imperfect: it uses broad WhatsApp Web selectors
@@ -273,9 +216,7 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
 }
 
 #mirror-whatsapp-focus-return,
-#mirror-whatsapp-focus-search,
-#mirror-whatsapp-focus-sidebar,
-#mirror-whatsapp-focus-mode {
+#mirror-whatsapp-focus-sidebar {
   width: 50px;
   min-height: 72px;
   border: 0;
@@ -297,34 +238,17 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   color: #07130f;
 }
 
-#mirror-whatsapp-focus-search {
-  background: #1f2c33;
-  color: #e9edef;
-  border: 1px solid rgba(233, 237, 239, 0.22);
-}
-
 #mirror-whatsapp-focus-sidebar {
   background: #28353d;
   color: #e9edef;
   border: 1px solid rgba(233, 237, 239, 0.22);
 }
 
-#mirror-whatsapp-focus-mode {
-  background: #3b2f1f;
-  color: #f7d794;
-  border: 1px solid rgba(247, 215, 148, 0.34);
-}
-
-#mirror-whatsapp-focus-mode[aria-pressed="true"] {
-  background: #1f3b31;
-  color: #b7f7d0;
-  border-color: rgba(183, 247, 208, 0.34);
-}
-
 html.mwf-overlay-open #mirror-whatsapp-focus-controls {
   display: none !important;
 }
 
+html.mwf-active #mirror-whatsapp-focus-sidebar,
 html.mwf-searching #mirror-whatsapp-focus-sidebar {
   display: none !important;
 }

@@ -58,14 +58,13 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 
 ### Implementação adicional
 - Ao selecionar uma conversa no modo busca, a extensão tenta esconder automaticamente a lateral após 250ms, retornando ao estado de conversa focada.
-- Foram adicionados botão “Buscar outra conversa” e atalhos `Alt+Shift+B` para busca e `Alt+Shift+F` para modo foco. `Esc` foi evitado porque já tem semântica útil no WhatsApp Web: desselecionar conversa, sair de arquivadas e fechar configurações.
+- Foi testado um botão lateral “Buscar outra conversa” com atalho `Alt+Shift+B`, mas ele foi removido por ambiguidade: parecia abrir uma busca simples, não entrar no modo busca. A busca voltou a pertencer ao overlay de Modo Foco.
+- Foi mantido o atalho `Alt+Shift+F` para modo foco. `Esc` foi evitado porque já tem semântica útil no WhatsApp Web: desselecionar conversa, sair de arquivadas e fechar configurações.
 - A ação “Continuar na conversa aberta” passou a ficar oculta quando a extensão não detecta `#main`, evitando levar o usuário para um estado vazio.
-- O botão “Buscar” lateral deixou de desaparecer durante o modo busca, porque o sumiço confundia a navegação.
+- O botão “Lateral” foi mantido apenas para o modo full/manual: ele fica oculto no overlay, no modo busca e após seleção de pessoa pela busca.
 - Durante o carregamento inicial, a extensão mantém a tela cega, mas só libera ações quando detecta `#side`; antes disso mostra mensagem de carregamento. Isso evita clique em botões que levam para tela intermediária de loading.
-- Foi adicionado botão “Lateral” e atalho `Alt+Shift+L` para mostrar/ocultar a barra lateral fora do modo busca, útil quando o usuário já está em uma conversa e quer alternar visibilidade sem abrir o fluxo de busca.
-- O experimento `Rígido/Sob` foi substituído por `Oculta/Colapso`: no modo Oculta, selecionar uma conversa na busca esconde a lateral; no modo Colapso, selecionar uma conversa reduz a lateral para uma faixa estreita. O estado fica salvo em `localStorage` para permitir teste em ciclos reais.
-- Primeiro teste do modo Colapso escondeu o conteúdo, mas manteve a largura inteira do painel. A implementação passou a marcar dinamicamente o ancestral lateral provável com `data-mwf-collapsed-pane` e aplicar largura reduzida também nele.
-- O modo Colapso melhorou a área de mensagem, mas revelou uma linha vertical persistente; foram adicionadas regras defensivas para remover bordas/outline e mascarar o limite direito do painel.
+- Foi adicionado botão “Lateral” e atalho `Alt+Shift+L` para mostrar/ocultar a barra lateral apenas no modo full/manual. Ele não aparece no overlay, não aparece no modo busca e não deve funcionar via atalho no modo busca. Ao ocultar manualmente a lateral, o botão permanece visível para permitir reabrir.
+- O experimento `Oculta/Colapso` foi removido após teste prático. O comportamento padrão voltou a ser: selecionar uma conversa na busca esconde a lateral.
 - Quando o WhatsApp está em uma visão aninhada como Arquivadas, o campo de busca nativo pode não existir. O botão Buscar passou a tentar sair da visão aninhada via controle Back/Voltar e, como fallback, eventos `Escape`, antes de refocar a busca.
 
 ## Backlog de produto

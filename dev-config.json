@@ -3,16 +3,8 @@
     "top": "330px",
     "left": "6px"
   },
-  "searchButton": {
-    "top": "445px",
-    "left": "6px"
-  },
   "sidebarButton": {
     "top": "560px",
-    "left": "6px"
-  },
-  "modeButton": {
-    "top": "640px",
     "left": "6px"
   },
   "hideInSearch": [

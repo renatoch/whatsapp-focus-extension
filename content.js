@@ -3,22 +3,16 @@
   const ROOT_NORMAL = "mwf-normal";
   const ROOT_SEARCHING = "mwf-searching";
   const ROOT_SIDEBAR_OPEN = "mwf-sidebar-open";
-  const ROOT_SIDEBAR_COLLAPSED = "mwf-sidebar-collapsed";
+  const ROOT_SIDEBAR_HIDDEN = "mwf-sidebar-hidden";
   const ROOT_OVERLAY_OPEN = "mwf-overlay-open";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
-  const SEARCH_BUTTON_ID = "mirror-whatsapp-focus-search";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
-  const MODE_BUTTON_ID = "mirror-whatsapp-focus-mode";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
-  const COLLAPSED_PANE_ATTR = "data-mwf-collapsed-pane";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
   const BYPASS_MS = 5 * 60 * 1000;
   const DEV_REFRESH_MS = 1000;
-  const MODE_STORAGE_KEY = "mirrorWhatsAppFocusSidebarMode";
-  const SIDEBAR_MODE_HIDDEN = "hidden";
-  const SIDEBAR_MODE_COLLAPSED = "collapsed";
   let bypassTimer = null;
   let lastHotCss = "";
   let lastConfigCss = "";
@@ -27,38 +21,18 @@
     return document.documentElement;
   }
 
-  function getSidebarMode() {
-    return localStorage.getItem(MODE_STORAGE_KEY) === SIDEBAR_MODE_COLLAPSED
-      ? SIDEBAR_MODE_COLLAPSED
-      : SIDEBAR_MODE_HIDDEN;
-  }
-
-  function isCollapsedMode() {
-    return getSidebarMode() === SIDEBAR_MODE_COLLAPSED;
-  }
-
-  function toggleSidebarMode() {
-    const nextMode = isCollapsedMode() ? SIDEBAR_MODE_HIDDEN : SIDEBAR_MODE_COLLAPSED;
-    localStorage.setItem(MODE_STORAGE_KEY, nextMode);
-    updateModeButton();
-  }
-
   function setActive({ showOverlay }) {
-    clearCollapsedSidebarPane();
     root().classList.add(ROOT_ACTIVE);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_COLLAPSED);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
     root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
     ensureOverlay();
     ensureReturnButton();
-    ensureSearchButton();
     ensureSidebarButton();
-    ensureModeButton();
     getOverlay().hidden = !showOverlay;
   }
 
   function setNormal() {
-    clearCollapsedSidebarPane();
-    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_COLLAPSED, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_NORMAL);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -70,8 +44,7 @@
       return;
     }
 
-    clearCollapsedSidebarPane();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_COLLAPSED, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SEARCHING);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -86,21 +59,26 @@
     return root().classList.contains(ROOT_SIDEBAR_OPEN);
   }
 
-  function isSidebarCollapsed() {
-    return root().classList.contains(ROOT_SIDEBAR_COLLAPSED);
+  function isSidebarHiddenManually() {
+    return root().classList.contains(ROOT_SIDEBAR_HIDDEN);
+  }
+
+  function canToggleSidebar() {
+    const overlay = getOverlay();
+    return !isSearching() && !(overlay && !overlay.hidden) && !root().classList.contains(ROOT_ACTIVE);
   }
 
   function toggleSidebar() {
-    if (isSearching()) return;
-    const overlay = getOverlay();
-    if (overlay && !overlay.hidden) return;
+    if (!canToggleSidebar()) return;
 
-    if (isSidebarOpen() || isSidebarCollapsed()) {
-      setActive({ showOverlay: false });
+    if (isSidebarOpen() || root().classList.contains(ROOT_NORMAL)) {
+      setSidebarHiddenManually();
       return;
     }
 
-    setSidebarOpen();
+    if (isSidebarHiddenManually()) {
+      setSidebarOpen();
+    }
   }
 
   function isConversationListClick(target) {
@@ -116,59 +94,20 @@
 
   function setSidebarOpen() {
     const overlay = getOverlay();
-    clearCollapsedSidebarPane();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_COLLAPSED, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_OPEN);
     if (overlay) overlay.hidden = true;
   }
 
-  function setSidebarCollapsed() {
+  function setSidebarHiddenManually() {
     const overlay = getOverlay();
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
-    root().classList.add(ROOT_SIDEBAR_COLLAPSED);
-    markCollapsedSidebarPane();
+    root().classList.add(ROOT_SIDEBAR_HIDDEN);
     if (overlay) overlay.hidden = true;
   }
 
-  function clearCollapsedSidebarPane() {
-    document.querySelectorAll(`[${COLLAPSED_PANE_ATTR}]`).forEach((element) => {
-      element.removeAttribute(COLLAPSED_PANE_ATTR);
-    });
-  }
-
-  function markCollapsedSidebarPane() {
-    clearCollapsedSidebarPane();
-    const side = document.querySelector("#side");
-    if (!side) return;
-
-    const sideRect = side.getBoundingClientRect();
-    let pane = side;
-    let current = side.parentElement;
-
-    while (current && current !== document.body) {
-      const rect = current.getBoundingClientRect();
-      const isTooBroad = rect.width > 620 || rect.right > window.innerWidth * 0.72;
-      const isLikelySidebarPane =
-        !isTooBroad &&
-        rect.width >= Math.max(240, sideRect.width) &&
-        rect.left < Math.max(180, window.innerWidth * 0.22) &&
-        rect.height > window.innerHeight * 0.5;
-
-      if (isLikelySidebarPane) pane = current;
-      current = current.parentElement;
-    }
-
-    pane.setAttribute(COLLAPSED_PANE_ATTR, "true");
-  }
-
   function enterFocusedConversationSoon() {
-    window.setTimeout(() => {
-      if (isCollapsedMode()) {
-        setSidebarCollapsed();
-        return;
-      }
-      setActive({ showOverlay: false });
-    }, 250);
+    window.setTimeout(() => setActive({ showOverlay: false }), 250);
   }
 
   function focusNativeSearch({ retriedFromNestedView = false } = {}) {
@@ -333,19 +272,6 @@
     getControlsContainer().appendChild(button);
   }
 
-  function ensureSearchButton() {
-    if (!document.body || document.getElementById(SEARCH_BUTTON_ID)) return;
-
-    const button = document.createElement("button");
-    button.id = SEARCH_BUTTON_ID;
-    button.type = "button";
-    button.textContent = "Buscar";
-    button.title = "Buscar outra conversa (Alt+Shift+B)";
-    button.addEventListener("click", () => setSearchMode());
-
-    getControlsContainer().appendChild(button);
-  }
-
   function ensureSidebarButton() {
     if (!document.body || document.getElementById(SIDEBAR_BUTTON_ID)) return;
 
@@ -357,28 +283,6 @@
     button.addEventListener("click", () => toggleSidebar());
 
     getControlsContainer().appendChild(button);
-  }
-
-  function ensureModeButton() {
-    if (!document.body || document.getElementById(MODE_BUTTON_ID)) return;
-
-    const button = document.createElement("button");
-    button.id = MODE_BUTTON_ID;
-    button.type = "button";
-    button.addEventListener("click", () => toggleSidebarMode());
-
-    getControlsContainer().appendChild(button);
-    updateModeButton();
-  }
-
-  function updateModeButton() {
-    const button = document.getElementById(MODE_BUTTON_ID);
-    if (!button) return;
-    button.textContent = isCollapsedMode() ? "Colapso" : "Oculta";
-    button.title = isCollapsedMode()
-      ? "Modo colapso: ao escolher conversa, reduz a lateral. Clique para ocultar lateral."
-      : "Modo oculta: ao escolher conversa, esconde a lateral. Clique para modo colapso.";
-    button.setAttribute("aria-pressed", String(isCollapsedMode()));
   }
 
   function getControlsContainer() {
@@ -394,9 +298,7 @@
     if (!document.body) return;
     getControlsContainer();
     ensureReturnButton();
-    ensureSearchButton();
     ensureSidebarButton();
-    ensureModeButton();
   }
 
   function ensureStyle(id) {
@@ -429,22 +331,10 @@
       parts.push(`#${RETURN_ID} { top: ${top} !important; left: ${left} !important; }`);
     }
 
-    if (config.searchButton) {
-      const top = config.searchButton.top || "14px";
-      const left = config.searchButton.left || "430px";
-      parts.push(`#${SEARCH_BUTTON_ID} { top: ${top} !important; left: ${left} !important; }`);
-    }
-
     if (config.sidebarButton) {
       const top = config.sidebarButton.top || "560px";
       const left = config.sidebarButton.left || "6px";
       parts.push(`#${SIDEBAR_BUTTON_ID} { top: ${top} !important; left: ${left} !important; }`);
-    }
-
-    if (config.modeButton) {
-      const top = config.modeButton.top || "640px";
-      const left = config.modeButton.left || "6px";
-      parts.push(`#${MODE_BUTTON_ID} { top: ${top} !important; left: ${left} !important; }`);
     }
 
     if (Array.isArray(config.hideInSearch) && config.hideInSearch.length > 0) {
@@ -493,28 +383,28 @@
   }
 
   function installKeyboardShortcuts() {
-    document.addEventListener("keydown", (event) => {
-      if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
-      if (event.key.toLowerCase() === "f") {
-        event.preventDefault();
-        setActive({ showOverlay: true });
-      }
-      if (event.key.toLowerCase() === "b") {
-        event.preventDefault();
-        setSearchMode();
-      }
-      if (event.key.toLowerCase() === "l") {
-        event.preventDefault();
-        toggleSidebar();
-      }
-    });
+    document.addEventListener(
+      "keydown",
+      (event) => {
+        if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+        if (event.key.toLowerCase() === "f") {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          setActive({ showOverlay: true });
+        }
+        if (event.key.toLowerCase() === "l") {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          if (!canToggleSidebar()) return;
+          toggleSidebar();
+        }
+      },
+      true
+    );
   }
 
   function installConversationStateObserver() {
-    const observer = new MutationObserver(() => {
-      updateOverlayState();
-      if (isSidebarCollapsed()) markCollapsedSidebarPane();
-    });
+    const observer = new MutationObserver(updateOverlayState);
     observer.observe(document.documentElement, { childList: true, subtree: true });
     updateOverlayState();
   }
@@ -571,7 +461,7 @@
     });
   }
 
-  root().classList.remove(ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_COLLAPSED, ROOT_NORMAL);
+  root().classList.remove(ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
   root().classList.add(ROOT_ACTIVE, ROOT_OVERLAY_OPEN);
   boot();
 })();
