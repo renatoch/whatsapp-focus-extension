@@ -1,0 +1,338 @@
+html.mwf-active #side {
+  display: none !important;
+}
+
+html.mwf-active body {
+  overflow: hidden !important;
+}
+
+html.mwf-searching #side,
+html.mwf-sidebar-open #side,
+html.mwf-sidebar-collapsed #side {
+  display: flex !important;
+}
+
+html.mwf-sidebar-collapsed #side,
+html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"] {
+  position: relative !important;
+  flex: 0 0 96px !important;
+  width: 96px !important;
+  min-width: 96px !important;
+  max-width: 96px !important;
+  overflow: hidden !important;
+  background: linear-gradient(180deg, rgba(0, 168, 132, 0.05), rgba(31, 44, 51, 0.04)) !important;
+  border: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+}
+
+html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"]::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: -8px;
+  bottom: 0;
+  z-index: 2;
+  width: 16px;
+  background: #f7f5f3;
+  pointer-events: none;
+}
+
+html.mwf-sidebar-collapsed #main,
+html.mwf-sidebar-collapsed #main *,
+html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"],
+html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"] * {
+  border-left-color: transparent !important;
+  border-right-color: transparent !important;
+  outline-color: transparent !important;
+}
+
+html.mwf-sidebar-collapsed #side > *,
+html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"] > * {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+html.mwf-sidebar-collapsed [data-mwf-collapsed-pane="true"]::after {
+  content: "Lateral colapsada";
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  z-index: 1;
+  color: rgba(31, 44, 51, 0.42);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: translate(-50%, -50%) rotate(180deg);
+  pointer-events: none;
+}
+
+/* Search mode is intentionally imperfect: it uses broad WhatsApp Web selectors
+   to reduce previews, timestamps and unread badges while keeping contact names. */
+html.mwf-searching #side [data-testid="cell-frame-secondary"],
+html.mwf-searching #side [data-testid="msg-meta"],
+html.mwf-searching #side [data-testid="last-msg-status"],
+html.mwf-searching #side [data-icon="pinned2"],
+html.mwf-searching #side [aria-label*="unread" i],
+html.mwf-searching #side [aria-label*="não lida" i],
+html.mwf-searching #side [aria-label*="não lidas" i],
+html.mwf-searching #side span[aria-label*="unread" i],
+html.mwf-searching #side span[aria-label*="não lida" i],
+html.mwf-searching #side span[aria-label*="não lidas" i],
+html.mwf-searching #side [role="gridcell"] > div > div:nth-child(2),
+html.mwf-searching #side [role="listitem"] > div > div > div > div:nth-child(2),
+html.mwf-searching #side [role="listitem"] time,
+html.mwf-searching #side [role="listitem"] [style*="color: var(--unread-timestamp"],
+html.mwf-searching #side [role="listitem"] [style*="color: rgb(0, 168, 132"],
+html.mwf-searching #side [role="listitem"] [style*="font-weight: 600"],
+html.mwf-searching #side [role="listitem"] [style*="font-weight:700"] {
+  visibility: hidden !important;
+}
+
+/* More aggressive search-mode clipping: keep the contact/title row, remove the
+   lower preview row and right-side metadata where WhatsApp's generic selectors
+   are the only stable hooks available. */
+html.mwf-searching #side [role="listitem"] [role="gridcell"] > div > div:nth-child(2) > div:nth-child(2),
+html.mwf-searching #side [role="listitem"] [role="gridcell"] > div > div:nth-child(2) > div:first-child > div:nth-child(2),
+html.mwf-searching #side [role="listitem"] [role="gridcell"] > div > div:nth-child(2) > div:first-child > span:nth-child(2),
+html.mwf-searching #side [role="listitem"] [role="gridcell"] > div > div:nth-child(2) > div:first-child time,
+html.mwf-searching #side [role="row"] [role="gridcell"] > div > div:nth-child(2) > div:nth-child(2),
+html.mwf-searching #side [role="row"] [role="gridcell"] > div > div:nth-child(2) > div:first-child > div:nth-child(2),
+html.mwf-searching #side [role="row"] [role="gridcell"] > div > div:nth-child(2) > div:first-child time {
+  display: none !important;
+}
+
+/* Fallback strategy: make chat-list text invisible by default and restore only
+   elements that usually carry the contact/conversation title. This is blunt, but
+   useful for MVP validation when WhatsApp changes internal class names. */
+html.mwf-searching #side [role="listitem"] time,
+html.mwf-searching #side [role="row"] time,
+html.mwf-searching #side [role="listitem"] span,
+html.mwf-searching #side [role="row"] span {
+  color: transparent !important;
+  text-shadow: none !important;
+}
+
+html.mwf-searching #side [data-testid="cell-frame-title"] span[title],
+html.mwf-searching #side [data-testid="cell-frame-title"] span[title] * {
+  color: var(--primary-strong, #e9edef) !important;
+  visibility: visible !important;
+}
+
+html.mwf-searching #side [data-testid="cell-frame-secondary"],
+html.mwf-searching #side [data-testid="cell-frame-secondary"] *,
+html.mwf-searching #side [data-testid="cell-frame-primary-detail"],
+html.mwf-searching #side [data-testid="cell-frame-primary-detail"] *,
+html.mwf-searching #side [data-testid="last-msg-status"],
+html.mwf-searching #side [data-testid="last-msg-status"] * {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+/* If preview text is rendered outside spans, clip each row to its title band. */
+html.mwf-searching #side [role="listitem"],
+html.mwf-searching #side [role="row"] {
+  overflow: hidden !important;
+}
+
+html.mwf-searching #side [role="listitem"] [role="gridcell"],
+html.mwf-searching #side [role="row"] [role="gridcell"] {
+  overflow: hidden !important;
+}
+
+html.mwf-searching #side [role="listitem"] [role="gridcell"] > div,
+html.mwf-searching #side [role="row"] [role="gridcell"] > div {
+  overflow: hidden !important;
+}
+
+html.mwf-searching #side [role="listitem"] [role="gridcell"] > div > div:nth-child(2),
+html.mwf-searching #side [role="row"] [role="gridcell"] > div > div:nth-child(2) {
+  max-height: 26px !important;
+  overflow: hidden !important;
+}
+
+html.mwf-normal #mirror-whatsapp-focus-overlay {
+  display: none !important;
+}
+
+html.mwf-normal #mirror-whatsapp-focus-overlay {
+  display: none !important;
+}
+
+#mirror-whatsapp-focus-overlay[hidden] {
+  display: none !important;
+}
+
+#mirror-whatsapp-focus-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483647;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0b141a;
+  color: #e9edef;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.mwf-card {
+  width: min(520px, calc(100vw - 48px));
+  padding: 28px;
+  border: 1px solid rgba(233, 237, 239, 0.14);
+  border-radius: 18px;
+  background: #111b21;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.mwf-kicker {
+  margin: 0 0 8px;
+  color: #00a884;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mwf-card h1 {
+  margin: 0 0 10px;
+  color: #e9edef !important;
+  font-size: 28px;
+  line-height: 1.15;
+}
+
+.mwf-card p {
+  margin: 0 0 22px;
+  color: #aebac1;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.mwf-loading {
+  display: block;
+  color: #f1c40f !important;
+}
+
+#mirror-whatsapp-focus-overlay.mwf-ready .mwf-loading {
+  display: none !important;
+}
+
+#mirror-whatsapp-focus-overlay:not(.mwf-ready) .mwf-actions {
+  display: none !important;
+}
+
+.mwf-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mwf-button {
+  border: 0;
+  border-radius: 999px;
+  padding: 11px 16px;
+  cursor: pointer;
+  font: inherit;
+  font-weight: 650;
+}
+
+.mwf-button:disabled {
+  cursor: wait;
+  opacity: 0.55;
+}
+
+.mwf-button-primary {
+  background: #00a884;
+  color: #07130f;
+}
+
+.mwf-button-secondary {
+  background: rgba(233, 237, 239, 0.10);
+  color: #e9edef;
+}
+
+.mwf-button-quiet {
+  background: transparent;
+  color: #aebac1;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#mirror-whatsapp-focus-controls {
+  position: fixed;
+  left: 6px;
+  top: 300px;
+  z-index: 2147483646;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+#mirror-whatsapp-focus-return,
+#mirror-whatsapp-focus-search,
+#mirror-whatsapp-focus-sidebar,
+#mirror-whatsapp-focus-mode {
+  width: 50px;
+  min-height: 72px;
+  border: 0;
+  border-radius: 14px;
+  padding: 8px 7px;
+  cursor: pointer;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.15;
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
+#mirror-whatsapp-focus-return {
+  background: #00a884;
+  color: #07130f;
+}
+
+#mirror-whatsapp-focus-search {
+  background: #1f2c33;
+  color: #e9edef;
+  border: 1px solid rgba(233, 237, 239, 0.22);
+}
+
+#mirror-whatsapp-focus-sidebar {
+  background: #28353d;
+  color: #e9edef;
+  border: 1px solid rgba(233, 237, 239, 0.22);
+}
+
+#mirror-whatsapp-focus-mode {
+  background: #3b2f1f;
+  color: #f7d794;
+  border: 1px solid rgba(247, 215, 148, 0.34);
+}
+
+#mirror-whatsapp-focus-mode[aria-pressed="true"] {
+  background: #1f3b31;
+  color: #b7f7d0;
+  border-color: rgba(183, 247, 208, 0.34);
+}
+
+html.mwf-overlay-open #mirror-whatsapp-focus-controls {
+  display: none !important;
+}
+
+html.mwf-searching #mirror-whatsapp-focus-sidebar {
+  display: none !important;
+}
+
+html:not(.mwf-overlay-open) #mirror-whatsapp-focus-controls {
+  display: flex !important;
+}
+
+#mirror-whatsapp-focus-overlay:not(.mwf-has-conversation) [data-mwf-action="continue"] {
+  display: none !important;
+}

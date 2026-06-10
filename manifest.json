@@ -1,0 +1,22 @@
+{
+  "manifest_version": 3,
+  "name": "WhatsApp Focus Mode",
+  "version": "0.1.0",
+  "description": "Abre o WhatsApp Web em modo cego para reduzir distrações e chamarizes.",
+  "permissions": [],
+  "content_scripts": [
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["content.js"],
+      "css": ["focus.css"],
+      "run_at": "document_start"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["focus.css", "dev-config.json"],
+      "matches": ["https://web.whatsapp.com/*"]
+    }
+  ],
+  "icons": {}
+}

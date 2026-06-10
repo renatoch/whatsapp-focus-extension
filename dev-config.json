@@ -1,0 +1,39 @@
+{
+  "returnButton": {
+    "top": "330px",
+    "left": "6px"
+  },
+  "searchButton": {
+    "top": "445px",
+    "left": "6px"
+  },
+  "sidebarButton": {
+    "top": "560px",
+    "left": "6px"
+  },
+  "modeButton": {
+    "top": "640px",
+    "left": "6px"
+  },
+  "hideInSearch": [
+    "#side [data-testid=\"cell-frame-secondary\"]",
+    "#side [data-testid=\"msg-meta\"]",
+    "#side [data-testid=\"last-msg-status\"]",
+    "#side [data-icon=\"pinned2\"]",
+    "#side [aria-label*=\"unread\" i]",
+    "#side [aria-label*=\"não lida\" i]",
+    "#side [aria-label*=\"não lidas\" i]",
+    "#side span[aria-label*=\"unread\" i]",
+    "#side span[aria-label*=\"não lida\" i]",
+    "#side span[aria-label*=\"não lidas\" i]",
+    "#side [role=\"gridcell\"] > div > div:nth-child(2)",
+    "#side [role=\"listitem\"] > div > div > div > div:nth-child(2)",
+    "#side [role=\"listitem\"] time",
+    "#side [role=\"listitem\"] [style*=\"color: var(--unread-timestamp\"]",
+    "#side [role=\"listitem\"] [style*=\"color: rgb(0, 168, 132\"]",
+    "#side [role=\"listitem\"] [style*=\"font-weight: 600\"]",
+    "#side [role=\"listitem\"] [style*=\"font-weight:700\"]"
+  ],
+  "dimInSearch": [],
+  "hideTextIncludes": []
+}
