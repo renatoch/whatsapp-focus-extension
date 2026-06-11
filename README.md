@@ -3,6 +3,8 @@
 Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 
 > **Status:** protótipo/MVP pessoal. Este projeto ainda não deve ser tratado como extensão pronta para distribuição pública.
+>
+> Projeto independente, não afiliado, associado, autorizado ou endossado por WhatsApp, Meta ou suas empresas relacionadas.
 
 ## Privacidade e segurança
 

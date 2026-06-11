@@ -16,7 +16,7 @@
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
   const BYPASS_MS = 5 * 60 * 1000;
   const DEV_REFRESH_MS = 1000;
-  const DEBUG = true;
+  const DEBUG = false;
   let bypassTimer = null;
   let lastHotCss = "";
   let lastConfigCss = "";
