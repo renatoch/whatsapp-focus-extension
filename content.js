@@ -2,12 +2,14 @@
   const ROOT_ACTIVE = "mwf-active";
   const ROOT_NORMAL = "mwf-normal";
   const ROOT_SEARCHING = "mwf-searching";
+  const ROOT_SEARCH_FOCUSED = "mwf-search-focused";
   const ROOT_SIDEBAR_OPEN = "mwf-sidebar-open";
   const ROOT_SIDEBAR_HIDDEN = "mwf-sidebar-hidden";
   const ROOT_OVERLAY_OPEN = "mwf-overlay-open";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
+  const SEARCH_AGAIN_BUTTON_ID = "mirror-whatsapp-focus-search-again";
   const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
@@ -47,16 +49,17 @@
 
   function setActive({ showOverlay }) {
     root().classList.add(ROOT_ACTIVE);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
     root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
     ensureOverlay();
     ensureReturnButton();
     ensureSidebarButton();
+    ensureSearchAgainButton();
     getOverlay().hidden = !showOverlay;
   }
 
   function setNormal() {
-    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_NORMAL);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -75,7 +78,7 @@
       return;
     }
 
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SEARCHING);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -129,20 +132,31 @@
 
   function setSidebarOpen() {
     const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_OPEN);
     if (overlay) overlay.hidden = true;
   }
 
   function setSidebarHiddenManually() {
     const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_HIDDEN);
     if (overlay) overlay.hidden = true;
   }
 
   function enterFocusedConversationSoon() {
-    window.setTimeout(() => setActive({ showOverlay: false }), 250);
+    window.setTimeout(() => setSearchFocusedConversation(), 250);
+  }
+
+  function setSearchFocusedConversation() {
+    const overlay = getOverlay();
+    root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    ensureOverlay();
+    ensureReturnButton();
+    ensureSidebarButton();
+    ensureSearchAgainButton();
+    if (overlay) overlay.hidden = true;
   }
 
   function continueOpenConversation() {
@@ -481,6 +495,19 @@
     getControlsContainer().appendChild(button);
   }
 
+  function ensureSearchAgainButton() {
+    if (!document.body || document.getElementById(SEARCH_AGAIN_BUTTON_ID)) return;
+
+    const button = document.createElement("button");
+    button.id = SEARCH_AGAIN_BUTTON_ID;
+    button.type = "button";
+    button.textContent = "Buscar";
+    button.title = "Buscar outra conversa";
+    button.addEventListener("click", () => setSearchMode());
+
+    document.body.appendChild(button);
+  }
+
   function showToast(message) {
     if (!document.body) return;
     let toast = document.getElementById(TOAST_ID);
@@ -513,6 +540,7 @@
     getControlsContainer();
     ensureReturnButton();
     ensureSidebarButton();
+    ensureSearchAgainButton();
   }
 
   function ensureStyle(id) {
@@ -675,7 +703,7 @@
     });
   }
 
-  root().classList.remove(ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
+  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
   root().classList.add(ROOT_ACTIVE, ROOT_OVERLAY_OPEN);
   boot();
 })();

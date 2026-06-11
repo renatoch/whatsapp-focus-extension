@@ -15,6 +15,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - mostra uma tela neutra de **Modo foco**;
 - inclui uma primeira opção **Buscar conversa**, que abre a busca nativa com tentativa de reduzir previews/badges;
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
+- nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e exibe estado de carregamento sem ações clicáveis;

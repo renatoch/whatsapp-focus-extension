@@ -257,6 +257,30 @@ html:not(.mwf-overlay-open) #mirror-whatsapp-focus-controls {
   display: flex !important;
 }
 
+#mirror-whatsapp-focus-search-again {
+  display: none !important;
+}
+
+html.mwf-search-focused #mirror-whatsapp-focus-search-again {
+  position: fixed;
+  left: 112px;
+  top: 92px;
+  z-index: 2147483646;
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 168, 132, 0.32);
+  border-radius: 999px;
+  padding: 9px 14px;
+  background: rgba(0, 168, 132, 0.94);
+  color: #07130f;
+  cursor: pointer;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.22);
+}
+
 #mirror-whatsapp-focus-toast[hidden] {
   display: none !important;
 }
