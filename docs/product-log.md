@@ -70,6 +70,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - Observação de teste: o alerta não apareceu em alguns casos porque o WhatsApp podia estar em Arquivadas/Configurações ainda com elementos parecidos com busca. A tentativa de saída passou a priorizar o botão global “Conversas/Chats” da lateral esquerda antes de usar Back/Escape.
 - Correção validada: ao entrar no modo busca, a extensão clica primeiro em “Conversas/Chats” quando encontra esse botão global e só depois foca a busca. Isso permite sair de Arquivadas e outras telas internas que ainda expõem um campo de busca contextual.
 - “Continuar na conversa aberta” passou a tentar clicar em “Conversas/Chats” antes de esconder o overlay, para normalizar o contexto lateral quando o WhatsApp estava em Arquivadas ou outra tela interna.
+- A navegação para “Conversas/Chats” foi centralizada em uma função compartilhada entre modo busca e continuar conversa, para testar se ambos os fluxos se comportam igual antes de uma refatoração maior.
 
 ## Revisão de privacidade e segurança — análise preliminar
 

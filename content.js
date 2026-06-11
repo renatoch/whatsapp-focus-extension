@@ -79,7 +79,11 @@
     root().classList.add(ROOT_SEARCHING);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
-    window.setTimeout(() => focusNativeSearch({ source: "setSearchMode" }), 100);
+    window.setTimeout(() => {
+      goToMainChatsThen("search", () =>
+        focusNativeSearch({ retriedFromNestedView: true, source: "after-shared-main-chats" })
+      );
+    }, 100);
   }
 
   function isSearching() {
@@ -150,24 +154,32 @@
       nested: isNestedListView(),
     });
 
+    goToMainChatsThen("continue", () => {
+      debugLog("continueOpenConversation:after-main-chats", {
+        rootClass: root().className,
+        nativeSearchField: describeElement(findNativeSearchField()),
+        nested: isNestedListView(),
+      });
+      setActive({ showOverlay: false });
+    });
+  }
+
+  function goToMainChatsThen(source, callback) {
     const chatsButton = findMainChatsButton();
-    debugLog("continueOpenConversation:mainChatsButton", describeElement(chatsButton));
+    debugLog("goToMainChatsThen:mainChatsButton", {
+      source,
+      button: describeElement(chatsButton),
+    });
+
     if (chatsButton) {
       chatsButton.click();
-      debugLog("continueOpenConversation:clicked-mainChatsButton");
-      window.setTimeout(() => {
-        debugLog("continueOpenConversation:after-delay-hide", {
-          rootClass: root().className,
-          nativeSearchField: describeElement(findNativeSearchField()),
-          nested: isNestedListView(),
-        });
-        setActive({ showOverlay: false });
-      }, 260);
+      debugLog("goToMainChatsThen:clicked-mainChatsButton", { source });
+      window.setTimeout(callback, 260);
       return;
     }
 
-    debugLog("continueOpenConversation:no-mainChatsButton -> hide");
-    setActive({ showOverlay: false });
+    debugLog("goToMainChatsThen:no-mainChatsButton", { source });
+    callback();
   }
 
   function focusNativeSearch({ retriedFromNestedView = false, source = "unknown" } = {}) {
@@ -178,20 +190,6 @@
       nested,
       rootClass: root().className,
     });
-
-    if (!retriedFromNestedView) {
-      const chatsButton = findMainChatsButton();
-      debugLog("focusNativeSearch:mainChatsButton-before-field", describeElement(chatsButton));
-      if (chatsButton) {
-        chatsButton.click();
-        debugLog("focusNativeSearch:clicked-mainChatsButton-before-field");
-        window.setTimeout(
-          () => focusNativeSearch({ retriedFromNestedView: true, source: "after-main-chats-click" }),
-          260
-        );
-        return;
-      }
-    }
 
     if (nested && !retriedFromNestedView) {
       debugLog("focusNativeSearch:nested -> exitNestedListView");
