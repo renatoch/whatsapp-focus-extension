@@ -2,6 +2,16 @@
 
 Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 
+> **Status:** protótipo/MVP pessoal. Este projeto ainda não deve ser tratado como extensão pronta para distribuição pública.
+
+## Privacidade e segurança
+
+- A extensão roda localmente no navegador e não possui backend.
+- O código atual não envia mensagens, contatos ou dados de uso para servidores externos.
+- Por ser uma extensão que roda em `web.whatsapp.com`, ela tem acesso técnico ao DOM visível do WhatsApp Web. Isso inclui elementos da interface, nomes de conversas e conteúdo exibido na tela.
+- Esse acesso é necessário para ocultar a lateral, limpar previews e controlar o modo foco, mas significa que qualquer pessoa instalando a extensão precisa confiar no código.
+- O hot-refresh de desenvolvimento (`focus.css` e `dev-config.json` em `web_accessible_resources`) é uma conveniência de prototipagem. Antes de uma versão pública/distribuível, ele deve ser removido ou protegido por build/flag de desenvolvimento.
+
 ## Como documentar o MVP
 
 - `README.md`: uso atual, instalação, teste e limitações práticas.
@@ -32,17 +42,12 @@ A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa 
 1. Abra `chrome://extensions`.
 2. Ative **Developer mode** / **Modo do desenvolvedor**.
 3. Clique em **Load unpacked** / **Carregar sem compactação**.
-4. Selecione esta pasta:
-
-   ```text
-   /path/to/whatsapp-focus-extension
-   ```
-
+4. Selecione a pasta clonada deste projeto.
 5. Abra ou recarregue `https://web.whatsapp.com`.
 
 ## Desenvolvimento sem recarregar a aba toda
 
-A extensão tem um pequeno hot-refresh de desenvolvimento.
+A extensão tem um pequeno hot-refresh de desenvolvimento. Isso é **dev-only** e deve ser removido/gateado antes de qualquer distribuição pública.
 
 Depois de uma recarga única da extensão e da aba, o `content.js` passa a buscar a cada 1 segundo:
 
