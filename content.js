@@ -267,25 +267,23 @@
 
   function updateSearchGateState(field = findNativeSearchField()) {
     if (!isSearching()) {
-      window.clearTimeout(searchSettleTimer);
-      searchSettleTimer = null;
-      pendingSearchText = "";
-      revealedSearchText = "";
+      resetSearchGate();
       root().classList.remove(ROOT_SEARCH_TOO_SHORT);
       return;
     }
 
     const searchText = getSearchText(field);
     if (searchText.length < MIN_SEARCH_CHARS) {
-      window.clearTimeout(searchSettleTimer);
-      searchSettleTimer = null;
+      resetSearchGate();
       pendingSearchText = searchText;
-      revealedSearchText = "";
       root().classList.add(ROOT_SEARCH_TOO_SHORT);
       return;
     }
 
-    if (searchText === revealedSearchText) {
+    // Once a specific-enough query is revealed, keep results visible while the
+    // user keeps refining it. Re-hiding on every DOM mutation/keystroke creates
+    // flicker and fights WhatsApp's native filtering.
+    if (revealedSearchText) {
       root().classList.remove(ROOT_SEARCH_TOO_SHORT);
       return;
     }
@@ -296,15 +294,21 @@
     pendingSearchText = searchText;
     root().classList.add(ROOT_SEARCH_TOO_SHORT);
     searchSettleTimer = window.setTimeout(() => {
-      const latestText = getSearchText();
-      if (!isSearching() || latestText !== pendingSearchText || latestText.length < MIN_SEARCH_CHARS) {
+      if (!isSearching() || getSearchText().length < MIN_SEARCH_CHARS) {
         updateSearchGateState();
         return;
       }
       searchSettleTimer = null;
-      revealedSearchText = latestText;
+      revealedSearchText = getSearchText();
       root().classList.remove(ROOT_SEARCH_TOO_SHORT);
     }, SEARCH_SETTLE_MS);
+  }
+
+  function resetSearchGate() {
+    window.clearTimeout(searchSettleTimer);
+    searchSettleTimer = null;
+    pendingSearchText = "";
+    revealedSearchText = "";
   }
 
   function findNativeSearchField() {
@@ -737,13 +741,6 @@
 
     document.addEventListener("input", refresh, true);
     document.addEventListener("keyup", refresh, true);
-    document.addEventListener("focusin", refresh, true);
-
-    const observer = new MutationObserver(() => {
-      if (!isSearching()) return;
-      updateSearchGateState();
-    });
-    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
   }
 
   function installSearchSelectionHandler() {
