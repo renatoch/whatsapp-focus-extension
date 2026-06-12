@@ -15,6 +15,34 @@ html.mwf-sidebar-hidden #side {
   display: none !important;
 }
 
+#mirror-whatsapp-focus-search-gate {
+  position: fixed;
+  left: 78px;
+  top: 154px;
+  z-index: 2147483645;
+  width: 280px;
+  box-sizing: border-box;
+  display: none;
+  padding: 14px 16px;
+  border: 1px solid rgba(233, 237, 239, 0.14);
+  border-radius: 14px;
+  background: #111b21;
+  color: #aebac1;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 14px;
+  line-height: 1.4;
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
+}
+
+html.mwf-searching.mwf-search-too-short #mirror-whatsapp-focus-search-gate {
+  display: block !important;
+}
+
+html.mwf-searching.mwf-search-too-short #side [role="listitem"],
+html.mwf-searching.mwf-search-too-short #side [role="row"] {
+  visibility: hidden !important;
+}
+
 /* Search mode is intentionally imperfect: it uses broad WhatsApp Web selectors
    to reduce previews, timestamps and unread badges while keeping contact names. */
 html.mwf-searching #side [data-testid="cell-frame-secondary"],

@@ -71,6 +71,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - Correção validada: ao entrar no modo busca, a extensão clica primeiro em “Conversas/Chats” quando encontra esse botão global e só depois foca a busca. Isso permite sair de Arquivadas e outras telas internas que ainda expõem um campo de busca contextual.
 - “Continuar na conversa aberta” passou a tentar clicar em “Conversas/Chats” antes de esconder o overlay, para normalizar o contexto lateral quando o WhatsApp estava em Arquivadas ou outra tela interna.
 - A navegação para “Conversas/Chats” foi centralizada em uma função compartilhada entre modo busca e continuar conversa, para testar se ambos os fluxos se comportam igual antes de uma refatoração maior.
+- A busca passou a ocultar resultados/lista até que o texto digitado tenha pelo menos 3 letras. Motivação: feedback de amiga apontou que ver recentes antes de uma intenção específica pode indicar mensagem nova e gerar curiosidade.
 
 ## Revisão de privacidade e segurança — análise preliminar
 
@@ -92,7 +93,7 @@ Uma revisão externa preliminar apontou riscos e recomendações para uma eventu
 
 ## Backlog de produto
 
-- Na busca, não mostrar lista de contatos/resultados antes de digitar pelo menos 3 letras. Feedback de amiga: resultados/recentes antes da intenção estar específica podem indicar que alguém mandou mensagem e gerar curiosidade.
+- Validar em uso real se o bloqueio de resultados antes de 3 letras cobre todos os estados da busca nativa e não esconde controles úteis do WhatsApp.
 - Ajustar botão “Lateral” para funcionar fora da lista principal: hoje ele só oculta corretamente se o WhatsApp estiver na lista principal; se estiver em Arquivadas/telas internas, não faz nada. Deve usar o mesmo tratamento de normalização de “Conversas/Chats” usado por Buscar e Continuar na conversa.
 - Testar forma clara de “buscar outra conversa” sem precisar voltar pelo fluxo Foco → Busca. Contexto: o botão lateral “Busca” surgiu para esse caso, mas ficou ambíguo. Experimento atual: botão “Buscar” no topo da área/lateral ocultada após selecionar uma conversa via modo busca; ele só aparece nesse estado pós-busca e some ao sair dele.
 - Revisão futura das recomendações de privacidade/segurança registradas acima. A versão completa em HTML/rich text está salva no banco da jornada como memória `37b21a40` — “Análise completa de privacidade e segurança — WhatsApp Focus Mode (HTML)”.

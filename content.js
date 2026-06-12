@@ -3,6 +3,7 @@
   const ROOT_NORMAL = "mwf-normal";
   const ROOT_SEARCHING = "mwf-searching";
   const ROOT_SEARCH_FOCUSED = "mwf-search-focused";
+  const ROOT_SEARCH_TOO_SHORT = "mwf-search-too-short";
   const ROOT_SIDEBAR_OPEN = "mwf-sidebar-open";
   const ROOT_SIDEBAR_HIDDEN = "mwf-sidebar-hidden";
   const ROOT_OVERLAY_OPEN = "mwf-overlay-open";
@@ -10,12 +11,14 @@
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
   const SEARCH_AGAIN_BUTTON_ID = "mirror-whatsapp-focus-search-again";
+  const SEARCH_GATE_ID = "mirror-whatsapp-focus-search-gate";
   const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
   const BYPASS_MS = 5 * 60 * 1000;
   const DEV_REFRESH_MS = 1000;
+  const MIN_SEARCH_CHARS = 3;
   const DEBUG = false;
   let bypassTimer = null;
   let lastHotCss = "";
@@ -49,17 +52,18 @@
 
   function setActive({ showOverlay }) {
     root().classList.add(ROOT_ACTIVE);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
     root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
     ensureOverlay();
     ensureReturnButton();
     ensureSidebarButton();
     ensureSearchAgainButton();
+    ensureSearchGateMessage();
     getOverlay().hidden = !showOverlay;
   }
 
   function setNormal() {
-    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_NORMAL);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -79,7 +83,7 @@
     }
 
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN);
-    root().classList.add(ROOT_SEARCHING);
+    root().classList.add(ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
     window.setTimeout(() => {
@@ -132,14 +136,14 @@
 
   function setSidebarOpen() {
     const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_OPEN);
     if (overlay) overlay.hidden = true;
   }
 
   function setSidebarHiddenManually() {
     const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_HIDDEN);
     if (overlay) overlay.hidden = true;
   }
@@ -151,7 +155,7 @@
   function setSearchFocusedConversation() {
     const overlay = getOverlay();
     root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     ensureOverlay();
     ensureReturnButton();
     ensureSidebarButton();
@@ -220,6 +224,7 @@
     if (field) {
       field.focus();
       field.click();
+      updateSearchGateState(field);
       debugLog("focusNativeSearch:field-focused", describeElement(field));
       return;
     }
@@ -240,6 +245,22 @@
     showToast(
       "Por enquanto, o modo busca só funciona na lista principal de mensagens. Feche Arquivadas, Configurações ou outras telas internas e tente de novo."
     );
+  }
+
+  function getSearchText(field = findNativeSearchField()) {
+    if (!field) return "";
+    if ("value" in field) return String(field.value || "").trim();
+    return String(field.textContent || "").trim();
+  }
+
+  function updateSearchGateState(field = findNativeSearchField()) {
+    if (!isSearching()) {
+      root().classList.remove(ROOT_SEARCH_TOO_SHORT);
+      return;
+    }
+
+    const searchText = getSearchText(field);
+    root().classList.toggle(ROOT_SEARCH_TOO_SHORT, searchText.length < MIN_SEARCH_CHARS);
   }
 
   function findNativeSearchField() {
@@ -495,6 +516,17 @@
     getControlsContainer().appendChild(button);
   }
 
+  function ensureSearchGateMessage() {
+    if (!document.body || document.getElementById(SEARCH_GATE_ID)) return;
+
+    const message = document.createElement("div");
+    message.id = SEARCH_GATE_ID;
+    message.setAttribute("role", "status");
+    message.textContent = `Digite pelo menos ${MIN_SEARCH_CHARS} letras para mostrar conversas.`;
+
+    document.body.appendChild(message);
+  }
+
   function ensureSearchAgainButton() {
     if (!document.body || document.getElementById(SEARCH_AGAIN_BUTTON_ID)) return;
 
@@ -541,6 +573,7 @@
     ensureReturnButton();
     ensureSidebarButton();
     ensureSearchAgainButton();
+    ensureSearchGateMessage();
   }
 
   function ensureStyle(id) {
@@ -651,6 +684,24 @@
     updateOverlayState();
   }
 
+  function installSearchGateHandler() {
+    const refresh = (event) => {
+      if (!isSearching()) return;
+      const field = event?.target?.closest?.('#side [contenteditable="true"], #side input[type="text"], #side [role="textbox"]');
+      updateSearchGateState(field || undefined);
+    };
+
+    document.addEventListener("input", refresh, true);
+    document.addEventListener("keyup", refresh, true);
+    document.addEventListener("focusin", refresh, true);
+
+    const observer = new MutationObserver(() => {
+      if (!isSearching()) return;
+      updateSearchGateState();
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true, characterData: true });
+  }
+
   function installSearchSelectionHandler() {
     document.addEventListener(
       "click",
@@ -695,6 +746,7 @@
   function boot() {
     startDevRefresh();
     installKeyboardShortcuts();
+    installSearchGateHandler();
     installSearchSelectionHandler();
     installConversationStateObserver();
     whenBodyExists(() => {
@@ -703,7 +755,7 @@
     });
   }
 
-  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
+  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
   root().classList.add(ROOT_ACTIVE, ROOT_OVERLAY_OPEN);
   boot();
 })();

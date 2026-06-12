@@ -28,6 +28,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - esconde o painel lateral (`#side`) por padrão;
 - mostra uma tela neutra de **Modo foco**;
 - inclui uma primeira opção **Buscar conversa**, que abre a busca nativa com tentativa de reduzir previews/badges;
+- durante a busca, oculta resultados até que pelo menos 3 letras sejam digitadas, reduzindo a exposição a conversas recentes;
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
@@ -74,11 +75,12 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 1. Ao abrir WhatsApp Web, a tela deve mostrar apenas **Modo foco**.
 2. O painel lateral de conversas não deve aparecer.
 3. Clique em **Buscar conversa**.
-4. A lateral deve aparecer para permitir a busca nativa, com menos previews/badges quando os seletores funcionarem.
-5. Selecione uma conversa; a lateral deve sumir automaticamente depois da seleção.
-6. Clique em **Voltar ao modo foco** para retornar à tela neutra.
-7. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.
-8. Clique em **Continuar na conversa aberta**.
+4. A lateral deve aparecer para permitir a busca nativa, sem mostrar resultados antes de 3 letras.
+5. Digite 3 letras; os resultados aparecem com menos previews/badges quando os seletores funcionarem.
+6. Selecione uma conversa; a lateral deve sumir automaticamente depois da seleção.
+7. Clique em **Voltar ao modo foco** para retornar à tela neutra.
+8. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.
+9. Clique em **Continuar na conversa aberta**.
 10. A conversa, se houver uma aberta, fica visível; a lateral continua escondida.
 11. Clique em **Ver WhatsApp normal por 5 min** para validar a válvula de escape.
 12. Durante o modo normal, clique em **Voltar ao modo foco** para encerrar a liberação antes dos 5 minutos.
