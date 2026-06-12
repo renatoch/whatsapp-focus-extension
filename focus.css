@@ -38,6 +38,41 @@ html.mwf-searching.mwf-search-too-short #mirror-whatsapp-focus-search-gate {
   display: block !important;
 }
 
+html.mwf-searching.mwf-search-waiting #mirror-whatsapp-focus-search-gate {
+  padding-left: 42px;
+}
+
+html.mwf-searching.mwf-search-waiting #mirror-whatsapp-focus-search-gate::before {
+  content: "";
+  position: absolute;
+  left: 16px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border: 2px solid rgba(174, 186, 193, 0.35);
+  border-top-color: #00a884;
+  border-radius: 999px;
+  animation: mwf-spin 0.8s linear infinite;
+}
+
+@keyframes mwf-spin {
+  to { transform: rotate(360deg); }
+}
+
+html.mwf-searching.mwf-search-too-short #side #pane-side,
+html.mwf-searching.mwf-search-too-short #side [aria-label*="lista de conversas" i],
+html.mwf-searching.mwf-search-too-short #side [aria-label*="chat list" i] {
+  overflow: hidden !important;
+  scrollbar-width: none !important;
+}
+
+html.mwf-searching.mwf-search-too-short #side #pane-side::-webkit-scrollbar,
+html.mwf-searching.mwf-search-too-short #side [aria-label*="lista de conversas" i]::-webkit-scrollbar,
+html.mwf-searching.mwf-search-too-short #side [aria-label*="chat list" i]::-webkit-scrollbar {
+  display: none !important;
+}
+
 html.mwf-searching.mwf-search-too-short #side [role="listitem"],
 html.mwf-searching.mwf-search-too-short #side [role="row"],
 html.mwf-searching.mwf-search-too-short #side [data-testid="cell-frame-container"],

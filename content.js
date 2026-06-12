@@ -4,6 +4,7 @@
   const ROOT_SEARCHING = "mwf-searching";
   const ROOT_SEARCH_FOCUSED = "mwf-search-focused";
   const ROOT_SEARCH_TOO_SHORT = "mwf-search-too-short";
+  const ROOT_SEARCH_WAITING = "mwf-search-waiting";
   const ROOT_SIDEBAR_OPEN = "mwf-sidebar-open";
   const ROOT_SIDEBAR_HIDDEN = "mwf-sidebar-hidden";
   const ROOT_OVERLAY_OPEN = "mwf-overlay-open";
@@ -56,7 +57,7 @@
 
   function setActive({ showOverlay }) {
     root().classList.add(ROOT_ACTIVE);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
     root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
     ensureOverlay();
     ensureReturnButton();
@@ -67,7 +68,7 @@
   }
 
   function setNormal() {
-    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_NORMAL);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -144,14 +145,14 @@
 
   function setSidebarOpen() {
     const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_OPEN);
     if (overlay) overlay.hidden = true;
   }
 
   function setSidebarHiddenManually() {
     const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_HIDDEN);
     if (overlay) overlay.hidden = true;
   }
@@ -167,7 +168,7 @@
     pendingSearchText = "";
     revealedSearchText = "";
     root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     ensureOverlay();
     ensureReturnButton();
     ensureSidebarButton();
@@ -268,7 +269,7 @@
   function updateSearchGateState(field = findNativeSearchField()) {
     if (!isSearching()) {
       resetSearchGate();
-      root().classList.remove(ROOT_SEARCH_TOO_SHORT);
+      root().classList.remove(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
       return;
     }
 
@@ -276,6 +277,8 @@
     if (searchText.length < MIN_SEARCH_CHARS) {
       resetSearchGate();
       pendingSearchText = searchText;
+      updateSearchGateMessage(searchText);
+      root().classList.remove(ROOT_SEARCH_WAITING);
       root().classList.add(ROOT_SEARCH_TOO_SHORT);
       return;
     }
@@ -284,7 +287,7 @@
     // user keeps refining it. Re-hiding on every DOM mutation/keystroke creates
     // flicker and fights WhatsApp's native filtering.
     if (revealedSearchText) {
-      root().classList.remove(ROOT_SEARCH_TOO_SHORT);
+      root().classList.remove(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
       return;
     }
 
@@ -292,7 +295,8 @@
 
     window.clearTimeout(searchSettleTimer);
     pendingSearchText = searchText;
-    root().classList.add(ROOT_SEARCH_TOO_SHORT);
+    updateSearchGateMessage(searchText);
+    root().classList.add(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
     searchSettleTimer = window.setTimeout(() => {
       if (!isSearching() || getSearchText().length < MIN_SEARCH_CHARS) {
         updateSearchGateState();
@@ -300,7 +304,7 @@
       }
       searchSettleTimer = null;
       revealedSearchText = getSearchText();
-      root().classList.remove(ROOT_SEARCH_TOO_SHORT);
+      root().classList.remove(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
     }, SEARCH_SETTLE_MS);
   }
 
@@ -570,9 +574,20 @@
     const message = document.createElement("div");
     message.id = SEARCH_GATE_ID;
     message.setAttribute("role", "status");
-    message.textContent = `Digite pelo menos ${MIN_SEARCH_CHARS} letras e aguarde a busca filtrar.`;
+    message.textContent = searchGateMessageText("");
 
     document.body.appendChild(message);
+  }
+
+  function searchGateMessageText(searchText) {
+    if (searchText.length < MIN_SEARCH_CHARS) return `Digite pelo menos ${MIN_SEARCH_CHARS} letras.`;
+    return "Filtrando conversas…";
+  }
+
+  function updateSearchGateMessage(searchText) {
+    const message = document.getElementById(SEARCH_GATE_ID);
+    if (!message) return;
+    message.textContent = searchGateMessageText(searchText);
   }
 
   function ensureSearchAgainButton() {
@@ -796,7 +811,7 @@
     });
   }
 
-  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
+  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
   root().classList.add(ROOT_ACTIVE, ROOT_OVERLAY_OPEN);
   boot();
 })();
