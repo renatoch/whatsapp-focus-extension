@@ -28,7 +28,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - esconde o painel lateral (`#side`) por padrão;
 - mostra uma tela neutra de **Modo foco**;
 - inclui uma primeira opção **Buscar conversa**, que abre a busca nativa com tentativa de reduzir previews/badges;
-- durante a busca, oculta resultados até que pelo menos 3 letras sejam digitadas, reduzindo a exposição a conversas recentes;
+- durante a busca, oculta resultados até que pelo menos 3 letras sejam digitadas e a busca tenha cerca de 2s para filtrar, reduzindo a exposição a conversas recentes;
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
@@ -76,7 +76,7 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 2. O painel lateral de conversas não deve aparecer.
 3. Clique em **Buscar conversa**.
 4. A lateral deve aparecer para permitir a busca nativa, sem mostrar resultados antes de 3 letras.
-5. Digite 3 letras; os resultados aparecem com menos previews/badges quando os seletores funcionarem.
+5. Digite ou cole 3 letras; os resultados só devem aparecer depois de uma breve espera para a busca filtrar.
 6. Selecione uma conversa; a lateral deve sumir automaticamente depois da seleção.
 7. Clique em **Voltar ao modo foco** para retornar à tela neutra.
 8. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.

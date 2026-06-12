@@ -19,8 +19,11 @@
   const BYPASS_MS = 5 * 60 * 1000;
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
+  const SEARCH_SETTLE_MS = 2000;
   const DEBUG = false;
   let bypassTimer = null;
+  let searchSettleTimer = null;
+  let pendingSearchText = "";
   let lastHotCss = "";
   let lastConfigCss = "";
 
@@ -82,6 +85,9 @@
       return;
     }
 
+    window.clearTimeout(searchSettleTimer);
+    searchSettleTimer = null;
+    pendingSearchText = "";
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT);
     const overlay = getOverlay();
@@ -154,6 +160,9 @@
 
   function setSearchFocusedConversation() {
     const overlay = getOverlay();
+    window.clearTimeout(searchSettleTimer);
+    searchSettleTimer = null;
+    pendingSearchText = "";
     root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED);
     root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     ensureOverlay();
@@ -255,12 +264,36 @@
 
   function updateSearchGateState(field = findNativeSearchField()) {
     if (!isSearching()) {
+      window.clearTimeout(searchSettleTimer);
+      searchSettleTimer = null;
+      pendingSearchText = "";
       root().classList.remove(ROOT_SEARCH_TOO_SHORT);
       return;
     }
 
     const searchText = getSearchText(field);
-    root().classList.toggle(ROOT_SEARCH_TOO_SHORT, searchText.length < MIN_SEARCH_CHARS);
+    if (searchText.length < MIN_SEARCH_CHARS) {
+      window.clearTimeout(searchSettleTimer);
+      searchSettleTimer = null;
+      pendingSearchText = searchText;
+      root().classList.add(ROOT_SEARCH_TOO_SHORT);
+      return;
+    }
+
+    if (searchText === pendingSearchText && searchSettleTimer) return;
+
+    window.clearTimeout(searchSettleTimer);
+    pendingSearchText = searchText;
+    root().classList.add(ROOT_SEARCH_TOO_SHORT);
+    searchSettleTimer = window.setTimeout(() => {
+      const latestText = getSearchText();
+      if (!isSearching() || latestText !== pendingSearchText || latestText.length < MIN_SEARCH_CHARS) {
+        updateSearchGateState();
+        return;
+      }
+      searchSettleTimer = null;
+      root().classList.remove(ROOT_SEARCH_TOO_SHORT);
+    }, SEARCH_SETTLE_MS);
   }
 
   function findNativeSearchField() {
@@ -522,7 +555,7 @@
     const message = document.createElement("div");
     message.id = SEARCH_GATE_ID;
     message.setAttribute("role", "status");
-    message.textContent = `Digite pelo menos ${MIN_SEARCH_CHARS} letras para mostrar conversas.`;
+    message.textContent = `Digite pelo menos ${MIN_SEARCH_CHARS} letras e aguarde a busca filtrar.`;
 
     document.body.appendChild(message);
   }

@@ -39,7 +39,23 @@ html.mwf-searching.mwf-search-too-short #mirror-whatsapp-focus-search-gate {
 }
 
 html.mwf-searching.mwf-search-too-short #side [role="listitem"],
-html.mwf-searching.mwf-search-too-short #side [role="row"] {
+html.mwf-searching.mwf-search-too-short #side [role="row"],
+html.mwf-searching.mwf-search-too-short #side [data-testid="cell-frame-container"],
+html.mwf-searching.mwf-search-too-short #side [data-testid="cell-frame-title"],
+html.mwf-searching.mwf-search-too-short #side [data-testid="cell-frame-secondary"],
+html.mwf-searching.mwf-search-too-short #side [data-testid="cell-frame-primary-detail"],
+html.mwf-searching.mwf-search-too-short #side [data-testid="conversation-list-item"],
+html.mwf-searching.mwf-search-too-short #side #pane-side [role="button"],
+html.mwf-searching.mwf-search-too-short #side [aria-label*="lista de conversas" i] [role="button"],
+html.mwf-searching.mwf-search-too-short #side [aria-label*="chat list" i] [role="button"] {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+html.mwf-searching.mwf-search-too-short #side [data-testid="cell-frame-container"] *,
+html.mwf-searching.mwf-search-too-short #side [data-testid="cell-frame-title"] *,
+html.mwf-searching.mwf-search-too-short #side #pane-side [role="button"] * {
+  display: none !important;
   visibility: hidden !important;
 }
 
