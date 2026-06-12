@@ -24,6 +24,7 @@
   let bypassTimer = null;
   let searchSettleTimer = null;
   let pendingSearchText = "";
+  let revealedSearchText = "";
   let lastHotCss = "";
   let lastConfigCss = "";
 
@@ -88,6 +89,7 @@
     window.clearTimeout(searchSettleTimer);
     searchSettleTimer = null;
     pendingSearchText = "";
+    revealedSearchText = "";
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT);
     const overlay = getOverlay();
@@ -163,6 +165,7 @@
     window.clearTimeout(searchSettleTimer);
     searchSettleTimer = null;
     pendingSearchText = "";
+    revealedSearchText = "";
     root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED);
     root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     ensureOverlay();
@@ -267,6 +270,7 @@
       window.clearTimeout(searchSettleTimer);
       searchSettleTimer = null;
       pendingSearchText = "";
+      revealedSearchText = "";
       root().classList.remove(ROOT_SEARCH_TOO_SHORT);
       return;
     }
@@ -276,7 +280,13 @@
       window.clearTimeout(searchSettleTimer);
       searchSettleTimer = null;
       pendingSearchText = searchText;
+      revealedSearchText = "";
       root().classList.add(ROOT_SEARCH_TOO_SHORT);
+      return;
+    }
+
+    if (searchText === revealedSearchText) {
+      root().classList.remove(ROOT_SEARCH_TOO_SHORT);
       return;
     }
 
@@ -292,6 +302,7 @@
         return;
       }
       searchSettleTimer = null;
+      revealedSearchText = latestText;
       root().classList.remove(ROOT_SEARCH_TOO_SHORT);
     }, SEARCH_SETTLE_MS);
   }
