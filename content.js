@@ -129,7 +129,7 @@
     if (!canToggleSidebar()) return;
 
     if (isSidebarOpen() || root().classList.contains(ROOT_NORMAL)) {
-      setSidebarHiddenManually();
+      hideSidebarFromCurrentView();
       return;
     }
 
@@ -154,6 +154,10 @@
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_OPEN);
     if (overlay) overlay.hidden = true;
+  }
+
+  function hideSidebarFromCurrentView() {
+    goToMainChatsThen("sidebar", () => setSidebarHiddenManually());
   }
 
   function setSidebarHiddenManually() {

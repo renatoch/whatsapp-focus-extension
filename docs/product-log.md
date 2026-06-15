@@ -100,8 +100,8 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Em teste] Pausa de 8s antes de abrir WhatsApp normal pode perder efeito se virar gesto automático**
   - Observar se o usuário começa a clicar em “Abrir agora” sem perceber/pensar. Se acontecer, testar variações como “+15s de reflexão”, desligar countdown automático, ou outra fricção voluntária.
 
-- **[Próximo ajuste] Botão “Lateral” precisa funcionar também em Arquivadas/telas internas**
-  - Hoje ele só oculta corretamente quando o WhatsApp está na lista principal. Próximo teste: usar a mesma normalização por “Conversas/Chats” usada por Buscar e Continuar na conversa.
+- **[Em teste] Botão “Lateral” precisa funcionar também em Arquivadas/telas internas**
+  - Implementação atual: antes de ocultar a lateral, tenta normalizar para “Conversas/Chats” usando o mesmo caminho de Buscar e Continuar na conversa. Validar em Arquivadas/telas internas.
 
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
