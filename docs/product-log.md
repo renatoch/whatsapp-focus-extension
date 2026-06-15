@@ -103,29 +103,11 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Próximo ajuste] Botão “Lateral” precisa funcionar também em Arquivadas/telas internas**
   - Hoje ele só oculta corretamente quando o WhatsApp está na lista principal. Próximo teste: usar a mesma normalização por “Conversas/Chats” usada por Buscar e Continuar na conversa.
 
-- **[Próximo ajuste] Buscar outra conversa sem voltar pelo caminho Foco → Busca**
-  - O botão lateral “Busca” ficou ambíguo e foi removido. Experimento atual: botão “Buscar” no topo da área/lateral ocultada após selecionar uma conversa via modo busca; aparece só no estado pós-busca.
-
-- **[Próximo ajuste] Estado sem conversa aberta ainda pode ficar pouco claro**
-  - Quando não há conversa aberta, algumas ações podem levar a estados vazios ou mensagens que precisam mudar. Melhorar cópia/estado visual para esse caso.
-
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
 
 - **[Dev ergonomics] Recarregar extensão e aba automaticamente durante desenvolvimento**
   - Estudar script/perfil Chrome separado com `--remote-debugging-port` para evitar abrir manualmente `chrome://extensions` a cada mudança de `content.js`.
-
-- **[Ideia futura] Busca própria por contato sem previews**
-  - Substituir ou complementar a busca nativa do WhatsApp para controlar completamente o que aparece e evitar recentes/previews.
-
-- **[Ideia futura] Whitelist de 2–3 conversas por sessão de foco**
-  - Permitir um conjunto pequeno de conversas autorizadas enquanto o resto do WhatsApp segue cego.
-
-- **[Ideia futura] Modo de foco por tema/contexto**
-  - Configurar foco por tipo de uso, projeto ou contexto, em vez de um único modo genérico.
-
-- **[Ideia futura] Revisar/expandir atalhos para voltar ao modo foco**
-  - Tornar o retorno ao foco mais fluido sem conflitar com atalhos úteis do WhatsApp.
 
 - **[Hardening] Revisar recomendações de privacidade e segurança antes de distribuição pública**
   - Recomendações principais estão registradas acima; versão completa está salva na memória `37b21a40` — “Análise completa de privacidade e segurança — WhatsApp Focus Mode (HTML)”.
