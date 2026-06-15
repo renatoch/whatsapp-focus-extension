@@ -22,7 +22,7 @@
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
   const SEARCH_SETTLE_MS = 2000;
-  const NORMAL_DELAY_MS = 5000;
+  const NORMAL_DELAY_MS = 8000;
   const DEBUG = false;
   let bypassTimer = null;
   let normalDelayTimer = null;
@@ -554,7 +554,7 @@
           <h2>Abrir WhatsApp normal?</h2>
           <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
           <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
-          <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>5</strong>s…</p>
+          <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>8</strong>s…</p>
           <div class="mwf-actions">
             <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
             <button class="mwf-button mwf-button-secondary" data-mwf-action="normal-cancel">Cancelar</button>
@@ -882,7 +882,7 @@
       <h2>Abrir WhatsApp normal?</h2>
       <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
       <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
-      <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>5</strong>s…</p>
+      <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>8</strong>s…</p>
       <div class="mwf-actions">
         <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
         <button class="mwf-button mwf-button-secondary" data-mwf-action="normal-cancel">Cancelar</button>

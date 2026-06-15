@@ -34,7 +34,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
-- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, com pausa consciente de 5s antes de liberar;
+- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, com pausa consciente de 8s antes de liberar;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
 - adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;
