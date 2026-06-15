@@ -33,7 +33,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
-- durante o carregamento inicial do WhatsApp Web, mantém a tela cega e exibe apenas uma barra de carregamento sem ações clicáveis;
+- durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
@@ -72,8 +72,8 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 
 ## Como testar
 
-1. Ao abrir WhatsApp Web, enquanto a interface ainda carrega, deve aparecer apenas uma barra de carregamento.
-2. Quando o WhatsApp estiver pronto, a tela deve mostrar **Modo foco**.
+1. Ao abrir WhatsApp Web, enquanto a interface ainda carrega, o card de foco deve aparecer sem ações e com uma barra de carregamento no lugar do aviso textual.
+2. Quando o WhatsApp estiver pronto, a tela deve mostrar **Modo foco** com ações disponíveis.
 3. O painel lateral de conversas não deve aparecer.
 4. Clique em **Buscar conversa**.
 5. A lateral deve aparecer para permitir a busca nativa, sem mostrar resultados antes de 3 letras.
