@@ -71,6 +71,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - Correção validada: ao entrar no modo busca, a extensão clica primeiro em “Conversas/Chats” quando encontra esse botão global e só depois foca a busca. Isso permite sair de Arquivadas e outras telas internas que ainda expõem um campo de busca contextual.
 - “Continuar na conversa aberta” passou a tentar clicar em “Conversas/Chats” antes de esconder o overlay, para normalizar o contexto lateral quando o WhatsApp estava em Arquivadas ou outra tela interna.
 - A navegação para “Conversas/Chats” foi centralizada em uma função compartilhada entre modo busca e continuar conversa, para testar se ambos os fluxos se comportam igual antes de uma refatoração maior.
+- O botão “Lateral” passou a usar a mesma normalização por “Conversas/Chats” antes de ocultar a lateral, funcionando melhor quando o WhatsApp estava em Arquivadas/telas internas.
 - A busca passou a ocultar resultados/lista até que o texto digitado tenha pelo menos 3 letras e mostrar um estado visual de filtragem antes da primeira exibição. Motivação: feedback de amiga apontou que ver recentes antes de uma intenção específica pode indicar mensagem nova e gerar curiosidade; após a primeira liberação, a lista permanece visível enquanto o usuário refina a busca para evitar flicker.
 - Durante o carregamento inicial do WhatsApp Web, o overlay passou a manter o card de foco e substituir o aviso textual por uma barra de carregamento. Quando a barra nativa `<progress>` do WhatsApp está disponível, a extensão espelha `value`/`max`; se não encontrar, usa uma animação indeterminada como fallback.
 - A válvula “Ver WhatsApp normal por 5 min” passou a ter uma pausa consciente de 8s antes de liberar o ambiente completo, com alternativas “Continuar na conversa”, “Cancelar” e “Abrir agora”. Quando não há conversa aberta, a mensagem não sugere continuar conversa e avisa que a ação abrirá a lista completa. A intenção é quebrar o impulso sem bloquear uso legítimo.
@@ -99,9 +100,6 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 
 - **[Em teste] Pausa de 8s antes de abrir WhatsApp normal pode perder efeito se virar gesto automático**
   - Observar se o usuário começa a clicar em “Abrir agora” sem perceber/pensar. Se acontecer, testar variações como “+15s de reflexão”, desligar countdown automático, ou outra fricção voluntária.
-
-- **[Em teste] Botão “Lateral” precisa funcionar também em Arquivadas/telas internas**
-  - Implementação atual: antes de ocultar a lateral, tenta normalizar para “Conversas/Chats” usando o mesmo caminho de Buscar e Continuar na conversa. Validar em Arquivadas/telas internas.
 
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
