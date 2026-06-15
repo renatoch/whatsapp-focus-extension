@@ -512,8 +512,10 @@
 
     const max = Number(nativeProgress.getAttribute("max") || nativeProgress.max || 100);
     const value = Number(nativeProgress.getAttribute("value") || nativeProgress.value || 0);
-    mirrorProgress.max = Number.isFinite(max) && max > 0 ? max : 100;
-    mirrorProgress.value = Number.isFinite(value) ? value : 0;
+    const nextMax = Number.isFinite(max) && max > 0 ? max : 100;
+    const nextValue = Number.isFinite(value) ? value : 0;
+    if (mirrorProgress.max !== nextMax) mirrorProgress.max = nextMax;
+    if (mirrorProgress.value !== nextValue) mirrorProgress.value = nextValue;
     mirrorProgress.removeAttribute("data-mwf-indeterminate");
   }
 
@@ -773,15 +775,10 @@
 
   function installConversationStateObserver() {
     const observer = new MutationObserver(updateOverlayState);
-    observer.observe(document.documentElement, {
-      childList: true,
-      subtree: true,
-      attributes: true,
-      attributeFilter: ["value", "max", "style", "class"],
-    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
     window.setInterval(() => {
       if (!isWhatsAppReady()) updateOverlayState();
-    }, 200);
+    }, 500);
     updateOverlayState();
   }
 
