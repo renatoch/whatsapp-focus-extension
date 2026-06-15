@@ -73,7 +73,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - A navegação para “Conversas/Chats” foi centralizada em uma função compartilhada entre modo busca e continuar conversa, para testar se ambos os fluxos se comportam igual antes de uma refatoração maior.
 - A busca passou a ocultar resultados/lista até que o texto digitado tenha pelo menos 3 letras e mostrar um estado visual de filtragem antes da primeira exibição. Motivação: feedback de amiga apontou que ver recentes antes de uma intenção específica pode indicar mensagem nova e gerar curiosidade; após a primeira liberação, a lista permanece visível enquanto o usuário refina a busca para evitar flicker.
 - Durante o carregamento inicial do WhatsApp Web, o overlay passou a manter o card de foco e substituir o aviso textual por uma barra de carregamento. Quando a barra nativa `<progress>` do WhatsApp está disponível, a extensão espelha `value`/`max`; se não encontrar, usa uma animação indeterminada como fallback.
-- A válvula “Ver WhatsApp normal por 5 min” passou a ter uma pausa consciente de 5s antes de liberar o ambiente completo, com alternativas “Continuar na conversa”, “Cancelar” e “Abrir agora”. A intenção é quebrar o impulso sem bloquear uso legítimo.
+- A válvula “Ver WhatsApp normal por 5 min” passou a ter uma pausa consciente de 5s antes de liberar o ambiente completo, com alternativas “Continuar na conversa”, “Cancelar” e “Abrir agora”. Quando não há conversa aberta, a mensagem não sugere continuar conversa e avisa que a ação abrirá a lista completa. A intenção é quebrar o impulso sem bloquear uso legítimo.
 
 ## Revisão de privacidade e segurança — análise preliminar
 

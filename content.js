@@ -552,7 +552,8 @@
         </div>
         <div class="mwf-normal-confirm" aria-live="polite">
           <h2>Abrir WhatsApp normal?</h2>
-          <p>Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+          <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+          <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
           <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>5</strong>s…</p>
           <div class="mwf-actions">
             <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
@@ -879,7 +880,8 @@
     confirm.setAttribute("aria-live", "polite");
     confirm.innerHTML = `
       <h2>Abrir WhatsApp normal?</h2>
-      <p>Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+      <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+      <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
       <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>5</strong>s…</p>
       <div class="mwf-actions">
         <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>

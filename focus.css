@@ -311,6 +311,11 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   font-weight: 650;
 }
 
+#mirror-whatsapp-focus-overlay.mwf-has-conversation .mwf-normal-no-conversation,
+#mirror-whatsapp-focus-overlay:not(.mwf-has-conversation) .mwf-normal-has-conversation {
+  display: none !important;
+}
+
 .mwf-button {
   border: 0;
   border-radius: 999px;
