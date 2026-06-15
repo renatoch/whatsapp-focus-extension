@@ -220,7 +220,8 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   text-transform: uppercase;
 }
 
-.mwf-card h1 {
+.mwf-card h1,
+.mwf-normal-confirm h2 {
   margin: 0 0 10px;
   color: #e9edef !important;
   font-size: 28px;
@@ -289,6 +290,25 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+}
+
+.mwf-normal-confirm {
+  display: none;
+}
+
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > h1,
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > p,
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-actions {
+  display: none !important;
+}
+
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-normal-confirm {
+  display: block;
+}
+
+.mwf-normal-countdown {
+  color: #00a884 !important;
+  font-weight: 650;
 }
 
 .mwf-button {

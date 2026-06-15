@@ -34,7 +34,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
-- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**;
+- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, com pausa consciente de 5s antes de liberar;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
 - adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;
@@ -83,7 +83,7 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 9. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.
 10. Clique em **Continuar na conversa aberta**.
 11. A conversa, se houver uma aberta, fica visível; a lateral continua escondida.
-12. Clique em **Ver WhatsApp normal por 5 min** para validar a válvula de escape.
+12. Clique em **Ver WhatsApp normal por 5 min** e valide a pausa consciente com opções **Continuar na conversa**, **Cancelar** e **Abrir agora**.
 13. Durante o modo normal, clique em **Voltar ao modo foco** para encerrar a liberação antes dos 5 minutos.
 14. Recarregue a página e confirme que ela volta ao modo foco imediatamente.
 

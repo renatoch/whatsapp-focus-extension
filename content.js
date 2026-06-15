@@ -22,8 +22,11 @@
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
   const SEARCH_SETTLE_MS = 2000;
+  const NORMAL_DELAY_MS = 5000;
   const DEBUG = false;
   let bypassTimer = null;
+  let normalDelayTimer = null;
+  let normalDelayInterval = null;
   let searchSettleTimer = null;
   let pendingSearchText = "";
   let revealedSearchText = "";
@@ -57,6 +60,7 @@
   }
 
   function setActive({ showOverlay }) {
+    clearNormalDelay();
     root().classList.add(ROOT_ACTIVE);
     root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
     root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
@@ -69,6 +73,7 @@
   }
 
   function setNormal() {
+    clearNormalDelay();
     root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_NORMAL);
     const overlay = getOverlay();
@@ -545,6 +550,16 @@
           <button class="mwf-button mwf-button-secondary" data-mwf-action="continue">Continuar na conversa aberta</button>
           <button class="mwf-button mwf-button-secondary" data-mwf-action="normal">Ver WhatsApp normal por 5 min</button>
         </div>
+        <div class="mwf-normal-confirm" aria-live="polite">
+          <h2>Abrir WhatsApp normal?</h2>
+          <p>Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+          <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>5</strong>s…</p>
+          <div class="mwf-actions">
+            <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
+            <button class="mwf-button mwf-button-secondary" data-mwf-action="normal-cancel">Cancelar</button>
+            <button class="mwf-button mwf-button-quiet" data-mwf-action="normal-now">Abrir agora</button>
+          </div>
+        </div>
       </div>
     `;
 
@@ -559,9 +574,16 @@
         setSearchMode();
       }
       if (action === "continue") {
+        clearNormalDelay();
         continueOpenConversation();
       }
       if (action === "normal") {
+        startNormalDelay();
+      }
+      if (action === "normal-cancel") {
+        clearNormalDelay();
+      }
+      if (action === "normal-now") {
         setNormalTemporarily();
       }
     });
@@ -825,7 +847,38 @@
     observer.observe(document.documentElement, { childList: true });
   }
 
+  function startNormalDelay() {
+    const overlay = getOverlay();
+    if (!overlay) return;
+
+    clearNormalDelay();
+    overlay.classList.add("mwf-normal-pending");
+    const startedAt = Date.now();
+
+    const updateCountdown = () => {
+      const remainingMs = Math.max(0, NORMAL_DELAY_MS - (Date.now() - startedAt));
+      const remainingSeconds = Math.ceil(remainingMs / 1000);
+      overlay.querySelectorAll("[data-mwf-normal-countdown]").forEach((element) => {
+        element.textContent = String(remainingSeconds);
+      });
+    };
+
+    updateCountdown();
+    normalDelayInterval = window.setInterval(updateCountdown, 200);
+    normalDelayTimer = window.setTimeout(() => setNormalTemporarily(), NORMAL_DELAY_MS);
+  }
+
+  function clearNormalDelay() {
+    if (normalDelayTimer) window.clearTimeout(normalDelayTimer);
+    if (normalDelayInterval) window.clearInterval(normalDelayInterval);
+    normalDelayTimer = null;
+    normalDelayInterval = null;
+    const overlay = getOverlay();
+    if (overlay) overlay.classList.remove("mwf-normal-pending");
+  }
+
   function setNormalTemporarily() {
+    clearNormalDelay();
     if (bypassTimer) window.clearTimeout(bypassTimer);
     setNormal();
     bypassTimer = window.setTimeout(() => {
