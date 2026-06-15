@@ -851,6 +851,7 @@
     const overlay = getOverlay();
     if (!overlay) return;
 
+    ensureNormalConfirm(overlay);
     clearNormalDelay();
     overlay.classList.add("mwf-normal-pending");
     const startedAt = Date.now();
@@ -866,6 +867,27 @@
     updateCountdown();
     normalDelayInterval = window.setInterval(updateCountdown, 200);
     normalDelayTimer = window.setTimeout(() => setNormalTemporarily(), NORMAL_DELAY_MS);
+  }
+
+  function ensureNormalConfirm(overlay = getOverlay()) {
+    if (!overlay || overlay.querySelector(".mwf-normal-confirm")) return;
+    const card = overlay.querySelector(".mwf-card");
+    if (!card) return;
+
+    const confirm = document.createElement("div");
+    confirm.className = "mwf-normal-confirm";
+    confirm.setAttribute("aria-live", "polite");
+    confirm.innerHTML = `
+      <h2>Abrir WhatsApp normal?</h2>
+      <p>Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+      <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>5</strong>s…</p>
+      <div class="mwf-actions">
+        <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
+        <button class="mwf-button mwf-button-secondary" data-mwf-action="normal-cancel">Cancelar</button>
+        <button class="mwf-button mwf-button-quiet" data-mwf-action="normal-now">Abrir agora</button>
+      </div>
+    `;
+    card.appendChild(confirm);
   }
 
   function clearNormalDelay() {
