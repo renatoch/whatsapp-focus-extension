@@ -95,6 +95,7 @@ Uma revisão externa preliminar apontou riscos e recomendações para uma eventu
 
 ## Backlog de produto
 
+- Ergonomia de desenvolvimento: estudar script/perfil Chrome separado com `--remote-debugging-port` para recarregar extensão e aba do WhatsApp automaticamente durante testes, evitando abrir manualmente `chrome://extensions` a cada mudança de `content.js`.
 - Estudar configurações e toggles: permitir desativar funcionalidades e ajustar parâmetros quando fizer sentido, como delays intencionais para usuários mais sensíveis e duração do “Ver WhatsApp normal”.
 - Validar em uso real a pausa consciente antes de “Ver WhatsApp normal por 5 min”: se 5s é adequado, se “Continuar na conversa” reduz abertura desnecessária da lista e se “Abrir agora” evita frustração quando o uso é legítimo.
 - Ajustar botão “Lateral” para funcionar fora da lista principal: hoje ele só oculta corretamente se o WhatsApp estiver na lista principal; se estiver em Arquivadas/telas internas, não faz nada. Deve usar o mesmo tratamento de normalização de “Conversas/Chats” usado por Buscar e Continuar na conversa.
