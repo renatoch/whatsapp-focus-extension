@@ -94,7 +94,6 @@ Uma revisão externa preliminar apontou riscos e recomendações para uma eventu
 
 ## Backlog de produto
 
-- Validar em recarregamentos reais se a barra de carregamento espelha corretamente o `<progress>` nativo do WhatsApp, sem flash da interface original e sem prender o usuário caso `#side` demore a surgir.
 - Estudar configurações e toggles: permitir desativar funcionalidades e ajustar parâmetros quando fizer sentido, como delays intencionais para usuários mais sensíveis e duração do “Ver WhatsApp normal”.
 - Testar fricção consciente antes de “Ver WhatsApp normal por 5 min”: talvez apenas quando o WhatsApp estava dormente/focado, mostrar um timer de alguns segundos antes de liberar, com botão tipo “não quero mais” para dar chance de perceber o impulso e quebrar o vício.
 - Ajustar botão “Lateral” para funcionar fora da lista principal: hoje ele só oculta corretamente se o WhatsApp estiver na lista principal; se estiver em Arquivadas/telas internas, não faz nada. Deve usar o mesmo tratamento de normalização de “Conversas/Chats” usado por Buscar e Continuar na conversa.
