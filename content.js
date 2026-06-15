@@ -13,6 +13,7 @@
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
   const SEARCH_AGAIN_BUTTON_ID = "mirror-whatsapp-focus-search-again";
   const SEARCH_GATE_ID = "mirror-whatsapp-focus-search-gate";
+  const LOADING_PROGRESS_ID = "mirror-whatsapp-focus-loading-progress";
   const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
@@ -491,8 +492,35 @@
     const ready = isWhatsAppReady();
     overlay.classList.toggle("mwf-ready", ready);
     overlay.classList.toggle("mwf-has-conversation", hasOpenConversation());
+    if (!ready) updateOverlayLoadingProgress();
     overlay.querySelectorAll("[data-mwf-action]").forEach((button) => {
       button.disabled = !ready;
+    });
+  }
+
+  function updateOverlayLoadingProgress() {
+    const mirrorProgress = document.getElementById(LOADING_PROGRESS_ID);
+    if (!mirrorProgress) return;
+
+    const nativeProgress = findNativeLoadingProgress();
+    if (!nativeProgress) {
+      mirrorProgress.setAttribute("data-mwf-indeterminate", "true");
+      mirrorProgress.max = 100;
+      mirrorProgress.value = 8;
+      return;
+    }
+
+    const max = Number(nativeProgress.getAttribute("max") || nativeProgress.max || 100);
+    const value = Number(nativeProgress.getAttribute("value") || nativeProgress.value || 0);
+    mirrorProgress.max = Number.isFinite(max) && max > 0 ? max : 100;
+    mirrorProgress.value = Number.isFinite(value) ? value : 0;
+    mirrorProgress.removeAttribute("data-mwf-indeterminate");
+  }
+
+  function findNativeLoadingProgress() {
+    return Array.from(document.querySelectorAll("progress")).find((progress) => {
+      if (progress.closest(`#${OVERLAY_ID}`)) return false;
+      return isVisibleElement(progress);
     });
   }
 
@@ -508,7 +536,7 @@
         <h1 id="mwf-title">Modo foco</h1>
         <p>O WhatsApp está cego por padrão. Abra somente o que você veio buscar — sem lista de conversas, arquivadas, badges ou previews.</p>
         <div class="mwf-loading" aria-label="Carregando WhatsApp Web">
-          <div class="mwf-loading-bar" aria-hidden="true"></div>
+          <progress id="mirror-whatsapp-focus-loading-progress" class="mwf-loading-progress" value="0" max="100"></progress>
         </div>
         <div class="mwf-actions">
           <button class="mwf-button mwf-button-primary" data-mwf-action="search">Buscar conversa</button>
@@ -745,7 +773,15 @@
 
   function installConversationStateObserver() {
     const observer = new MutationObserver(updateOverlayState);
-    observer.observe(document.documentElement, { childList: true, subtree: true });
+    observer.observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["value", "max", "style", "class"],
+    });
+    window.setInterval(() => {
+      if (!isWhatsAppReady()) updateOverlayState();
+    }, 200);
     updateOverlayState();
   }
 

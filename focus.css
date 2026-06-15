@@ -239,21 +239,35 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   margin: -4px 0 22px;
 }
 
-.mwf-loading-bar {
-  position: relative;
+.mwf-loading-progress {
+  width: 100%;
   height: 3px;
   overflow: hidden;
+  border: 0;
+  border-radius: 999px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(233, 237, 239, 0.16);
+}
+
+.mwf-loading-progress::-webkit-progress-bar {
   border-radius: 999px;
   background: rgba(233, 237, 239, 0.16);
 }
 
-.mwf-loading-bar::before {
-  content: "";
-  position: absolute;
-  inset: 0 auto 0 0;
-  width: 42%;
-  border-radius: inherit;
+.mwf-loading-progress::-webkit-progress-value {
+  border-radius: 999px;
   background: #00a884;
+  transition: width 120ms linear;
+}
+
+.mwf-loading-progress::-moz-progress-bar {
+  border-radius: 999px;
+  background: #00a884;
+  transition: width 120ms linear;
+}
+
+.mwf-loading-progress[data-mwf-indeterminate="true"]::-webkit-progress-value {
   animation: mwf-loading-slide 1.35s ease-in-out infinite;
 }
 
