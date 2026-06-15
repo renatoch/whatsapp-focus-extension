@@ -95,58 +95,17 @@ Uma revisão externa preliminar apontou riscos e recomendações para uma eventu
 
 ## Backlog de produto
 
-### Em teste
+Formato: uma linha por item, com título descritivo suficiente para decidir rápido. Detalhes adicionais ficam na mesma linha para evitar blocos longos.
 
-#### Pausa antes do modo normal
-- **Ideia:** validar se a pausa consciente antes de “Ver WhatsApp normal por 5 min” continua quebrando o impulso após adaptação do hábito.
-- **Observar:** se o usuário começa a clicar em “Abrir agora” automaticamente, sem perceber/pensar.
-- **Variações possíveis:** acrescentar mais 15s de reflexão, desligar countdown automático, ou outra fricção voluntária quando a pausa de 8s deixar de funcionar.
-
-### Próximos ajustes
-
-#### Lateral fora da lista principal
-- **Problema:** o botão “Lateral” só oculta corretamente quando o WhatsApp está na lista principal.
-- **Contexto:** em Arquivadas/telas internas, pode não fazer nada.
-- **Próximo teste:** usar a mesma normalização por “Conversas/Chats” usada por Buscar e Continuar na conversa.
-
-#### Buscar outra conversa
-- **Problema:** ainda é preciso validar a forma mais clara de buscar outra conversa sem voltar pelo fluxo Foco → Busca.
-- **Contexto:** o botão lateral “Busca” ficou ambíguo e foi removido.
-- **Experimento atual:** botão “Buscar” no topo da área/lateral ocultada após selecionar uma conversa via modo busca; aparece só no estado pós-busca.
-
-#### Estado sem conversa aberta
-- **Problema:** quando não há conversa aberta, algumas ações podem levar a estados vazios ou pouco claros.
-- **Próximo teste:** melhorar cópia/estado visual para esse caso.
-
-### Configuração e ergonomia
-
-#### Configurações e toggles
-- **Ideia:** permitir desativar funcionalidades e ajustar parâmetros quando fizer sentido.
-- **Exemplos:** delays intencionais, duração do “Ver WhatsApp normal”, busca com mínimo de letras.
-
-#### Release/dev reload automático
-- **Ideia:** estudar script/perfil Chrome separado com `--remote-debugging-port` para recarregar extensão e aba do WhatsApp automaticamente durante testes.
-- **Motivação:** evitar abrir manualmente `chrome://extensions` a cada mudança de `content.js`.
-
-### Ideias futuras
-
-#### Busca limpa por contato
-- **Ideia:** busca própria por contato sem previews, em vez de depender da busca nativa do WhatsApp.
-
-#### Whitelist de conversas
-- **Ideia:** permitir 2–3 conversas autorizadas por sessão de foco.
-
-#### Modo de foco por tema/contexto
-- **Ideia:** configurar foco por tipo de uso, projeto ou contexto.
-
-#### Atalho para modo foco
-- **Ideia:** revisar/expandir atalhos para voltar ao modo foco de forma mais fluida.
-
-### Hardening / segurança
-
-#### Revisão de privacidade e segurança
-- **Contexto:** recomendações principais estão registradas acima; versão completa em HTML/rich text está salva no banco da jornada como memória `37b21a40` — “Análise completa de privacidade e segurança — WhatsApp Focus Mode (HTML)”.
-- **Próximo passo:** revisar recomendações antes de qualquer distribuição pública.
-
-#### Revisão final com especialistas
-- **Ideia:** fazer revisão final com especialistas de privacidade e segurança antes de distribuição pública.
+- **[Em teste] Pausa de 8s antes de abrir WhatsApp normal pode perder efeito se virar gesto automático** — Observar se o usuário começa a clicar em “Abrir agora” sem perceber/pensar. Se acontecer, testar variações como “+15s de reflexão”, desligar countdown automático, ou outra fricção voluntária.
+- **[Próximo ajuste] Botão “Lateral” precisa funcionar também em Arquivadas/telas internas** — Hoje ele só oculta corretamente quando o WhatsApp está na lista principal. Próximo teste: usar a mesma normalização por “Conversas/Chats” usada por Buscar e Continuar na conversa.
+- **[Próximo ajuste] Buscar outra conversa sem voltar pelo caminho Foco → Busca** — O botão lateral “Busca” ficou ambíguo e foi removido. Experimento atual: botão “Buscar” no topo da área/lateral ocultada após selecionar uma conversa via modo busca; aparece só no estado pós-busca.
+- **[Próximo ajuste] Estado sem conversa aberta ainda pode ficar pouco claro** — Quando não há conversa aberta, algumas ações podem levar a estados vazios ou mensagens que precisam mudar. Melhorar cópia/estado visual para esse caso.
+- **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis** — Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
+- **[Dev ergonomics] Recarregar extensão e aba automaticamente durante desenvolvimento** — Estudar script/perfil Chrome separado com `--remote-debugging-port` para evitar abrir manualmente `chrome://extensions` a cada mudança de `content.js`.
+- **[Ideia futura] Busca própria por contato sem previews** — Substituir ou complementar a busca nativa do WhatsApp para controlar completamente o que aparece e evitar recentes/previews.
+- **[Ideia futura] Whitelist de 2–3 conversas por sessão de foco** — Permitir um conjunto pequeno de conversas autorizadas enquanto o resto do WhatsApp segue cego.
+- **[Ideia futura] Modo de foco por tema/contexto** — Configurar foco por tipo de uso, projeto ou contexto, em vez de um único modo genérico.
+- **[Ideia futura] Revisar/expandir atalhos para voltar ao modo foco** — Tornar o retorno ao foco mais fluido sem conflitar com atalhos úteis do WhatsApp.
+- **[Hardening] Revisar recomendações de privacidade e segurança antes de distribuição pública** — Recomendações principais estão registradas acima; versão completa está salva na memória `37b21a40` — “Análise completa de privacidade e segurança — WhatsApp Focus Mode (HTML)”.
+- **[Hardening] Fazer revisão final com especialistas antes de distribuição pública** — Rodada final de privacidade e segurança antes de recomendar instalação pública.
