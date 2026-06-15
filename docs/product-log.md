@@ -93,6 +93,7 @@ Uma revisão externa preliminar apontou riscos e recomendações para uma eventu
 
 ## Backlog de produto
 
+- Testar fricção consciente antes de “Ver WhatsApp normal por 5 min”: talvez apenas quando o WhatsApp estava dormente/focado, mostrar um timer de alguns segundos antes de liberar, com botão tipo “não quero mais” para dar chance de perceber o impulso e quebrar o vício.
 - Ajustar botão “Lateral” para funcionar fora da lista principal: hoje ele só oculta corretamente se o WhatsApp estiver na lista principal; se estiver em Arquivadas/telas internas, não faz nada. Deve usar o mesmo tratamento de normalização de “Conversas/Chats” usado por Buscar e Continuar na conversa.
 - Testar forma clara de “buscar outra conversa” sem precisar voltar pelo fluxo Foco → Busca. Contexto: o botão lateral “Busca” surgiu para esse caso, mas ficou ambíguo. Experimento atual: botão “Buscar” no topo da área/lateral ocultada após selecionar uma conversa via modo busca; ele só aparece nesse estado pós-busca e some ao sair dele.
 - Revisão futura das recomendações de privacidade/segurança registradas acima. A versão completa em HTML/rich text está salva no banco da jornada como memória `37b21a40` — “Análise completa de privacidade e segurança — WhatsApp Focus Mode (HTML)”.
