@@ -72,6 +72,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - “Continuar na conversa aberta” passou a tentar clicar em “Conversas/Chats” antes de esconder o overlay, para normalizar o contexto lateral quando o WhatsApp estava em Arquivadas ou outra tela interna.
 - A navegação para “Conversas/Chats” foi centralizada em uma função compartilhada entre modo busca e continuar conversa, para testar se ambos os fluxos se comportam igual antes de uma refatoração maior.
 - A busca passou a ocultar resultados/lista até que o texto digitado tenha pelo menos 3 letras e mostrar um estado visual de filtragem antes da primeira exibição. Motivação: feedback de amiga apontou que ver recentes antes de uma intenção específica pode indicar mensagem nova e gerar curiosidade; após a primeira liberação, a lista permanece visível enquanto o usuário refina a busca para evitar flicker.
+- Durante o carregamento inicial do WhatsApp Web, o overlay passou a mostrar apenas uma barra de carregamento em tela cega, em vez do card completo com texto e ações desabilitadas.
 
 ## Revisão de privacidade e segurança — análise preliminar
 
@@ -93,7 +94,7 @@ Uma revisão externa preliminar apontou riscos e recomendações para uma eventu
 
 ## Backlog de produto
 
-- Enquanto o WhatsApp Web carrega, testar se dá para mostrar apenas uma barra de progresso/estado de carregamento semelhante ao próprio WhatsApp, mantendo o restante cego.
+- Validar em recarregamentos reais se a barra de carregamento cega aparece durante o loading do WhatsApp sem flash da interface original e sem prender o usuário caso `#side` demore a surgir.
 - Estudar configurações e toggles: permitir desativar funcionalidades e ajustar parâmetros quando fizer sentido, como delays intencionais para usuários mais sensíveis e duração do “Ver WhatsApp normal”.
 - Testar fricção consciente antes de “Ver WhatsApp normal por 5 min”: talvez apenas quando o WhatsApp estava dormente/focado, mostrar um timer de alguns segundos antes de liberar, com botão tipo “não quero mais” para dar chance de perceber o impulso e quebrar o vício.
 - Ajustar botão “Lateral” para funcionar fora da lista principal: hoje ele só oculta corretamente se o WhatsApp estiver na lista principal; se estiver em Arquivadas/telas internas, não faz nada. Deve usar o mesmo tratamento de normalização de “Conversas/Chats” usado por Buscar e Continuar na conversa.

@@ -33,7 +33,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
-- durante o carregamento inicial do WhatsApp Web, mantém a tela cega e exibe estado de carregamento sem ações clicáveis;
+- durante o carregamento inicial do WhatsApp Web, mantém a tela cega e exibe apenas uma barra de carregamento sem ações clicáveis;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
@@ -72,19 +72,20 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 
 ## Como testar
 
-1. Ao abrir WhatsApp Web, a tela deve mostrar apenas **Modo foco**.
-2. O painel lateral de conversas não deve aparecer.
-3. Clique em **Buscar conversa**.
-4. A lateral deve aparecer para permitir a busca nativa, sem mostrar resultados antes de 3 letras.
-5. Digite ou cole 3 letras; deve aparecer um indicador de filtragem antes dos resultados.
-6. Selecione uma conversa; a lateral deve sumir automaticamente depois da seleção.
-7. Clique em **Voltar ao modo foco** para retornar à tela neutra.
-8. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.
-9. Clique em **Continuar na conversa aberta**.
-10. A conversa, se houver uma aberta, fica visível; a lateral continua escondida.
-11. Clique em **Ver WhatsApp normal por 5 min** para validar a válvula de escape.
-12. Durante o modo normal, clique em **Voltar ao modo foco** para encerrar a liberação antes dos 5 minutos.
-13. Recarregue a página e confirme que ela volta ao modo foco imediatamente.
+1. Ao abrir WhatsApp Web, enquanto a interface ainda carrega, deve aparecer apenas uma barra de carregamento.
+2. Quando o WhatsApp estiver pronto, a tela deve mostrar **Modo foco**.
+3. O painel lateral de conversas não deve aparecer.
+4. Clique em **Buscar conversa**.
+5. A lateral deve aparecer para permitir a busca nativa, sem mostrar resultados antes de 3 letras.
+6. Digite ou cole 3 letras; deve aparecer um indicador de filtragem antes dos resultados.
+7. Selecione uma conversa; a lateral deve sumir automaticamente depois da seleção.
+8. Clique em **Voltar ao modo foco** para retornar à tela neutra.
+9. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.
+10. Clique em **Continuar na conversa aberta**.
+11. A conversa, se houver uma aberta, fica visível; a lateral continua escondida.
+12. Clique em **Ver WhatsApp normal por 5 min** para validar a válvula de escape.
+13. Durante o modo normal, clique em **Voltar ao modo foco** para encerrar a liberação antes dos 5 minutos.
+14. Recarregue a página e confirme que ela volta ao modo foco imediatamente.
 
 ## Limitações conhecidas
 

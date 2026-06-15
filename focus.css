@@ -236,13 +236,48 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
 
 .mwf-loading {
   display: block;
-  color: #f1c40f !important;
+  margin-top: 4px;
+}
+
+.mwf-loading-bar {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: rgba(233, 237, 239, 0.16);
+}
+
+.mwf-loading-bar::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 36%;
+  border-radius: inherit;
+  background: #00a884;
+  animation: mwf-loading-slide 1.35s ease-in-out infinite;
+}
+
+@keyframes mwf-loading-slide {
+  0% { transform: translateX(-110%); }
+  55% { transform: translateX(140%); }
+  100% { transform: translateX(310%); }
 }
 
 #mirror-whatsapp-focus-overlay.mwf-ready .mwf-loading {
   display: none !important;
 }
 
+#mirror-whatsapp-focus-overlay:not(.mwf-ready) .mwf-card {
+  width: min(320px, calc(100vw - 80px));
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+#mirror-whatsapp-focus-overlay:not(.mwf-ready) .mwf-kicker,
+#mirror-whatsapp-focus-overlay:not(.mwf-ready) #mwf-title,
+#mirror-whatsapp-focus-overlay:not(.mwf-ready) .mwf-card > p,
 #mirror-whatsapp-focus-overlay:not(.mwf-ready) .mwf-actions {
   display: none !important;
 }

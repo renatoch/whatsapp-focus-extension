@@ -507,7 +507,9 @@
         <p class="mwf-kicker">WhatsApp Focus Mode</p>
         <h1 id="mwf-title">Modo foco</h1>
         <p>O WhatsApp está cego por padrão. Abra somente o que você veio buscar — sem lista de conversas, arquivadas, badges ou previews.</p>
-        <p class="mwf-loading">Carregando WhatsApp Web… os comandos aparecem quando a interface estiver pronta.</p>
+        <div class="mwf-loading" aria-label="Carregando WhatsApp Web">
+          <div class="mwf-loading-bar" aria-hidden="true"></div>
+        </div>
         <div class="mwf-actions">
           <button class="mwf-button mwf-button-primary" data-mwf-action="search">Buscar conversa</button>
           <button class="mwf-button mwf-button-secondary" data-mwf-action="continue">Continuar na conversa aberta</button>
