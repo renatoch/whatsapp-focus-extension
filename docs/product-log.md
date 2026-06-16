@@ -104,6 +104,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Próximo ajuste] Replicar filtro de não lidas dentro de Arquivadas**
   - O chat principal já tem botão nativo para filtrar conversas não lidas. Ideia: oferecer comportamento equivalente em Arquivadas, para achar não lidas arquivadas sem varrer a lista inteira.
 
+- **[Experimento] Mostrar há quanto tempo o WhatsApp normal não é aberto**
+  - Objetivo: gerar consciência de reabertura impulsiva/tédio, especialmente quando o usuário acabou de abrir e volta logo em seguida. Começar simples: um contador na tela de foco para tempo desde a última abertura do modo normal. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
+
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
 
