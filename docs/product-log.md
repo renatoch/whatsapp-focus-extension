@@ -102,6 +102,7 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 
 - **[Em teste] Confirmação explícita quando WhatsApp normal foi aberto há menos de 10 min**
   - Implementação atual: se a última abertura do modo normal foi recente, não há countdown automático; a tela mostra há quanto tempo abriu e pede clique explícito em “Abrir mesmo assim”. Observar se isso quebra melhor o impulso/tédio ou se também vira gesto automático.
+  - Avaliar caso específico: quando os 5 min de modo normal acabam e a extensão volta sozinha ao modo foco, faz sentido tratar como “abriu há ~5 min” e exigir confirmação explícita? Pode funcionar como estímulo para continuar na conversa focada em vez de reabrir o painel lateral, mas precisa ser validado em uso real.
 
 - **[Próximo ajuste] Replicar filtro de não lidas dentro de Arquivadas**
   - O chat principal já tem botão nativo para filtrar conversas não lidas. Ideia: oferecer comportamento equivalente em Arquivadas, para achar não lidas arquivadas sem varrer a lista inteira.
