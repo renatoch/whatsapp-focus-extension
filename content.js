@@ -963,7 +963,7 @@
   function updateRecentNormalWarning(overlay, lastOpenedAt) {
     const warning = overlay.querySelector("[data-mwf-normal-recent-warning]");
     if (!warning || !lastOpenedAt) return;
-    warning.textContent = `Você abriu o WhatsApp normal há ${formatElapsedTime(Date.now() - lastOpenedAt)}. Talvez seja impulso ou tédio.`;
+    warning.textContent = `Você abriu o WhatsApp normal há ${formatElapsedTime(Date.now() - lastOpenedAt)}. É impulso ou tédio?`;
   }
 
   function clearNormalDelay() {
