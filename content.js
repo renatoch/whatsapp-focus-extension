@@ -63,6 +63,7 @@
 
   function setActive({ showOverlay }) {
     clearNormalDelay();
+    updateFocusStreak();
     root().classList.add(ROOT_ACTIVE);
     root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
     root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
@@ -525,7 +526,7 @@
 
   function formatElapsedTime(ms) {
     const totalMinutes = Math.max(0, Math.floor(ms / 60000));
-    if (totalMinutes < 1) return "menos de 1 min";
+    if (totalMinutes < 1) return "0 min";
     if (totalMinutes < 60) return `${totalMinutes} min`;
 
     const hours = Math.floor(totalMinutes / 60);
@@ -969,7 +970,7 @@
     installSearchGateHandler();
     installSearchSelectionHandler();
     installConversationStateObserver();
-    window.setInterval(updateFocusStreak, 30000);
+    window.setInterval(updateFocusStreak, 10000);
     whenBodyExists(() => {
       ensureControls();
       setActive({ showOverlay: true });
