@@ -235,6 +235,18 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   line-height: 1.5;
 }
 
+.mwf-focus-streak {
+  display: inline-flex;
+  margin: -8px 0 22px !important;
+  border: 1px solid rgba(0, 168, 132, 0.32);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: rgba(0, 168, 132, 0.08);
+  color: #7ee2bd !important;
+  font-size: 13px !important;
+  font-weight: 650;
+}
+
 .mwf-loading {
   display: block;
   margin: -4px 0 22px;

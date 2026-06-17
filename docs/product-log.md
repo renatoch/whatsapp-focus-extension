@@ -75,6 +75,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - A busca passou a ocultar resultados/lista até que o texto digitado tenha pelo menos 3 letras e mostrar um estado visual de filtragem antes da primeira exibição. Motivação: feedback de amiga apontou que ver recentes antes de uma intenção específica pode indicar mensagem nova e gerar curiosidade; após a primeira liberação, a lista permanece visível enquanto o usuário refina a busca para evitar flicker.
 - Durante o carregamento inicial do WhatsApp Web, o overlay passou a manter o card de foco e substituir o aviso textual por uma barra de carregamento. Quando a barra nativa `<progress>` do WhatsApp está disponível, a extensão espelha `value`/`max`; se não encontrar, usa uma animação indeterminada como fallback.
 - A válvula “Ver WhatsApp normal por 5 min” passou a ter uma pausa consciente de 8s antes de liberar o ambiente completo, com alternativas “Continuar na conversa”, “Cancelar” e “Abrir agora”. Quando não há conversa aberta, a mensagem não sugere continuar conversa e avisa que a ação abrirá a lista completa. A intenção é quebrar o impulso sem bloquear uso legítimo.
+- A tela de foco passou a mostrar há quanto tempo o WhatsApp normal não é aberto, usando `localStorage` para registrar a última abertura do modo normal. Objetivo: tornar visível o padrão de reabertura por impulso/tédio.
 
 ## Revisão de privacidade e segurança — análise preliminar
 
@@ -104,8 +105,8 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Próximo ajuste] Replicar filtro de não lidas dentro de Arquivadas**
   - O chat principal já tem botão nativo para filtrar conversas não lidas. Ideia: oferecer comportamento equivalente em Arquivadas, para achar não lidas arquivadas sem varrer a lista inteira.
 
-- **[Experimento] Mostrar há quanto tempo o WhatsApp normal não é aberto**
-  - Objetivo: gerar consciência de reabertura impulsiva/tédio, especialmente quando o usuário acabou de abrir e volta logo em seguida. Começar simples: um contador na tela de foco para tempo desde a última abertura do modo normal. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
+- **[Em teste] Contador de tempo sem abrir WhatsApp normal ajuda ou vira ruído?**
+  - Implementação atual: a tela de foco mostra tempo desde a última abertura do modo normal. Observar se aumenta consciência de reabertura impulsiva/tédio ou se passa a ser ignorado. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
 
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.

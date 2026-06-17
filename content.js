@@ -14,6 +14,8 @@
   const SEARCH_AGAIN_BUTTON_ID = "mirror-whatsapp-focus-search-again";
   const SEARCH_GATE_ID = "mirror-whatsapp-focus-search-gate";
   const LOADING_PROGRESS_ID = "mirror-whatsapp-focus-loading-progress";
+  const FOCUS_STREAK_ID = "mirror-whatsapp-focus-streak";
+  const LAST_NORMAL_OPEN_KEY = "mirror-whatsapp-focus-last-normal-opened-at";
   const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
@@ -502,9 +504,51 @@
     overlay.classList.toggle("mwf-ready", ready);
     overlay.classList.toggle("mwf-has-conversation", hasOpenConversation());
     if (!ready) updateOverlayLoadingProgress();
+    updateFocusStreak();
     overlay.querySelectorAll("[data-mwf-action]").forEach((button) => {
       button.disabled = !ready;
     });
+  }
+
+  function readLastNormalOpenedAt() {
+    const raw = window.localStorage?.getItem(LAST_NORMAL_OPEN_KEY);
+    const timestamp = Number(raw);
+    return Number.isFinite(timestamp) && timestamp > 0 ? timestamp : null;
+  }
+
+  function recordNormalOpenedAt() {
+    try {
+      window.localStorage?.setItem(LAST_NORMAL_OPEN_KEY, String(Date.now()));
+    } catch (_error) {
+      // Keep focus behavior working even if storage is unavailable.
+    }
+  }
+
+  function formatElapsedTime(ms) {
+    const totalMinutes = Math.max(0, Math.floor(ms / 60000));
+    if (totalMinutes < 1) return "menos de 1 min";
+    if (totalMinutes < 60) return `${totalMinutes} min`;
+
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+    if (hours < 24) return minutes ? `${hours}h ${minutes}min` : `${hours}h`;
+
+    const days = Math.floor(hours / 24);
+    const remainingHours = hours % 24;
+    return remainingHours ? `${days}d ${remainingHours}h` : `${days}d`;
+  }
+
+  function updateFocusStreak() {
+    const streak = document.getElementById(FOCUS_STREAK_ID);
+    if (!streak) return;
+
+    const lastOpenedAt = readLastNormalOpenedAt();
+    if (!lastOpenedAt) {
+      streak.textContent = "Você ainda não abriu o WhatsApp normal nesta instalação.";
+      return;
+    }
+
+    streak.textContent = `Sem abrir WhatsApp normal há ${formatElapsedTime(Date.now() - lastOpenedAt)}.`;
   }
 
   function updateOverlayLoadingProgress() {
@@ -546,6 +590,7 @@
         <p class="mwf-kicker">WhatsApp Focus Mode</p>
         <h1 id="mwf-title">Modo foco</h1>
         <p>O WhatsApp está cego por padrão. Abra somente o que você veio buscar — sem lista de conversas, arquivadas, badges ou previews.</p>
+        <p id="mirror-whatsapp-focus-streak" class="mwf-focus-streak">Você ainda não abriu o WhatsApp normal nesta instalação.</p>
         <div class="mwf-loading" aria-label="Carregando WhatsApp Web">
           <progress id="mirror-whatsapp-focus-loading-progress" class="mwf-loading-progress" value="0" max="100"></progress>
         </div>
@@ -908,6 +953,7 @@
   function setNormalTemporarily() {
     clearNormalDelay();
     if (bypassTimer) window.clearTimeout(bypassTimer);
+    recordNormalOpenedAt();
     setNormal();
     bypassTimer = window.setTimeout(() => {
       bypassTimer = null;
@@ -921,6 +967,7 @@
     installSearchGateHandler();
     installSearchSelectionHandler();
     installConversationStateObserver();
+    window.setInterval(updateFocusStreak, 30000);
     whenBodyExists(() => {
       ensureControls();
       setActive({ showOverlay: true });
