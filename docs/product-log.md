@@ -107,6 +107,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Próximo ajuste] Replicar filtro de não lidas dentro de Arquivadas**
   - O chat principal já tem botão nativo para filtrar conversas não lidas. Ideia: oferecer comportamento equivalente em Arquivadas, para achar não lidas arquivadas sem varrer a lista inteira.
 
+- **[Ideia/Próximo ajuste] Fixar conversas buscadas para manter 2–3 conversas acessíveis**
+  - Permitir fixar conversas encontradas pela busca, nem que seja por período ou critério de desfazer/desfixar. Objetivo: trabalhar com poucas conversas simultâneas sem precisar buscar novamente e sem reabrir a lista geral.
+
 - **[Em teste] Contador de tempo sem abrir WhatsApp normal ajuda ou vira ruído?**
   - Implementação atual: a tela de foco mostra tempo desde a última abertura do modo normal. Observar se aumenta consciência de reabertura impulsiva/tédio ou se passa a ser ignorado. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
 
