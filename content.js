@@ -504,7 +504,6 @@
     overlay.classList.toggle("mwf-ready", ready);
     overlay.classList.toggle("mwf-has-conversation", hasOpenConversation());
     if (!ready) updateOverlayLoadingProgress();
-    updateFocusStreak();
     overlay.querySelectorAll("[data-mwf-action]").forEach((button) => {
       button.disabled = !ready;
     });
@@ -544,11 +543,13 @@
 
     const lastOpenedAt = readLastNormalOpenedAt();
     if (!lastOpenedAt) {
-      streak.textContent = "Você ainda não abriu o WhatsApp normal nesta instalação.";
+      const text = "Você ainda não abriu o WhatsApp normal nesta instalação.";
+      if (streak.textContent !== text) streak.textContent = text;
       return;
     }
 
-    streak.textContent = `Sem abrir WhatsApp normal há ${formatElapsedTime(Date.now() - lastOpenedAt)}.`;
+    const text = `Sem abrir WhatsApp normal há ${formatElapsedTime(Date.now() - lastOpenedAt)}.`;
+    if (streak.textContent !== text) streak.textContent = text;
   }
 
   function updateOverlayLoadingProgress() {
@@ -639,6 +640,7 @@
     });
 
     document.body.appendChild(overlay);
+    updateFocusStreak();
     updateOverlayState();
   }
 
