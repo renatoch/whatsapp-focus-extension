@@ -35,7 +35,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
 - mostra há quanto tempo o WhatsApp normal não é aberto, para aumentar consciência de reaberturas impulsivas;
-- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, com pausa consciente de 8s antes de liberar;
+- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, com pausa consciente de 8s antes de liberar; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
 - adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;

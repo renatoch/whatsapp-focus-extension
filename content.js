@@ -25,6 +25,7 @@
   const MIN_SEARCH_CHARS = 3;
   const SEARCH_SETTLE_MS = 2000;
   const NORMAL_DELAY_MS = 8000;
+  const RECENT_NORMAL_OPEN_MS = 10 * 60 * 1000;
   const DEBUG = false;
   let bypassTimer = null;
   let normalDelayTimer = null;
@@ -605,6 +606,7 @@
           <h2>Abrir WhatsApp normal?</h2>
           <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
           <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
+          <p class="mwf-normal-recent-warning" data-mwf-normal-recent-warning></p>
           <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>8</strong>s…</p>
           <div class="mwf-actions">
             <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
@@ -907,6 +909,19 @@
     ensureNormalConfirm(overlay);
     clearNormalDelay();
     overlay.classList.add("mwf-normal-pending");
+
+    const lastOpenedAt = readLastNormalOpenedAt();
+    const recentlyOpened = lastOpenedAt && Date.now() - lastOpenedAt < RECENT_NORMAL_OPEN_MS;
+    updateRecentNormalWarning(overlay, lastOpenedAt);
+
+    if (recentlyOpened) {
+      overlay.classList.add("mwf-normal-recent");
+      overlay.querySelectorAll('[data-mwf-action="normal-now"]').forEach((button) => {
+        button.textContent = "Abrir mesmo assim";
+      });
+      return;
+    }
+
     const startedAt = Date.now();
 
     const updateCountdown = () => {
@@ -934,6 +949,7 @@
       <h2>Abrir WhatsApp normal?</h2>
       <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
       <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
+      <p class="mwf-normal-recent-warning" data-mwf-normal-recent-warning></p>
       <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>8</strong>s…</p>
       <div class="mwf-actions">
         <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
@@ -944,13 +960,24 @@
     card.appendChild(confirm);
   }
 
+  function updateRecentNormalWarning(overlay, lastOpenedAt) {
+    const warning = overlay.querySelector("[data-mwf-normal-recent-warning]");
+    if (!warning || !lastOpenedAt) return;
+    warning.textContent = `Você abriu o WhatsApp normal há ${formatElapsedTime(Date.now() - lastOpenedAt)}. Talvez seja impulso ou tédio.`;
+  }
+
   function clearNormalDelay() {
     if (normalDelayTimer) window.clearTimeout(normalDelayTimer);
     if (normalDelayInterval) window.clearInterval(normalDelayInterval);
     normalDelayTimer = null;
     normalDelayInterval = null;
     const overlay = getOverlay();
-    if (overlay) overlay.classList.remove("mwf-normal-pending");
+    if (overlay) {
+      overlay.classList.remove("mwf-normal-pending", "mwf-normal-recent");
+      overlay.querySelectorAll('[data-mwf-action="normal-now"]').forEach((button) => {
+        button.textContent = "Abrir agora";
+      });
+    }
   }
 
   function setNormalTemporarily() {

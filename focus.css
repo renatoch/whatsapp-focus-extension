@@ -323,6 +323,24 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   font-weight: 650;
 }
 
+.mwf-normal-recent-warning {
+  display: none;
+  border: 1px solid rgba(247, 215, 148, 0.35);
+  border-radius: 14px;
+  padding: 12px 14px;
+  background: rgba(247, 215, 148, 0.08);
+  color: #f7d794 !important;
+  font-weight: 650;
+}
+
+#mirror-whatsapp-focus-overlay.mwf-normal-recent .mwf-normal-recent-warning {
+  display: block;
+}
+
+#mirror-whatsapp-focus-overlay.mwf-normal-recent .mwf-normal-countdown {
+  display: none !important;
+}
+
 #mirror-whatsapp-focus-overlay.mwf-has-conversation .mwf-normal-no-conversation,
 #mirror-whatsapp-focus-overlay:not(.mwf-has-conversation) .mwf-normal-has-conversation {
   display: none !important;
