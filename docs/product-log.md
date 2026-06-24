@@ -113,6 +113,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Em teste] Contador de tempo sem abrir WhatsApp normal ajuda ou vira ruído?**
   - Implementação atual: a tela de foco mostra tempo desde a última abertura do modo normal. Observar se aumenta consciência de reabertura impulsiva/tédio ou se passa a ser ignorado. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
 
+- **[Ideia/Próximo ajuste] Contar quantas vezes o WhatsApp normal foi aberto no dia e na semana**
+  - Complementar o tempo desde a última abertura com volume de reaberturas: “abriu WhatsApp normal X vezes hoje” e talvez “Y vezes nesta semana”. Objetivo: tornar visível o padrão cumulativo de escape, não só o intervalo desde a última vez.
+
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
 
