@@ -116,6 +116,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Ideia/Próximo ajuste] Contar quantas vezes o WhatsApp normal foi aberto no dia e na semana**
   - Complementar o tempo desde a última abertura com volume de reaberturas: “abriu WhatsApp normal X vezes hoje” e talvez “Y vezes nesta semana”. Objetivo: tornar visível o padrão cumulativo de escape, não só o intervalo desde a última vez.
 
+- **[Ideia/Próximo ajuste] Marcar conversa focada como não lida e sair sem abrir o modo full**
+  - Quando estiver em modo de ver apenas a conversa, permitir marcar a conversa atual como não lida e sair dela mantendo esse estado, sem precisar voltar para o WhatsApp normal/lista completa.
+
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
 
