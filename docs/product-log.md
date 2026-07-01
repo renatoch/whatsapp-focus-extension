@@ -120,7 +120,7 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
   - Quando estiver em modo de ver apenas a conversa, permitir marcar a conversa atual como não lida e sair dela mantendo esse estado, sem precisar voltar para o WhatsApp normal/lista completa.
 
 - **[Ideia/Exploração] Sumarizar conversas do dia anterior para entender temas e foco**
-  - Gerar uma visão das conversas em que houve mensagem enviada no dia anterior — e talvez também conversas lidas, incluindo mensagens antigas que não estavam marcadas como não lidas — para perceber quais temas ocuparam atenção e como o tempo ficou pulverizado entre conversas.
+  - Gerar uma visão das conversas em que houve mensagem enviada no dia anterior — e talvez também conversas lidas, incluindo mensagens antigas que não estavam marcadas como não lidas — para perceber quais temas ocuparam atenção e como o tempo ficou pulverizado entre conversas. Incluir contador de quantas conversas privadas e de grupo tiveram mensagem enviada no dia; para grupos, se possível registrar/estimar quantidade de participantes para diferenciar grupos grandes e pequenos.
 
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
