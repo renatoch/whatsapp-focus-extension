@@ -60,15 +60,27 @@ Still, a curated list of names/phones is sensitive. For safer testing:
 
 ## JSON import format
 
+Private conversation:
+
 ```json
-[
-  {
-    "name": "Pessoa Exemplo",
-    "phone": "5511999999999",
-    "tags": ["trabalho"],
-    "favorite": true
-  }
-]
+{
+  "name": "Pessoa Exemplo",
+  "phone": "5511999999999",
+  "tags": ["trabalho"],
+  "favorite": true
+}
 ```
 
-Phone numbers should include country code and digits only if possible. The UI normalizes common punctuation before creating the WhatsApp link.
+Group conversation:
+
+```json
+{
+  "name": "Grupo Exemplo",
+  "type": "group",
+  "url": "https://chat.whatsapp.com/XXXXXXXXXXXX",
+  "tags": ["grupo"],
+  "favorite": false
+}
+```
+
+Phone numbers should include country code and digits only if possible. Group links use WhatsApp invite URLs, so treat them as sensitive.

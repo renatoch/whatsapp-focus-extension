@@ -7,8 +7,9 @@
   },
   {
     "name": "Grupo Exemplo",
-    "phone": "5521888888888",
-    "tags": ["família"],
+    "type": "group",
+    "url": "https://chat.whatsapp.com/XXXXXXXXXXXX",
+    "tags": ["grupo"],
     "favorite": false
   }
 ]

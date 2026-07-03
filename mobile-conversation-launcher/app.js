@@ -50,16 +50,37 @@ function saveContacts() {
 }
 
 function normalizeContact(contact) {
-  if (!contact || !contact.name || !contact.phone) return null;
+  const target = contact?.url || contact?.phone;
+  if (!contact || !contact.name || !target) return null;
+
+  const normalizedTarget = normalizeTarget(target);
+  if (!normalizedTarget) return null;
+
   return {
     id: contact.id || createId(),
     name: String(contact.name).trim(),
-    phone: normalizePhone(contact.phone),
+    type: contact.type || normalizedTarget.type,
+    phone: normalizedTarget.phone || '',
+    url: normalizedTarget.url || '',
     tags: Array.isArray(contact.tags)
       ? contact.tags.map((tag) => String(tag).trim()).filter(Boolean)
       : parseTags(contact.tags || ''),
     favorite: Boolean(contact.favorite),
   };
+}
+
+function normalizeTarget(target) {
+  const value = String(target).trim();
+  if (!value) return null;
+
+  if (/chat\.whatsapp\.com\//i.test(value)) {
+    const url = value.startsWith('http') ? value : `https://${value}`;
+    return { type: 'group', url };
+  }
+
+  const phone = normalizePhone(value);
+  if (!phone) return null;
+  return { type: 'person', phone };
 }
 
 function normalizePhone(phone) {
@@ -74,7 +95,7 @@ function parseTags(value) {
 }
 
 function contactSearchText(contact) {
-  return [contact.name, contact.phone, ...contact.tags].join(' ').toLowerCase();
+  return [contact.name, contact.type, contact.phone, contact.url, ...contact.tags].join(' ').toLowerCase();
 }
 
 function filteredContacts() {
@@ -85,6 +106,7 @@ function filteredContacts() {
 }
 
 function whatsappUrl(contact) {
+  if (contact.type === 'group') return contact.url;
   return `https://wa.me/${contact.phone}`;
 }
 
@@ -127,7 +149,7 @@ function createContactCard(contact) {
 
   const meta = document.createElement('p');
   meta.className = 'contact-meta';
-  meta.textContent = maskPhone(contact.phone);
+  meta.textContent = formatTarget(contact);
 
   const tags = document.createElement('div');
   tags.className = 'tags';
@@ -175,6 +197,11 @@ function createContactCard(contact) {
   return card;
 }
 
+function formatTarget(contact) {
+  if (contact.type === 'group') return 'Grupo · link de convite';
+  return maskPhone(contact.phone);
+}
+
 function maskPhone(phone) {
   if (phone.length <= 4) return '••••';
   return `${phone.slice(0, 4)}••••${phone.slice(-4)}`;
@@ -201,7 +228,7 @@ function openDialog(contact = null) {
   els.dialogTitle.textContent = contact ? 'Editar conversa' : 'Adicionar conversa';
   els.contactId.value = contact?.id || '';
   els.contactName.value = contact?.name || '';
-  els.contactPhone.value = contact?.phone || '';
+  els.contactPhone.value = contact?.url || contact?.phone || '';
   els.contactTags.value = contact?.tags?.join(', ') || '';
   els.contactFavorite.checked = Boolean(contact?.favorite);
   els.dialog.showModal();
