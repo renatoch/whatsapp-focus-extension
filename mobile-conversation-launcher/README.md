@@ -35,7 +35,8 @@ To install as an app-like launcher, the page must be served from a secure origin
 If serving over Wi-Fi is blocked, generate a single HTML file with CSS and JavaScript embedded:
 
 ```bash
-./scripts/build-mobile-standalone.py
+cd mobile-conversation-launcher
+./scripts/build-standalone.py
 ```
 
 Output:

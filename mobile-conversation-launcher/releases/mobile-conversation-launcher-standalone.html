@@ -1,0 +1,481 @@
+<!-- Standalone build generated from mobile-conversation-launcher/. Do not edit manually. -->
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1f1b">
+  <title>Conversas com foco</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20viewBox%3D%220%200%20512%20512%22%3E%0A%20%20%3Crect%20width%3D%22512%22%20height%3D%22512%22%20rx%3D%22112%22%20fill%3D%22%2307110f%22/%3E%0A%20%20%3Ccircle%20cx%3D%22256%22%20cy%3D%22256%22%20r%3D%22168%22%20fill%3D%22%2310211d%22%20stroke%3D%22%2335d07f%22%20stroke-width%3D%2224%22/%3E%0A%20%20%3Cpath%20d%3D%22M176%20264c44-76%20116-76%20160%200%22%20fill%3D%22none%22%20stroke%3D%22%23effaf6%22%20stroke-width%3D%2234%22%20stroke-linecap%3D%22round%22/%3E%0A%20%20%3Ccircle%20cx%3D%22196%22%20cy%3D%22212%22%20r%3D%2222%22%20fill%3D%22%2335d07f%22/%3E%0A%20%20%3Ccircle%20cx%3D%22316%22%20cy%3D%22212%22%20r%3D%2222%22%20fill%3D%22%2335d07f%22/%3E%0A%20%20%3Cpath%20d%3D%22M184%20334h144%22%20stroke%3D%22%2335d07f%22%20stroke-width%3D%2234%22%20stroke-linecap%3D%22round%22/%3E%0A%3C/svg%3E%0A" type="image/svg+xml">
+  <style>
+:root {
+  color-scheme: dark;
+  --bg: #07110f;
+  --panel: #10211d;
+  --panel-2: #132a25;
+  --text: #effaf6;
+  --muted: #94aaa3;
+  --accent: #35d07f;
+  --accent-2: #1fa362;
+  --danger: #ff8f8f;
+  --border: rgba(255, 255, 255, 0.1);
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #14362e 0, var(--bg) 45%);
+  color: var(--text);
+}
+
+button, input { font: inherit; }
+
+button, .button {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+  color: var(--text);
+  background: var(--panel-2);
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.primary, .button.primary {
+  border-color: transparent;
+  background: var(--accent);
+  color: #03100b;
+  font-weight: 700;
+}
+
+button.ghost { background: transparent; }
+button.danger { color: var(--danger); }
+
+.app-shell {
+  width: min(720px, 100%);
+  margin: 0 auto;
+  padding: max(1.25rem, env(safe-area-inset-top)) 1rem 2rem;
+}
+
+.hero { padding: 1.5rem 0 1rem; }
+.eyebrow { color: var(--accent); font-size: 0.8rem; letter-spacing: 0.12em; text-transform: uppercase; }
+h1 { margin: 0.15rem 0; font-size: clamp(2rem, 10vw, 3.7rem); line-height: 0.95; }
+.subtle, .hint { color: var(--muted); }
+
+.search-card, .empty-state, .contact-card, .dialog-card {
+  border: 1px solid var(--border);
+  border-radius: 1.25rem;
+  background: rgba(16, 33, 29, 0.86);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
+}
+
+.search-card { padding: 1rem; position: sticky; top: 0.5rem; z-index: 2; backdrop-filter: blur(14px); }
+label { display: grid; gap: 0.45rem; color: var(--muted); font-size: 0.9rem; }
+input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 1rem;
+  padding: 1rem;
+  color: var(--text);
+  background: #071612;
+  outline: none;
+}
+input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(53, 208, 127, 0.14); }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 0.6rem; margin: 1rem 0 1.5rem; }
+.section-title { margin: 1.3rem 0 0.7rem; color: var(--muted); font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.08em; }
+.contact-list { display: grid; gap: 0.75rem; }
+
+.contact-card { padding: 1rem; display: grid; gap: 0.8rem; }
+.contact-main { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.contact-name { margin: 0; font-size: 1.1rem; }
+.contact-meta { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.86rem; overflow-wrap: anywhere; }
+.tags { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-top: 0.5rem; }
+.tag { padding: 0.2rem 0.5rem; border-radius: 999px; background: rgba(255, 255, 255, 0.08); color: var(--muted); font-size: 0.78rem; }
+.contact-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+
+.empty-state { padding: 1.1rem; color: var(--muted); }
+.empty-message { color: var(--muted); padding: 0.5rem 0; }
+
+#contactDialog { border: 0; padding: 0; background: transparent; color: var(--text); width: min(92vw, 480px); }
+#contactDialog::backdrop { background: rgba(0, 0, 0, 0.65); }
+.dialog-card { padding: 1rem; display: grid; gap: 1rem; }
+.dialog-card h2 { margin: 0; }
+.checkbox-row { display: flex; align-items: center; gap: 0.6rem; }
+.checkbox-row input { width: auto; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: 0.6rem; }
+
+@media (max-width: 520px) {
+  .contact-main { display: grid; }
+  .contact-actions button, .contact-actions a { flex: 1 1 100%; text-align: center; }
+}
+
+</style>
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">WhatsApp Focus</p>
+      <h1>Qual conversa você quer abrir?</h1>
+      <p class="subtle">Entre pelo contato, não pela lista.</p>
+    </header>
+
+    <section class="search-card" aria-label="Buscar conversa">
+      <label for="searchInput">Buscar por nome, telefone ou tag</label>
+      <input id="searchInput" type="search" autocomplete="off" inputmode="search" placeholder="Digite para filtrar…" autofocus>
+      <p id="privacyHint" class="hint">Lista local neste navegador. Sem backend.</p>
+    </section>
+
+    <section class="toolbar" aria-label="Ações">
+      <button id="addContactButton" type="button">Adicionar</button>
+      <button id="importButton" type="button">Importar JSON</button>
+      <button id="exportButton" type="button">Exportar</button>
+    </section>
+
+    <section id="emptyState" class="empty-state" hidden>
+      <h2>Nenhuma conversa cadastrada</h2>
+      <p>Adicione poucos contatos de foco para testar se esta porta de entrada reduz distração.</p>
+    </section>
+
+    <section aria-label="Conversas favoritas">
+      <h2 class="section-title">Favoritas</h2>
+      <div id="favoritesList" class="contact-list"></div>
+    </section>
+
+    <section aria-label="Todas as conversas">
+      <h2 class="section-title">Todas</h2>
+      <div id="contactsList" class="contact-list"></div>
+    </section>
+  </main>
+
+  <dialog id="contactDialog">
+    <form method="dialog" id="contactForm" class="dialog-card">
+      <h2 id="dialogTitle">Adicionar conversa</h2>
+      <input type="hidden" id="contactId">
+
+      <label>
+        Nome ou apelido
+        <input id="contactName" required placeholder="Ex.: Ana">
+      </label>
+
+      <label>
+        Telefone com DDI
+        <input id="contactPhone" required inputmode="tel" placeholder="Ex.: 5511999999999">
+      </label>
+
+      <label>
+        Tags separadas por vírgula
+        <input id="contactTags" placeholder="Ex.: trabalho, família">
+      </label>
+
+      <label class="checkbox-row">
+        <input id="contactFavorite" type="checkbox">
+        Favorita
+      </label>
+
+      <div class="dialog-actions">
+        <button value="cancel" type="button" id="cancelDialogButton">Cancelar</button>
+        <button id="saveContactButton" value="default">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <input id="importFile" type="file" accept="application/json,.json" hidden>
+  <script>
+const STORAGE_KEY = 'whatsapp-focus-mobile-launcher-contacts';
+
+const DEFAULT_CONTACTS = [];
+
+const state = {
+  contacts: loadContacts(),
+  query: '',
+};
+
+const els = {
+  searchInput: document.querySelector('#searchInput'),
+  favoritesList: document.querySelector('#favoritesList'),
+  contactsList: document.querySelector('#contactsList'),
+  emptyState: document.querySelector('#emptyState'),
+  addContactButton: document.querySelector('#addContactButton'),
+  importButton: document.querySelector('#importButton'),
+  exportButton: document.querySelector('#exportButton'),
+  importFile: document.querySelector('#importFile'),
+  dialog: document.querySelector('#contactDialog'),
+  form: document.querySelector('#contactForm'),
+  dialogTitle: document.querySelector('#dialogTitle'),
+  contactId: document.querySelector('#contactId'),
+  contactName: document.querySelector('#contactName'),
+  contactPhone: document.querySelector('#contactPhone'),
+  contactTags: document.querySelector('#contactTags'),
+  contactFavorite: document.querySelector('#contactFavorite'),
+  cancelDialogButton: document.querySelector('#cancelDialogButton'),
+};
+
+function createId() {
+  if (globalThis.crypto?.randomUUID) return crypto.randomUUID();
+  return `contact-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
+function loadContacts() {
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if (!raw) return DEFAULT_CONTACTS;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return DEFAULT_CONTACTS;
+    return parsed.map(normalizeContact).filter(Boolean);
+  } catch {
+    return DEFAULT_CONTACTS;
+  }
+}
+
+function saveContacts() {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state.contacts));
+}
+
+function normalizeContact(contact) {
+  if (!contact || !contact.name || !contact.phone) return null;
+  return {
+    id: contact.id || createId(),
+    name: String(contact.name).trim(),
+    phone: normalizePhone(contact.phone),
+    tags: Array.isArray(contact.tags)
+      ? contact.tags.map((tag) => String(tag).trim()).filter(Boolean)
+      : parseTags(contact.tags || ''),
+    favorite: Boolean(contact.favorite),
+  };
+}
+
+function normalizePhone(phone) {
+  return String(phone).replace(/[^0-9]/g, '');
+}
+
+function parseTags(value) {
+  return String(value)
+    .split(',')
+    .map((tag) => tag.trim())
+    .filter(Boolean);
+}
+
+function contactSearchText(contact) {
+  return [contact.name, contact.phone, ...contact.tags].join(' ').toLowerCase();
+}
+
+function filteredContacts() {
+  const query = state.query.trim().toLowerCase();
+  const contacts = [...state.contacts].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'));
+  if (!query) return contacts;
+  return contacts.filter((contact) => contactSearchText(contact).includes(query));
+}
+
+function whatsappUrl(contact) {
+  return `https://wa.me/${contact.phone}`;
+}
+
+function render() {
+  const contacts = filteredContacts();
+  const favorites = contacts.filter((contact) => contact.favorite);
+
+  els.emptyState.hidden = state.contacts.length > 0;
+  renderList(els.favoritesList, favorites, 'Nenhuma favorita encontrada.');
+  renderList(els.contactsList, contacts, 'Nenhuma conversa encontrada.');
+}
+
+function renderList(container, contacts, emptyText) {
+  container.replaceChildren();
+
+  if (contacts.length === 0) {
+    const empty = document.createElement('p');
+    empty.className = 'empty-message';
+    empty.textContent = emptyText;
+    container.append(empty);
+    return;
+  }
+
+  for (const contact of contacts) {
+    container.append(createContactCard(contact));
+  }
+}
+
+function createContactCard(contact) {
+  const card = document.createElement('article');
+  card.className = 'contact-card';
+
+  const main = document.createElement('div');
+  main.className = 'contact-main';
+
+  const info = document.createElement('div');
+  const name = document.createElement('h3');
+  name.className = 'contact-name';
+  name.textContent = contact.name;
+
+  const meta = document.createElement('p');
+  meta.className = 'contact-meta';
+  meta.textContent = maskPhone(contact.phone);
+
+  const tags = document.createElement('div');
+  tags.className = 'tags';
+  for (const tag of contact.tags) {
+    const tagEl = document.createElement('span');
+    tagEl.className = 'tag';
+    tagEl.textContent = tag;
+    tags.append(tagEl);
+  }
+
+  info.append(name, meta, tags);
+
+  const star = document.createElement('button');
+  star.type = 'button';
+  star.className = 'ghost';
+  star.textContent = contact.favorite ? '★' : '☆';
+  star.ariaLabel = contact.favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos';
+  star.addEventListener('click', () => toggleFavorite(contact.id));
+
+  main.append(info, star);
+
+  const actions = document.createElement('div');
+  actions.className = 'contact-actions';
+
+  const open = document.createElement('a');
+  open.href = whatsappUrl(contact);
+  open.className = 'button primary';
+  open.textContent = 'Abrir no WhatsApp';
+  open.rel = 'noreferrer';
+  open.addEventListener('click', () => recordLastOpened(contact));
+
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.textContent = 'Editar';
+  edit.addEventListener('click', () => openDialog(contact));
+
+  const remove = document.createElement('button');
+  remove.type = 'button';
+  remove.className = 'danger';
+  remove.textContent = 'Remover';
+  remove.addEventListener('click', () => removeContact(contact.id));
+
+  actions.append(open, edit, remove);
+  card.append(main, actions);
+  return card;
+}
+
+function maskPhone(phone) {
+  if (phone.length <= 4) return '••••';
+  return `${phone.slice(0, 4)}••••${phone.slice(-4)}`;
+}
+
+function toggleFavorite(id) {
+  state.contacts = state.contacts.map((contact) =>
+    contact.id === id ? { ...contact, favorite: !contact.favorite } : contact,
+  );
+  saveContacts();
+  render();
+}
+
+function removeContact(id) {
+  const contact = state.contacts.find((item) => item.id === id);
+  if (!contact) return;
+  if (!confirm(`Remover ${contact.name}?`)) return;
+  state.contacts = state.contacts.filter((item) => item.id !== id);
+  saveContacts();
+  render();
+}
+
+function openDialog(contact = null) {
+  els.dialogTitle.textContent = contact ? 'Editar conversa' : 'Adicionar conversa';
+  els.contactId.value = contact?.id || '';
+  els.contactName.value = contact?.name || '';
+  els.contactPhone.value = contact?.phone || '';
+  els.contactTags.value = contact?.tags?.join(', ') || '';
+  els.contactFavorite.checked = Boolean(contact?.favorite);
+  els.dialog.showModal();
+  els.contactName.focus();
+}
+
+function closeDialog() {
+  els.dialog.close();
+  els.form.reset();
+}
+
+function saveContactFromForm(event) {
+  event.preventDefault();
+
+  const contact = normalizeContact({
+    id: els.contactId.value || createId(),
+    name: els.contactName.value,
+    phone: els.contactPhone.value,
+    tags: parseTags(els.contactTags.value),
+    favorite: els.contactFavorite.checked,
+  });
+
+  if (!contact) return;
+
+  const existing = state.contacts.some((item) => item.id === contact.id);
+  state.contacts = existing
+    ? state.contacts.map((item) => (item.id === contact.id ? contact : item))
+    : [...state.contacts, contact];
+
+  saveContacts();
+  closeDialog();
+  render();
+}
+
+function exportContacts() {
+  const blob = new Blob([JSON.stringify(state.contacts, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = 'whatsapp-focus-contacts.json';
+  link.click();
+  URL.revokeObjectURL(url);
+}
+
+async function importContacts(file) {
+  if (!file) return;
+  const text = await file.text();
+  const parsed = JSON.parse(text);
+  if (!Array.isArray(parsed)) throw new Error('JSON precisa ser uma lista de contatos.');
+  const contacts = parsed.map(normalizeContact).filter(Boolean);
+  state.contacts = contacts;
+  saveContacts();
+  render();
+}
+
+function recordLastOpened(contact) {
+  localStorage.setItem(
+    'whatsapp-focus-mobile-launcher-last-opened',
+    JSON.stringify({ id: contact.id, name: contact.name, openedAt: new Date().toISOString() }),
+  );
+}
+
+els.searchInput.addEventListener('input', (event) => {
+  state.query = event.target.value;
+  render();
+});
+
+els.addContactButton.addEventListener('click', () => openDialog());
+els.cancelDialogButton.addEventListener('click', closeDialog);
+els.form.addEventListener('submit', saveContactFromForm);
+els.exportButton.addEventListener('click', exportContacts);
+els.importButton.addEventListener('click', () => els.importFile.click());
+els.importFile.addEventListener('change', async (event) => {
+  try {
+    await importContacts(event.target.files[0]);
+  } catch (error) {
+    alert(error.message || 'Não foi possível importar contatos.');
+  } finally {
+    event.target.value = '';
+  }
+});
+
+// Standalone build: service worker disabled intentionally.
+
+render();
+
+  </script>
+</body>
+</html>

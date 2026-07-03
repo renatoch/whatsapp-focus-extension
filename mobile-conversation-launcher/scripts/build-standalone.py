@@ -8,7 +8,7 @@ import urllib.parse
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "mobile-conversation-launcher"
+SOURCE = ROOT
 OUTPUT = ROOT / "releases" / "mobile-conversation-launcher-standalone.html"
 
 
