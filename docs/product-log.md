@@ -106,12 +106,27 @@ No celular, talvez seja mais simples reduzir distração criando uma porta alter
 
 Foi criada uma primeira versão funcional em `mobile-conversation-launcher/`, separada da extensão Chrome. Ela é uma página/PWA local-first com busca, favoritos, cadastro manual, importação/exportação JSON e abertura direta via link `wa.me`.
 
+### Aprendizados técnicos
+
+- A versão standalone com CSS/JS embutidos funcionou no Android quando abrir arquivos separados via `content://` falhou.
+- Links `https://wa.me/<telefone>` funcionam para abrir conversas individuais pelo WhatsApp mobile.
+- Links de convite `https://chat.whatsapp.com/...` funcionam como caminho PWA para grupos, mas são sensíveis e dependem de convite ativo.
+- Atalhos nativos do WhatsApp Android usam JIDs internos. Grupos aparecem no padrão `<group-id>@g.us` em `dumpsys shortcut`.
+- Foi validado via ADB que o WhatsApp abre um grupo diretamente com:
+
+```powershell
+.\adb shell am start -W -n com.whatsapp/.Conversation -e jid "<group-id>@g.us"
+```
+
+Isso sugere que um app Android mínimo poderia abrir conversas/grupos por `jid`, sem depender de link de convite. O PWA não consegue disparar esse Intent com extra `jid` de forma confiável; seria necessário app Android, Tasker/MacroDroid/Automate ou outra camada nativa.
+
 ### Riscos / incertezas
 
 - Lista de nomes e telefones é sensível; para teste, usar poucos contatos, apelidos e evitar publicar dados reais.
 - PWA instalável no celular exige origem segura (`https://`) ou localhost; abrir `index.html` direto funciona como página simples, mas não como PWA completo.
 - É preciso validar no Android se `wa.me` abre consistentemente a conversa desejada.
 - Ainda não está decidido se contatos devem ser exportados do WhatsApp Web, cadastrados manualmente ou derivados de outra fonte.
+- O caminho por Intent/JID depende de detalhes internos do WhatsApp Android e pode quebrar em atualizações.
 
 ## Backlog de produto
 
@@ -138,6 +153,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 
 - **[Ideia/Exploração] Sumarizar conversas do dia anterior para entender temas e foco**
   - Gerar uma visão das conversas em que houve mensagem enviada no dia anterior — e talvez também conversas lidas, incluindo mensagens antigas que não estavam marcadas como não lidas — para perceber quais temas ocuparam atenção e como o tempo ficou pulverizado entre conversas. Incluir contador de quantas conversas privadas e de grupo tiveram mensagem enviada no dia; para grupos, se possível registrar/estimar quantidade de participantes para diferenciar grupos grandes e pequenos. Em cada conversa, registrar também a quantidade de mensagens do dia, tanto em grupos quanto em conversas individuais.
+
+- **[Experimento técnico] Validar launcher Android nativo por Intent/JID**
+  - Próximo passo além do PWA: criar app Android mínimo, ou testar via Tasker/MacroDroid/Automate, que abra `com.whatsapp/.Conversation` com extra `jid`. Objetivo: abrir grupos diretamente por JID (`...@g.us`) sem depender de link de convite, e talvez abrir pessoas por `...@s.whatsapp.net`. Validar fragilidade, permissões e compatibilidade antes de investir.
 
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
