@@ -30,6 +30,22 @@ To install as an app-like launcher, the page must be served from a secure origin
 - later: private/static hosting if privacy trade-offs are acceptable;
 - later: package as a tiny Android app/WebView if hosting is undesirable.
 
+## Standalone file for Android file managers
+
+If serving over Wi-Fi is blocked, generate a single HTML file with CSS and JavaScript embedded:
+
+```bash
+./scripts/build-mobile-standalone.py
+```
+
+Output:
+
+```text
+releases/mobile-conversation-launcher-standalone.html
+```
+
+Copy/open that file on Android. This is not PWA-installable, but it should avoid `content://` path issues with separate CSS/JS files.
+
 ## Privacy notes
 
 Contacts are stored only in the browser `localStorage` of the device/browser that opens this page. There is no backend and no network request except when opening WhatsApp links.
