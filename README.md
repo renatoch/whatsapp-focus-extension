@@ -20,6 +20,7 @@ Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 
 - `README.md`: uso atual, instalação, teste e limitações práticas.
 - `docs/product-log.md`: dores observadas, decisões de design, aprendizados e backlog para uma futura reconstrução.
+- `mobile-conversation-launcher/`: experimento separado de launcher mobile/PWA para abrir WhatsApp direto em conversas intencionais.
 
 ## Objetivo do Protótipo 1
 

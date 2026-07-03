@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f1f1b">
+  <title>Conversas com foco</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="hero">
+      <p class="eyebrow">WhatsApp Focus</p>
+      <h1>Qual conversa você quer abrir?</h1>
+      <p class="subtle">Entre pelo contato, não pela lista.</p>
+    </header>
+
+    <section class="search-card" aria-label="Buscar conversa">
+      <label for="searchInput">Buscar por nome, telefone ou tag</label>
+      <input id="searchInput" type="search" autocomplete="off" inputmode="search" placeholder="Digite para filtrar…" autofocus>
+      <p id="privacyHint" class="hint">Lista local neste navegador. Sem backend.</p>
+    </section>
+
+    <section class="toolbar" aria-label="Ações">
+      <button id="addContactButton" type="button">Adicionar</button>
+      <button id="importButton" type="button">Importar JSON</button>
+      <button id="exportButton" type="button">Exportar</button>
+    </section>
+
+    <section id="emptyState" class="empty-state" hidden>
+      <h2>Nenhuma conversa cadastrada</h2>
+      <p>Adicione poucos contatos de foco para testar se esta porta de entrada reduz distração.</p>
+    </section>
+
+    <section aria-label="Conversas favoritas">
+      <h2 class="section-title">Favoritas</h2>
+      <div id="favoritesList" class="contact-list"></div>
+    </section>
+
+    <section aria-label="Todas as conversas">
+      <h2 class="section-title">Todas</h2>
+      <div id="contactsList" class="contact-list"></div>
+    </section>
+  </main>
+
+  <dialog id="contactDialog">
+    <form method="dialog" id="contactForm" class="dialog-card">
+      <h2 id="dialogTitle">Adicionar conversa</h2>
+      <input type="hidden" id="contactId">
+
+      <label>
+        Nome ou apelido
+        <input id="contactName" required placeholder="Ex.: Ana">
+      </label>
+
+      <label>
+        Telefone com DDI
+        <input id="contactPhone" required inputmode="tel" placeholder="Ex.: 5511999999999">
+      </label>
+
+      <label>
+        Tags separadas por vírgula
+        <input id="contactTags" placeholder="Ex.: trabalho, família">
+      </label>
+
+      <label class="checkbox-row">
+        <input id="contactFavorite" type="checkbox">
+        Favorita
+      </label>
+
+      <div class="dialog-actions">
+        <button value="cancel" type="button" id="cancelDialogButton">Cancelar</button>
+        <button id="saveContactButton" value="default">Salvar</button>
+      </div>
+    </form>
+  </dialog>
+
+  <input id="importFile" type="file" accept="application/json,.json" hidden>
+  <script src="app.js" defer></script>
+</body>
+</html>

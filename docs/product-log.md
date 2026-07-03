@@ -96,6 +96,23 @@ Uma revisão externa preliminar apontou riscos e recomendações para uma eventu
 - Adicionar ícones, limpar manifest e documentar compatibilidade Chrome/MV3.
 - Fazer nova revisão de privacidade/segurança antes de qualquer distribuição pública.
 
+## 2026-07-01 — Experimento mobile: launcher direto para conversas
+
+### Hipótese
+
+No celular, talvez seja mais simples reduzir distração criando uma porta alternativa para o WhatsApp do que tentar customizar o app Android. Links diretos como `https://wa.me/<telefone>` podem abrir uma conversa específica no app, evitando entrar pela lista/home do WhatsApp.
+
+### Protótipo criado
+
+Foi criada uma primeira versão funcional em `mobile-conversation-launcher/`, separada da extensão Chrome. Ela é uma página/PWA local-first com busca, favoritos, cadastro manual, importação/exportação JSON e abertura direta via link `wa.me`.
+
+### Riscos / incertezas
+
+- Lista de nomes e telefones é sensível; para teste, usar poucos contatos, apelidos e evitar publicar dados reais.
+- PWA instalável no celular exige origem segura (`https://`) ou localhost; abrir `index.html` direto funciona como página simples, mas não como PWA completo.
+- É preciso validar no Android se `wa.me` abre consistentemente a conversa desejada.
+- Ainda não está decidido se contatos devem ser exportados do WhatsApp Web, cadastrados manualmente ou derivados de outra fonte.
+
 ## Backlog de produto
 
 Formato: título descritivo no item principal; detalhe curto em subitem; linha em branco entre itens para facilitar leitura em dark mode.

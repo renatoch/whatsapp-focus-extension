@@ -1,0 +1,18 @@
+{
+  "name": "Conversas com foco",
+  "short_name": "Foco WA",
+  "description": "Launcher local para abrir WhatsApp direto em conversas intencionais.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#07110f",
+  "theme_color": "#0f1f1b",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

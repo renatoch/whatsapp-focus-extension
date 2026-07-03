@@ -1,0 +1,14 @@
+[
+  {
+    "name": "Pessoa Exemplo",
+    "phone": "5511999999999",
+    "tags": ["trabalho"],
+    "favorite": true
+  },
+  {
+    "name": "Grupo Exemplo",
+    "phone": "5521888888888",
+    "tags": ["família"],
+    "favorite": false
+  }
+]
