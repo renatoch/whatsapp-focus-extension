@@ -157,6 +157,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Experimento técnico] Validar launcher Android nativo por Intent/JID**
   - Próximo passo além do PWA: criar app Android mínimo, ou testar via Tasker/MacroDroid/Automate, que abra `com.whatsapp/.Conversation` com extra `jid`. Objetivo: abrir grupos diretamente por JID (`...@g.us`) sem depender de link de convite, e talvez abrir pessoas por `...@s.whatsapp.net`. Validar fragilidade, permissões e compatibilidade antes de investir.
 
+- **[Ideia/Exploração] Aguardar resposta sem checar repetidamente o WhatsApp**
+  - Caso de uso: depois de mandar mensagem para uma pessoa específica, o usuário fica esperando resposta e entra várias vezes no WhatsApp para checar, porque notificações gerais estão desligadas. Explorar se a extensão pode monitorar aquela conversa em intervalo definido e avisar quando houver resposta, ou se é melhor orientar/configurar uma notificação específica para aquela pessoa/conversa sem reativar notificações gerais.
+
 - **[Configuração] Permitir desligar funcionalidades e ajustar parâmetros sensíveis**
   - Exemplos: delays intencionais, duração do “Ver WhatsApp normal”, mínimo de letras antes de mostrar busca, e outros ajustes que dependem da sensibilidade do usuário.
 
