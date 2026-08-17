@@ -15,6 +15,7 @@
   const SEARCH_GATE_ID = "mirror-whatsapp-focus-search-gate";
   const LOADING_PROGRESS_ID = "mirror-whatsapp-focus-loading-progress";
   const FOCUS_STREAK_ID = "mirror-whatsapp-focus-streak";
+  const AWARENESS_PANEL_ID = "mirror-whatsapp-focus-awareness";
   const LAST_NORMAL_OPEN_KEY = "mirror-whatsapp-focus-last-normal-opened-at";
   const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
@@ -27,6 +28,7 @@
   const NORMAL_DELAY_MS = 8000;
   const RECENT_NORMAL_OPEN_MS = 10 * 60 * 1000;
   const DEBUG = false;
+  const awarenessStore = globalThis.MirrorAwareness?.createStore(window.localStorage);
   let bypassTimer = null;
   let normalDelayTimer = null;
   let normalDelayInterval = null;
@@ -35,6 +37,8 @@
   let revealedSearchText = "";
   let lastHotCss = "";
   let lastConfigCss = "";
+  let normalAttemptStartedAt = null;
+  let normalAttemptRecent = false;
 
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
@@ -63,6 +67,7 @@
   }
 
   function setActive({ showOverlay }) {
+    if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
     clearNormalDelay();
     updateFocusStreak();
     root().classList.add(ROOT_ACTIVE);
@@ -554,6 +559,88 @@
     if (streak.textContent !== text) streak.textContent = text;
   }
 
+  function recordAwareness(type, details = {}) {
+    try {
+      awarenessStore?.record(type, details);
+    } catch (_error) {
+      // Awareness must never break the focus experience.
+    }
+  }
+
+  function normalAttemptDuration() {
+    return normalAttemptStartedAt ? Math.max(0, Date.now() - normalAttemptStartedAt) : 0;
+  }
+
+  function finishNormalAttempt(type, details = {}) {
+    recordAwareness(type, { durationMs: normalAttemptDuration(), ...details });
+    normalAttemptStartedAt = null;
+    normalAttemptRecent = false;
+  }
+
+  function formatAwarenessReflection(category) {
+    return {
+      "specific-intent": "intenção específica",
+      "waiting-for-reply": "espera por resposta",
+      "anguish-boredom": "angústia ou tédio",
+      automatism: "automatismo",
+      "mixed-unclear": "misto ou ainda incerto",
+    }[category] || "ainda não registrada";
+  }
+
+  function renderAwarenessSummary() {
+    const panel = document.getElementById(AWARENESS_PANEL_ID);
+    if (!panel || !awarenessStore) return;
+
+    const summary = awarenessStore.getSummary();
+    const setText = (selector, text) => {
+      const element = panel.querySelector(selector);
+      if (element) element.textContent = text;
+    };
+
+    setText(
+      "[data-mwf-awareness-progress]",
+      summary.baselineComplete
+        ? `Baseline de 7 dias concluído · ${summary.observationDays} dias observados.`
+        : `Dia ${Math.min(summary.observationDays, 7)} de 7 da observação inicial.`
+    );
+    setText("[data-mwf-awareness-openings]", String(summary.openings));
+    setText("[data-mwf-awareness-today]", String(summary.openingsToday));
+    setText("[data-mwf-awareness-short]", String(summary.shortReopenings));
+    setText("[data-mwf-awareness-fast]", String(summary.fastSequences));
+    setText(
+      "[data-mwf-awareness-routes]",
+      `${summary.openingRoutes.countdown} pelo countdown · ${summary.openingRoutes.immediate} imediatas · ${summary.openingRoutes.recentExplicit} confirmações recentes`
+    );
+    setText(
+      "[data-mwf-awareness-outcomes]",
+      `${summary.cancelledAttempts} cancelamentos · ${summary.continuedFocusedConversation} continuidades na conversa · ${summary.manualFocusReturns} retornos manuais ao foco · ${summary.expiredFocusReturns} retornos por tempo`
+    );
+    setText(
+      "[data-mwf-awareness-reflection-status]",
+      summary.latestReflection
+        ? `Última leitura registrada: ${formatAwarenessReflection(summary.latestReflection.category)}.`
+        : "Nenhuma leitura pessoal registrada."
+    );
+
+    panel.querySelector("[data-mwf-awareness-reflection]").hidden = !summary.baselineComplete;
+    panel.querySelector('[data-mwf-action="awareness-toggle"]').textContent = summary.enabled
+      ? "Pausar coleta"
+      : "Retomar coleta";
+    panel.querySelector("[data-mwf-awareness-disabled]").hidden = summary.enabled;
+  }
+
+  function openAwarenessSummary() {
+    const panel = document.getElementById(AWARENESS_PANEL_ID);
+    if (!panel) return;
+    renderAwarenessSummary();
+    panel.hidden = false;
+  }
+
+  function closeAwarenessSummary() {
+    const panel = document.getElementById(AWARENESS_PANEL_ID);
+    if (panel) panel.hidden = true;
+  }
+
   function updateOverlayLoadingProgress() {
     const mirrorProgress = document.getElementById(LOADING_PROGRESS_ID);
     if (!mirrorProgress) return;
@@ -602,6 +689,43 @@
           <button class="mwf-button mwf-button-secondary" data-mwf-action="continue">Continuar na conversa aberta</button>
           <button class="mwf-button mwf-button-secondary" data-mwf-action="normal">Ver WhatsApp normal por 5 min</button>
         </div>
+        <button class="mwf-awareness-link" data-mwf-action="awareness">Ver padrão de uso</button>
+        <section id="mirror-whatsapp-focus-awareness" class="mwf-awareness-panel" aria-label="Padrão de uso" hidden>
+          <div class="mwf-awareness-header">
+            <div>
+              <p class="mwf-kicker">Espelho, não diagnóstico</p>
+              <h2>Seu padrão de uso</h2>
+            </div>
+            <button class="mwf-awareness-close" data-mwf-action="awareness-close" aria-label="Fechar padrão de uso">×</button>
+          </div>
+          <p data-mwf-awareness-progress></p>
+          <p class="mwf-awareness-disabled" data-mwf-awareness-disabled hidden>A coleta está pausada. O modo foco continua funcionando normalmente.</p>
+          <div class="mwf-awareness-metrics">
+            <div><strong data-mwf-awareness-openings>0</strong><span>aberturas observadas</span></div>
+            <div><strong data-mwf-awareness-today>0</strong><span>aberturas hoje</span></div>
+            <div><strong data-mwf-awareness-short>0</strong><span>reaberturas em até 10 min</span></div>
+            <div><strong data-mwf-awareness-fast>0</strong><span>sequências em até 2s</span></div>
+          </div>
+          <p class="mwf-awareness-detail" data-mwf-awareness-routes></p>
+          <p class="mwf-awareness-detail" data-mwf-awareness-outcomes></p>
+          <div class="mwf-awareness-reflection" data-mwf-awareness-reflection hidden>
+            <h3>O que parece ter predominado?</h3>
+            <p>Esta leitura é sua. Os cliques não revelam motivação sozinhos.</p>
+            <div class="mwf-awareness-choices">
+              <button data-mwf-reflection="specific-intent">Intenção específica</button>
+              <button data-mwf-reflection="waiting-for-reply">Espera por resposta</button>
+              <button data-mwf-reflection="anguish-boredom">Angústia ou tédio</button>
+              <button data-mwf-reflection="automatism">Automatismo</button>
+              <button data-mwf-reflection="mixed-unclear">Misto / incerto</button>
+            </div>
+            <p class="mwf-awareness-detail" data-mwf-awareness-reflection-status></p>
+          </div>
+          <div class="mwf-awareness-controls">
+            <button class="mwf-button mwf-button-secondary" data-mwf-action="awareness-toggle">Pausar coleta</button>
+            <button class="mwf-button mwf-button-quiet" data-mwf-action="awareness-clear">Apagar dados</button>
+          </div>
+          <p class="mwf-awareness-privacy">Somente horários e ações da extensão ficam neste navegador. Nenhuma mensagem, pessoa ou conversa é registrada.</p>
+        </section>
         <div class="mwf-normal-confirm" aria-live="polite">
           <h2>Abrir WhatsApp normal?</h2>
           <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
@@ -618,6 +742,13 @@
     `;
 
     overlay.addEventListener("click", async (event) => {
+      const reflectionButton = event.target.closest("[data-mwf-reflection]");
+      if (reflectionButton) {
+        awarenessStore?.saveReflection(reflectionButton.getAttribute("data-mwf-reflection"));
+        renderAwarenessSummary();
+        return;
+      }
+
       const button = event.target.closest("[data-mwf-action]");
       if (!button) return;
 
@@ -628,6 +759,9 @@
         setSearchMode();
       }
       if (action === "continue") {
+        if (overlay.classList.contains("mwf-normal-pending")) {
+          finishNormalAttempt("continued_focused_conversation");
+        }
         clearNormalDelay();
         continueOpenConversation();
       }
@@ -635,10 +769,28 @@
         startNormalDelay();
       }
       if (action === "normal-cancel") {
+        finishNormalAttempt("attempt_cancelled");
         clearNormalDelay();
       }
       if (action === "normal-now") {
-        setNormalTemporarily();
+        setNormalTemporarily(normalAttemptRecent ? "recent-explicit" : "immediate");
+      }
+      if (action === "awareness") {
+        openAwarenessSummary();
+      }
+      if (action === "awareness-close") {
+        closeAwarenessSummary();
+      }
+      if (action === "awareness-toggle") {
+        const enabled = awarenessStore?.getSummary().enabled;
+        awarenessStore?.setEnabled(!enabled);
+        renderAwarenessSummary();
+      }
+      if (action === "awareness-clear") {
+        if (window.confirm("Apagar todo o histórico local deste experimento?")) {
+          awarenessStore?.clear();
+          renderAwarenessSummary();
+        }
       }
     });
 
@@ -656,6 +808,7 @@
     button.textContent = "Foco";
     button.title = "Voltar ao modo foco (Alt+Shift+F)";
     button.addEventListener("click", () => {
+      if (root().classList.contains(ROOT_NORMAL)) recordAwareness("focus_returned", { reason: "manual" });
       if (bypassTimer) window.clearTimeout(bypassTimer);
       bypassTimer = null;
       setActive({ showOverlay: true });
@@ -837,6 +990,9 @@
         if (event.key.toLowerCase() === "f") {
           event.preventDefault();
           event.stopImmediatePropagation();
+          if (root().classList.contains(ROOT_NORMAL)) recordAwareness("focus_returned", { reason: "manual" });
+          if (bypassTimer) window.clearTimeout(bypassTimer);
+          bypassTimer = null;
           setActive({ showOverlay: true });
         }
         if (event.key.toLowerCase() === "l") {
@@ -911,7 +1067,10 @@
     overlay.classList.add("mwf-normal-pending");
 
     const lastOpenedAt = readLastNormalOpenedAt();
-    const recentlyOpened = lastOpenedAt && Date.now() - lastOpenedAt < RECENT_NORMAL_OPEN_MS;
+    const recentlyOpened = Boolean(lastOpenedAt && Date.now() - lastOpenedAt < RECENT_NORMAL_OPEN_MS);
+    normalAttemptStartedAt = Date.now();
+    normalAttemptRecent = recentlyOpened;
+    recordAwareness("attempt_started");
     updateRecentNormalWarning(overlay, lastOpenedAt);
 
     if (recentlyOpened) {
@@ -934,7 +1093,7 @@
 
     updateCountdown();
     normalDelayInterval = window.setInterval(updateCountdown, 200);
-    normalDelayTimer = window.setTimeout(() => setNormalTemporarily(), NORMAL_DELAY_MS);
+    normalDelayTimer = window.setTimeout(() => setNormalTemporarily("countdown"), NORMAL_DELAY_MS);
   }
 
   function ensureNormalConfirm(overlay = getOverlay()) {
@@ -980,13 +1139,15 @@
     }
   }
 
-  function setNormalTemporarily() {
+  function setNormalTemporarily(route = "immediate") {
+    finishNormalAttempt("normal_opened", { route });
     clearNormalDelay();
     if (bypassTimer) window.clearTimeout(bypassTimer);
     recordNormalOpenedAt();
     setNormal();
     bypassTimer = window.setTimeout(() => {
       bypassTimer = null;
+      recordAwareness("focus_returned", { reason: "expiry" });
       setActive({ showOverlay: true });
     }, BYPASS_MS);
   }

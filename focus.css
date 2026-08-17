@@ -203,6 +203,7 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
 }
 
 .mwf-card {
+  position: relative;
   width: min(520px, calc(100vw - 48px));
   padding: 28px;
   border: 1px solid rgba(233, 237, 239, 0.14);
@@ -245,6 +246,145 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   color: #7ee2bd !important;
   font-size: 13px !important;
   font-weight: 650;
+}
+
+.mwf-awareness-link {
+  margin: 18px 0 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #7f969f;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.mwf-awareness-panel[hidden] {
+  display: none !important;
+}
+
+.mwf-awareness-panel {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  max-height: min(78vh, 680px);
+  overflow-y: auto;
+  border: 1px solid rgba(233, 237, 239, 0.14);
+  border-radius: 18px;
+  padding: 24px;
+  background: #111b21;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.52);
+}
+
+.mwf-awareness-header {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mwf-awareness-header h2,
+.mwf-awareness-reflection h3 {
+  margin: 0 0 10px;
+  color: #e9edef;
+}
+
+.mwf-awareness-close {
+  border: 0;
+  padding: 0 4px;
+  background: transparent;
+  color: #aebac1;
+  cursor: pointer;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.mwf-awareness-metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 14px 0;
+}
+
+.mwf-awareness-metrics > div {
+  border: 1px solid rgba(233, 237, 239, 0.10);
+  border-radius: 13px;
+  padding: 12px;
+  background: rgba(233, 237, 239, 0.04);
+}
+
+.mwf-awareness-metrics strong,
+.mwf-awareness-metrics span {
+  display: block;
+}
+
+.mwf-awareness-metrics strong {
+  margin-bottom: 3px;
+  color: #7ee2bd;
+  font-size: 24px;
+}
+
+.mwf-awareness-metrics span {
+  color: #aebac1;
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.mwf-awareness-detail,
+.mwf-awareness-privacy,
+.mwf-awareness-disabled {
+  margin-bottom: 12px !important;
+  font-size: 13px !important;
+}
+
+.mwf-awareness-disabled[hidden] {
+  display: none !important;
+}
+
+.mwf-awareness-disabled {
+  border: 1px solid rgba(247, 215, 148, 0.35);
+  border-radius: 12px;
+  padding: 10px;
+  color: #f7d794 !important;
+}
+
+.mwf-awareness-reflection {
+  margin-top: 18px;
+  border-top: 1px solid rgba(233, 237, 239, 0.10);
+  padding-top: 18px;
+}
+
+.mwf-awareness-reflection[hidden] {
+  display: none !important;
+}
+
+.mwf-awareness-choices,
+.mwf-awareness-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mwf-awareness-choices button {
+  border: 1px solid rgba(0, 168, 132, 0.32);
+  border-radius: 999px;
+  padding: 8px 11px;
+  background: rgba(0, 168, 132, 0.08);
+  color: #c7f4e4;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
+.mwf-awareness-controls {
+  margin-top: 18px;
+}
+
+.mwf-awareness-privacy {
+  margin: 16px 0 0 !important;
+  color: #7f969f !important;
 }
 
 .mwf-loading {
@@ -310,7 +450,8 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
 
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > h1,
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > p,
-#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-actions {
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-actions,
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-awareness-link {
   display: none !important;
 }
 

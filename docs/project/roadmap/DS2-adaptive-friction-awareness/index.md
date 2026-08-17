@@ -2,7 +2,7 @@
 
 # DS2 — Adaptive Friction Awareness
 
-**Status:** 🟡 Proposed
+**Status:** 🟠 Implementing
 
 ---
 

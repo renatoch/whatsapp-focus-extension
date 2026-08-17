@@ -12,6 +12,7 @@ Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 
 - A extensão roda localmente no navegador e não possui backend.
 - O código atual não envia mensagens, contatos ou dados de uso para servidores externos.
+- O experimento **Padrão de uso** registra apenas horários e ações na própria barreira da extensão em `localStorage`; não registra mensagens, pessoas, conversas, buscas, telefones ou identificadores do WhatsApp. A coleta pode ser pausada e apagada pela interface.
 - Por ser uma extensão que roda em `web.whatsapp.com`, ela tem acesso técnico ao DOM visível do WhatsApp Web. Isso inclui elementos da interface, nomes de conversas e conteúdo exibido na tela.
 - Esse acesso é necessário para ocultar a lateral, limpar previews e controlar o modo foco, mas significa que qualquer pessoa instalando a extensão precisa confiar no código.
 - O hot-refresh de desenvolvimento (`focus.css` e `dev-config.json` em `web_accessible_resources`) é uma conveniência de prototipagem. Antes de uma versão pública/distribuível, ele deve ser removido ou protegido por build/flag de desenvolvimento.
@@ -36,6 +37,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
 - mostra há quanto tempo o WhatsApp normal não é aberto, para aumentar consciência de reaberturas impulsivas;
+- oferece **Ver padrão de uso**, uma síntese voluntária e local da coreografia de abertura do modo normal, com baseline inicial de 7 dias, retenção máxima de 14 dias e controles para pausar/apagar;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, com pausa consciente de 8s antes de liberar; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
@@ -88,7 +90,9 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 12. Clique em **Ver WhatsApp normal por 5 min** e valide a pausa consciente com opções **Continuar na conversa**, **Cancelar** e **Abrir agora**.
 13. Durante o modo normal, clique em **Voltar ao modo foco** para encerrar a liberação antes dos 5 minutos.
 14. Confirme que a tela de foco mostra há quanto tempo o WhatsApp normal não é aberto.
-15. Recarregue a página e confirme que ela volta ao modo foco imediatamente.
+15. Abra **Ver padrão de uso** e confirme que os contadores refletem somente ações da extensão.
+16. Teste pausar/retomar a coleta; depois teste apagar os dados locais.
+17. Recarregue a página e confirme que ela volta ao modo foco imediatamente.
 
 ## Limitações conhecidas
 

@@ -37,7 +37,7 @@ See: [`DS1-pinned-focus-conversations/index.md`](DS1-pinned-focus-conversations/
 
 ### DS2 — Adaptive Friction Awareness
 
-Status: proposed
+Status: implementing — automated checks green; awaiting manual Chrome validation
 
 Detect when the fixed normal-mode barrier has become an automatic choreography and shift from gatekeeper to mirror through a private behavioral baseline, delayed reflection, and user-recognized hypotheses before designing adaptive friction.
 
