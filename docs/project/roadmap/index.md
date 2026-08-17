@@ -15,7 +15,7 @@ Ariad-governed roadmap for the WhatsApp Focus Mode prototype.
 
 ## Active release state
 
-- Latest release tag: `v9`
+- Latest release tag: `v10`
 - Current validated features:
   - blind start overlay;
   - native search with reduced visual noise;
@@ -34,6 +34,14 @@ Status: proposed
 Enable the user to keep a tiny active shelf of 2–3 conversations found through search, so they can move between current work conversations without reopening the full WhatsApp list or repeating the full search flow.
 
 See: [`DS1-pinned-focus-conversations/index.md`](DS1-pinned-focus-conversations/index.md)
+
+### DS2 — Adaptive Friction Awareness
+
+Status: proposed
+
+Detect when the fixed normal-mode barrier has become an automatic choreography and shift from gatekeeper to mirror through a private behavioral baseline, delayed reflection, and user-recognized hypotheses before designing adaptive friction.
+
+See: [`DS2-adaptive-friction-awareness/index.md`](DS2-adaptive-friction-awareness/index.md)
 
 ### Later candidates
 
