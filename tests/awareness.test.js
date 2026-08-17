@@ -132,6 +132,33 @@ test('summarizes opening routes, repeated openings, fast sequences, and outcomes
   assert.equal(summary.expiredFocusReturns, 1);
 });
 
+test('prioritizes repeated openings as the strongest provisional signal', () => {
+  const { store, setNow } = setup();
+  store.record('normal_opened', { route: 'countdown', durationMs: 8000 });
+  setNow(START + 2 * 60 * 1000);
+  store.record('normal_opened', { route: 'immediate', durationMs: 700 });
+  setNow(START + 4 * 60 * 1000);
+  store.record('normal_opened', { route: 'recent-explicit', durationMs: 600 });
+
+  assert.equal(store.getSummary().primarySignal, 'repeated-openings');
+});
+
+test('recognizes when the pause repeatedly leads to another choice', () => {
+  const { store, setNow } = setup();
+  store.record('attempt_cancelled', { durationMs: 1200 });
+  setNow(START + 60 * 1000);
+  store.record('continued_focused_conversation', { durationMs: 900 });
+
+  assert.equal(store.getSummary().primarySignal, 'pause-created-choice');
+});
+
+test('does not manufacture an insight from sparse data', () => {
+  const { store } = setup();
+  store.record('normal_opened', { route: 'countdown', durationMs: 8000 });
+
+  assert.equal(store.getSummary().primarySignal, 'no-strong-pattern');
+});
+
 test('reports baseline progress and enables reflection after seven days', () => {
   const { store, setNow } = setup();
 

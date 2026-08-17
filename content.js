@@ -587,6 +587,47 @@
     }[category] || "ainda não registrada";
   }
 
+  function awarenessInsight(summary) {
+    const openingsLabel = summary.openings === 1 ? "abertura" : "aberturas";
+
+    if (summary.primarySignal === "collecting") {
+      return {
+        headline: "A observação está começando.",
+        context: "Ainda não há aberturas suficientes para destacar um padrão.",
+      };
+    }
+    if (summary.primarySignal === "repeated-openings") {
+      return {
+        headline: `No período observado, houve ${summary.openings} ${openingsLabel}. ${summary.shortReopenings} aconteceram até 10 minutos depois de outra abertura.`,
+        context: "A sequência pode estar virando um percurso conhecido. Isso é uma hipótese, não uma conclusão.",
+      };
+    }
+    if (summary.primarySignal === "fast-sequence") {
+      return {
+        headline: `Em ${summary.fastSequences} de ${summary.openings} ${openingsLabel}, a sequência foi concluída em até 2 segundos.`,
+        context: "A velocidade sugere que os cliques podem estar ficando automáticos. Só você pode reconhecer o que estava acontecendo.",
+      };
+    }
+    if (summary.primarySignal === "direct-openings") {
+      const direct = summary.openingRoutes.immediate + summary.openingRoutes.recentExplicit;
+      return {
+        headline: `Em ${direct} de ${summary.openings} ${openingsLabel}, você abriu antes do fim da pausa ou confirmou uma reabertura recente.`,
+        context: "Talvez a barreira já seja um caminho conhecido. O número descreve a ação, não o motivo.",
+      };
+    }
+    if (summary.primarySignal === "pause-created-choice") {
+      const choices = summary.cancelledAttempts + summary.continuedFocusedConversation;
+      return {
+        headline: `Em ${choices} ocasiões, a pausa terminou em cancelar ou continuar na conversa focada.`,
+        context: "Nesses momentos, a barreira parece ter criado espaço para outra escolha.",
+      };
+    }
+    return {
+      headline: `Ainda não apareceu um padrão forte ${summary.openings === 1 ? "na" : "nas"} ${summary.openings} ${openingsLabel} ${summary.openings === 1 ? "observada" : "observadas"}.`,
+      context: "Continuarei observando sem interromper você. Os detalhes ficam disponíveis se quiser inspecioná-los.",
+    };
+  }
+
   function renderAwarenessSummary() {
     const panel = document.getElementById(AWARENESS_PANEL_ID);
     if (!panel || !awarenessStore) return;
@@ -597,12 +638,15 @@
       if (element) element.textContent = text;
     };
 
+    const insight = awarenessInsight(summary);
     setText(
       "[data-mwf-awareness-progress]",
       summary.baselineComplete
         ? `Baseline de 7 dias concluído · ${summary.observationDays} dias observados.`
         : `Dia ${Math.min(summary.observationDays, 7)} de 7 da observação inicial.`
     );
+    setText("[data-mwf-awareness-insight]", insight.headline);
+    setText("[data-mwf-awareness-insight-context]", insight.context);
     setText("[data-mwf-awareness-openings]", String(summary.openings));
     setText("[data-mwf-awareness-today]", String(summary.openingsToday));
     setText("[data-mwf-awareness-short]", String(summary.shortReopenings));
@@ -700,14 +744,22 @@
           </div>
           <p data-mwf-awareness-progress></p>
           <p class="mwf-awareness-disabled" data-mwf-awareness-disabled hidden>A coleta está pausada. O modo foco continua funcionando normalmente.</p>
-          <div class="mwf-awareness-metrics">
-            <div><strong data-mwf-awareness-openings>0</strong><span>aberturas observadas</span></div>
-            <div><strong data-mwf-awareness-today>0</strong><span>aberturas hoje</span></div>
-            <div><strong data-mwf-awareness-short>0</strong><span>reaberturas em até 10 min</span></div>
-            <div><strong data-mwf-awareness-fast>0</strong><span>sequências em até 2s</span></div>
+          <div class="mwf-awareness-insight">
+            <h3>Leitura provisória</h3>
+            <p data-mwf-awareness-insight></p>
+            <p class="mwf-awareness-insight-context" data-mwf-awareness-insight-context></p>
           </div>
-          <p class="mwf-awareness-detail" data-mwf-awareness-routes></p>
-          <p class="mwf-awareness-detail" data-mwf-awareness-outcomes></p>
+          <details class="mwf-awareness-details">
+            <summary>Ver detalhes</summary>
+            <div class="mwf-awareness-metrics">
+              <div><strong data-mwf-awareness-openings>0</strong><span>aberturas observadas</span></div>
+              <div><strong data-mwf-awareness-today>0</strong><span>aberturas hoje</span></div>
+              <div><strong data-mwf-awareness-short>0</strong><span>reaberturas em até 10 min</span></div>
+              <div><strong data-mwf-awareness-fast>0</strong><span>sequências em até 2s</span></div>
+            </div>
+            <p class="mwf-awareness-detail" data-mwf-awareness-routes></p>
+            <p class="mwf-awareness-detail" data-mwf-awareness-outcomes></p>
+          </details>
           <div class="mwf-awareness-reflection" data-mwf-awareness-reflection hidden>
             <h3>O que parece ter predominado?</h3>
             <p>Esta leitura é sua. Os cliques não revelam motivação sozinhos.</p>

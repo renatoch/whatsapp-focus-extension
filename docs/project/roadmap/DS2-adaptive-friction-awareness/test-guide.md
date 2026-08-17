@@ -48,10 +48,12 @@ Pass condition: the summary reflects extension-interaction counts and timings on
 ### Summary before seven days
 
 1. Open **Ver padrão de uso** voluntarily.
-2. Confirm it shows observation progress and descriptive metrics.
-3. Confirm it does not demand interpretation or interrupt the normal-mode opening flow.
+2. Confirm the first visible block is one provisional reading in plain language, not a metric grid.
+3. Confirm detailed counts are collapsed behind **Ver detalhes**.
+4. Confirm the reading names uncertainty and does not infer motive from clicks.
+5. Confirm it does not demand interpretation or interrupt the normal-mode opening flow.
 
-Pass condition: the summary acts as a low-pressure mirror and existing friction remains unchanged.
+Pass condition: the summary acts as a low-pressure mirror, creates a recognizable perception without requiring manual analysis, and leaves existing friction unchanged.
 
 ### Seven-day state
 

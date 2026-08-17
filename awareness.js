@@ -142,6 +142,28 @@
     return date.getTime();
   }
 
+  function selectPrimarySignal(summary) {
+    if (summary.openings === 0) {
+      return summary.cancelledAttempts + summary.continuedFocusedConversation >= 2
+        ? "pause-created-choice"
+        : "collecting";
+    }
+    if (summary.shortReopenings >= 2 && summary.shortReopenings / summary.openings >= 0.4) {
+      return "repeated-openings";
+    }
+    if (summary.fastSequences >= 2 && summary.fastSequences / summary.openings >= 0.5) {
+      return "fast-sequence";
+    }
+    const directOpenings = summary.openingRoutes.immediate + summary.openingRoutes.recentExplicit;
+    if (directOpenings >= 2 && directOpenings / summary.openings >= 0.5) {
+      return "direct-openings";
+    }
+    if (summary.cancelledAttempts + summary.continuedFocusedConversation >= 2) {
+      return "pause-created-choice";
+    }
+    return "no-strong-pattern";
+  }
+
   function summarize(state, now) {
     const openings = state.events.filter((event) => event.type === "normal_opened");
     const todayStart = localDayStart(now);
@@ -153,7 +175,7 @@
     const count = (type, predicate = () => true) =>
       state.events.filter((event) => event.type === type && predicate(event)).length;
 
-    return {
+    const summary = {
       enabled: state.enabled,
       startedAt: state.startedAt,
       observationDays: Math.max(1, Math.floor((now - state.startedAt) / DAY_MS) + 1),
@@ -173,6 +195,7 @@
       expiredFocusReturns: count("focus_returned", (event) => event.reason === "expiry"),
       latestReflection: state.reflections.at(-1) || null,
     };
+    return { ...summary, primarySignal: selectPrimarySignal(summary) };
   }
 
   function createStore(storage, options = {}) {
