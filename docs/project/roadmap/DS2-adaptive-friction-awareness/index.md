@@ -2,7 +2,7 @@
 
 # DS2 — Adaptive Friction Awareness
 
-**Status:** 🟠 Implementing
+**Status:** 🟢 Done
 
 ---
 
@@ -20,7 +20,7 @@ Source exploration: [`adaptive-friction-awareness`](../../explorations/adaptive-
 
 ## Experiment boundary
 
-- Observe for an initial 7-day baseline.
+- The planned observation window was seven days; the Navigator accepted closure after two days because real-use evidence was already decisive.
 - Keep the existing normal-mode barrier unchanged during baseline collection.
 - Store data locally only.
 - Do not record message content, conversation names, contact names, phone numbers, search terms, or chat identifiers.

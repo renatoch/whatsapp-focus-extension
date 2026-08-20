@@ -37,11 +37,19 @@ See: [`DS1-pinned-focus-conversations/index.md`](DS1-pinned-focus-conversations/
 
 ### DS2 — Adaptive Friction Awareness
 
-Status: implementing — automated checks green; awaiting manual Chrome validation
+Status: done — Phase 1 closed early after decisive real-use evidence
 
-Detect when the fixed normal-mode barrier has become an automatic choreography and shift from gatekeeper to mirror through a private behavioral baseline, delayed reflection, and user-recognized hypotheses before designing adaptive friction.
+Detected that the fixed normal-mode barrier had become automatic choreography and added a private behavioral baseline plus a provisional usage mirror.
 
 See: [`DS2-adaptive-friction-awareness/index.md`](DS2-adaptive-friction-awareness/index.md)
+
+### DS3 — In-the-Moment Intent Declaration
+
+Status: proposed
+
+Capture structured self-reported intent and an optional private note before opening full WhatsApp, then compare intention, final decision, and continued choreography signals without inferring motive from clicks.
+
+See: [`DS3-in-the-moment-intent-declaration/index.md`](DS3-in-the-moment-intent-declaration/index.md)
 
 ### Later candidates
 
