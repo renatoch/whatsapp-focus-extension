@@ -775,17 +775,19 @@
 
     const intentPanel = panel.querySelector("[data-mwf-intent-summary]");
     intentPanel.hidden = summary.intent.total === 0;
-    setText("[data-mwf-intent-total]", `${summary.intent.total} declarações registradas.`);
+    setText("[data-mwf-intent-declarations]", String(summary.intent.total));
+    setText("[data-mwf-intent-opened]", String(summary.intent.decisions.opened));
+    setText("[data-mwf-intent-not-open]", String(summary.intent.decisions.notOpen));
+    setText(
+      "[data-mwf-intent-changed]",
+      String(summary.intent.decisions.cancelled + summary.intent.decisions.continuedFocused)
+    );
     setText(
       "[data-mwf-intent-categories]",
       globalThis.MirrorAwareness.INTENT_CATEGORIES
         .filter((category) => summary.intent.categories[category] > 0)
         .map((category) => `${formatIntentCategory(category)}: ${summary.intent.categories[category]}`)
         .join(" · ")
-    );
-    setText(
-      "[data-mwf-intent-decisions]",
-      `${summary.intent.decisions.opened} abriram · ${summary.intent.decisions.notOpen} não abriram · ${summary.intent.decisions.cancelled} cancelaram depois · ${summary.intent.decisions.continuedFocused} continuaram na conversa`
     );
     setText(
       "[data-mwf-intent-speed]",
@@ -880,8 +882,23 @@
             <p data-mwf-awareness-insight></p>
             <p class="mwf-awareness-insight-context" data-mwf-awareness-insight-context></p>
           </div>
+          <section class="mwf-intent-summary" data-mwf-intent-summary hidden>
+            <h3>O que aconteceu depois da declaração</h3>
+            <div class="mwf-awareness-metrics mwf-intent-decision-metrics">
+              <div><strong data-mwf-intent-declarations>0</strong><span>declarações feitas</span></div>
+              <div><strong data-mwf-intent-opened>0</strong><span>abriram o WhatsApp</span></div>
+              <div><strong data-mwf-intent-not-open>0</strong><span>não abriram agora</span></div>
+              <div><strong data-mwf-intent-changed>0</strong><span>mudaram de caminho depois</span></div>
+            </div>
+            <p class="mwf-awareness-detail" data-mwf-intent-categories></p>
+            <p class="mwf-awareness-detail" data-mwf-intent-speed></p>
+            <details class="mwf-intent-notes-details" data-mwf-intent-notes-details>
+              <summary>Ver minhas notas</summary>
+              <ul class="mwf-intent-notes" data-mwf-intent-notes></ul>
+            </details>
+          </section>
           <details class="mwf-awareness-details">
-            <summary>Ver detalhes</summary>
+            <summary>Coreografia dos cliques</summary>
             <div class="mwf-awareness-metrics">
               <div><strong data-mwf-awareness-openings>0</strong><span>aberturas observadas</span></div>
               <div><strong data-mwf-awareness-today>0</strong><span>aberturas hoje</span></div>
@@ -891,17 +908,6 @@
             <p class="mwf-awareness-detail" data-mwf-awareness-routes></p>
             <p class="mwf-awareness-detail" data-mwf-awareness-outcomes></p>
           </details>
-          <section class="mwf-intent-summary" data-mwf-intent-summary hidden>
-            <h3>O que você declarou no momento</h3>
-            <p data-mwf-intent-total></p>
-            <p class="mwf-awareness-detail" data-mwf-intent-categories></p>
-            <p class="mwf-awareness-detail" data-mwf-intent-decisions></p>
-            <p class="mwf-awareness-detail" data-mwf-intent-speed></p>
-            <details class="mwf-intent-notes-details" data-mwf-intent-notes-details>
-              <summary>Ver minhas notas</summary>
-              <ul class="mwf-intent-notes" data-mwf-intent-notes></ul>
-            </details>
-          </section>
           <div class="mwf-awareness-reflection" data-mwf-awareness-reflection hidden>
             <h3>O que parece ter predominado?</h3>
             <p>Esta leitura é sua. Os cliques não revelam motivação sozinhos.</p>

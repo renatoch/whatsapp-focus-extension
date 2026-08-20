@@ -64,9 +64,10 @@ Pass condition: the declaration is neutral, category is required, note is option
 
 1. Open **Ver padrão de uso**.
 2. Confirm Phase 1 baseline and Phase 2 intent data are visibly distinct.
-3. Confirm intent counts and outcomes are understandable without expanding raw metrics.
-4. Confirm authored notes are visible as plain text and do not render markup.
-5. Enter a note containing `<img src=x onerror=alert(1)>` for a controlled safety test.
+3. Confirm the primary Phase 2 cards show declarations, openings, decisions not to open, and later changes of path.
+4. Confirm timing/reopening metrics are secondary under **Coreografia dos cliques**.
+5. Confirm authored notes are visible as plain text and do not render markup.
+6. Enter a note containing `<img src=x onerror=alert(1)>` for a controlled safety test.
 
 Pass condition: the literal text appears and no HTML/script executes.
 
