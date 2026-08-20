@@ -45,7 +45,7 @@ See: [`DS2-adaptive-friction-awareness/index.md`](DS2-adaptive-friction-awarenes
 
 ### DS3 — In-the-Moment Intent Declaration
 
-Status: proposed
+Status: implementing — isolated storage and intent declaration ready for manual validation
 
 Capture structured self-reported intent and an optional private note before opening full WhatsApp, then compare intention, final decision, and continued choreography signals without inferring motive from clicks.
 

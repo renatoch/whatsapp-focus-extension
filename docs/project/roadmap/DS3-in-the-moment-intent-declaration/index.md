@@ -2,7 +2,7 @@
 
 # DS3 — In-the-Moment Intent Declaration
 
-**Status:** 🟡 Proposed
+**Status:** 🟠 Implementing
 
 ---
 

@@ -385,6 +385,70 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   color: #f7d794 !important;
 }
 
+.mwf-awareness-phase {
+  margin-bottom: 8px !important;
+  color: #7ee2bd !important;
+  font-size: 12px !important;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.mwf-intent-summary[hidden],
+.mwf-intent-notes-details[hidden] {
+  display: none !important;
+}
+
+.mwf-intent-summary {
+  margin-top: 18px;
+  border-top: 1px solid rgba(233, 237, 239, 0.10);
+  padding-top: 18px;
+}
+
+.mwf-intent-summary h3 {
+  margin: 0 0 10px;
+  color: #e9edef;
+}
+
+.mwf-intent-notes-details summary {
+  color: #aebac1;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.mwf-intent-notes {
+  display: grid;
+  gap: 8px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mwf-intent-notes li {
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(233, 237, 239, 0.05);
+}
+
+.mwf-intent-notes strong,
+.mwf-intent-notes span {
+  display: block;
+}
+
+.mwf-intent-notes strong {
+  margin-bottom: 4px;
+  color: #7ee2bd;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.mwf-intent-notes span {
+  color: #d9e7e2;
+  font-size: 13px;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
 .mwf-awareness-reflection {
   margin-top: 18px;
   border-top: 1px solid rgba(233, 237, 239, 0.10);
@@ -479,8 +543,86 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   gap: 10px;
 }
 
-.mwf-normal-confirm {
+.mwf-normal-confirm,
+.mwf-intent-declaration {
   display: none;
+}
+
+#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > h1,
+#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > p,
+#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > .mwf-actions,
+#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > .mwf-awareness-link {
+  display: none !important;
+}
+
+#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-intent-declaration {
+  display: block;
+}
+
+.mwf-intent-declaration h2 {
+  margin: 0 0 16px;
+  color: #e9edef;
+  font-size: 24px;
+}
+
+.mwf-intent-options {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.mwf-intent-options label {
+  display: flex;
+  align-items: start;
+  gap: 10px;
+  border: 1px solid rgba(233, 237, 239, 0.12);
+  border-radius: 12px;
+  padding: 10px 12px;
+  color: #d9e7e2;
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+.mwf-intent-options input {
+  margin-top: 3px;
+  accent-color: #00a884;
+}
+
+.mwf-intent-note-label {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 8px;
+  color: #aebac1;
+  font-size: 13px;
+}
+
+.mwf-intent-note-label span {
+  color: #7f969f;
+  font-size: 12px;
+}
+
+.mwf-intent-note-label textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid rgba(233, 237, 239, 0.14);
+  border-radius: 12px;
+  padding: 10px 12px;
+  background: #0b141a;
+  color: #e9edef;
+  font: inherit;
+  box-sizing: border-box;
+}
+
+.mwf-intent-storage-note,
+.mwf-intent-message {
+  margin-bottom: 12px !important;
+  color: #7f969f !important;
+  font-size: 12px !important;
+}
+
+.mwf-intent-message:not(:empty) {
+  color: #f7d794 !important;
 }
 
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > h1,

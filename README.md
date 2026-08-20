@@ -12,7 +12,8 @@ Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 
 - A extensão roda localmente no navegador e não possui backend.
 - O código atual não envia mensagens, contatos ou dados de uso para servidores externos.
-- O experimento **Padrão de uso** registra apenas horários e ações na própria barreira da extensão em `localStorage`; não registra mensagens, pessoas, conversas, buscas, telefones ou identificadores do WhatsApp. A coleta pode ser pausada e apagada pela interface.
+- O experimento **Padrão de uso** registra horários, ações na barreira e somente a intenção/nota que o usuário decide escrever. Esses dados ficam em `chrome.storage.local`, isolados dos scripts da página do WhatsApp, e podem ser pausados ou apagados pela interface.
+- A extensão não extrai mensagens, pessoas, conversas, buscas, telefones ou identificadores do WhatsApp.
 - Por ser uma extensão que roda em `web.whatsapp.com`, ela tem acesso técnico ao DOM visível do WhatsApp Web. Isso inclui elementos da interface, nomes de conversas e conteúdo exibido na tela.
 - Esse acesso é necessário para ocultar a lateral, limpar previews e controlar o modo foco, mas significa que qualquer pessoa instalando a extensão precisa confiar no código.
 - O hot-refresh de desenvolvimento (`focus.css` e `dev-config.json` em `web_accessible_resources`) é uma conveniência de prototipagem. Antes de uma versão pública/distribuível, ele deve ser removido ou protegido por build/flag de desenvolvimento.
@@ -37,8 +38,9 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
 - mostra há quanto tempo o WhatsApp normal não é aberto, para aumentar consciência de reaberturas impulsivas;
-- oferece **Ver padrão de uso**, uma síntese voluntária e local da coreografia de abertura do modo normal, com baseline inicial de 7 dias, retenção máxima de 14 dias e controles para pausar/apagar;
-- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, com pausa consciente de 8s antes de liberar; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
+- oferece **Ver padrão de uso**, uma síntese voluntária e local da coreografia de abertura do modo normal, com retenção máxima de 14 dias e controles para pausar/apagar;
+- antes de abrir o modo normal, pergunta de forma neutra a intenção, com opções estruturadas e nota livre opcional;
+- oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, mantendo a pausa consciente de 8s depois da declaração; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
 - adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;

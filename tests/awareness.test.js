@@ -43,7 +43,7 @@ test('creates a versioned empty state without sensitive fields', () => {
   const state = store.getState();
 
   assert.deepEqual(state, {
-    version: 1,
+    version: 2,
     startedAt: START,
     enabled: true,
     events: [],
@@ -65,6 +65,7 @@ test('records only allowlisted event fields and strips unknown data', () => {
     {
       type: 'normal_opened',
       at: START,
+      phase: 2,
       durationMs: 1250,
       route: 'immediate',
     },
@@ -179,7 +180,7 @@ test('persists only allowlisted aggregate reflection categories after baseline',
   assert.equal(store.saveReflection('automatism'), true);
   assert.equal(store.saveReflection('diagnosis-from-model'), false);
   assert.deepEqual(store.getState().reflections, [
-    { at: START + 7 * DAY, category: 'automatism' },
+    { at: START + 7 * DAY, category: 'automatism', phase: 2 },
   ]);
 });
 
@@ -190,7 +191,7 @@ test('recovers safely from malformed storage', () => {
   const { store } = setup({ initial });
 
   assert.deepEqual(store.getState(), {
-    version: 1,
+    version: 2,
     startedAt: START,
     enabled: true,
     events: [],
@@ -206,10 +207,92 @@ test('clear removes all awareness data and starts a fresh experiment', () => {
 
   assert.equal(storage.getItem(Awareness.STORAGE_KEY), null);
   assert.deepEqual(reset, {
-    version: 1,
+    version: 2,
     startedAt: START + DAY,
     enabled: true,
     events: [],
     reflections: [],
   });
+});
+
+test('migrates allowlisted v1 data once and removes only the legacy key', async () => {
+  const legacyState = {
+    version: 1,
+    startedAt: START,
+    enabled: true,
+    events: [{ type: 'normal_opened', at: START, durationMs: 8000, route: 'countdown', secret: 'drop' }],
+    reflections: [],
+  };
+  const legacy = new MemoryStorage({
+    [Awareness.LEGACY_STORAGE_KEY]: JSON.stringify(legacyState),
+    unrelated: 'keep',
+  });
+  const isolated = new MemoryStorage();
+  const adapter = {
+    getItem: async (key) => isolated.getItem(key),
+    setItem: async (key, value) => isolated.setItem(key, value),
+    removeItem: async (key) => isolated.removeItem(key),
+  };
+  const store = Awareness.createPersistentStore(adapter, { now: () => START + DAY });
+
+  const result = await store.initialize(legacy);
+  assert.equal(result.migrated, true);
+  assert.equal(legacy.getItem(Awareness.LEGACY_STORAGE_KEY), null);
+  assert.equal(legacy.getItem('unrelated'), 'keep');
+  assert.deepEqual(store.getState().events, [{
+    type: 'normal_opened', at: START, phase: 1, durationMs: 8000, route: 'countdown',
+  }]);
+});
+
+test('failed migration keeps legacy data', async () => {
+  const legacy = new MemoryStorage({
+    [Awareness.LEGACY_STORAGE_KEY]: JSON.stringify({ version: 1, startedAt: START, events: [], reflections: [] }),
+  });
+  const adapter = {
+    getItem: async () => null,
+    setItem: async () => { throw new Error('quota'); },
+    removeItem: async () => {},
+  };
+  const store = Awareness.createPersistentStore(adapter, { now: () => START });
+
+  const result = await store.initialize(legacy);
+  assert.ok(result.error);
+  assert.notEqual(legacy.getItem(Awareness.LEGACY_STORAGE_KEY), null);
+});
+
+test('isolated state wins over legacy data during idempotent initialization', async () => {
+  const isolatedState = { version: 2, startedAt: START, enabled: true, events: [], reflections: [] };
+  const isolated = new MemoryStorage({ [Awareness.STORAGE_KEY]: JSON.stringify(isolatedState) });
+  const legacy = new MemoryStorage({
+    [Awareness.LEGACY_STORAGE_KEY]: JSON.stringify({ version: 1, startedAt: START - DAY, events: [], reflections: [] }),
+  });
+  const adapter = {
+    getItem: async (key) => isolated.getItem(key),
+    setItem: async (key, value) => isolated.setItem(key, value),
+    removeItem: async (key) => isolated.removeItem(key),
+  };
+  const store = Awareness.createPersistentStore(adapter, { now: () => START });
+
+  const result = await store.initialize(legacy);
+  assert.equal(result.migrated, false);
+  assert.equal(store.getState().startedAt, START);
+});
+
+test('records phase 2 intent, caps notes, and separates phase summaries', () => {
+  const { store } = setup();
+  store.record('intent_outcome', {
+    attemptId: 'attempt-1',
+    intent: 'check-reply',
+    note: `  ${'x'.repeat(400)}  `,
+    decision: 'not-open',
+    promptDurationMs: 1500,
+  });
+
+  const event = store.getState().events[0];
+  assert.equal(event.phase, 2);
+  assert.equal(event.note.length, Awareness.MAX_NOTE_LENGTH);
+  const summary = store.getSummary();
+  assert.equal(summary.intent.categories['check-reply'], 1);
+  assert.equal(summary.intent.decisions.notOpen, 1);
+  assert.equal(summary.phases.phase1.openings, 0);
 });
