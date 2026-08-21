@@ -51,6 +51,14 @@ Capture structured self-reported intent and an optional private note before open
 
 See: [`DS3-in-the-moment-intent-declaration/index.md`](DS3-in-the-moment-intent-declaration/index.md)
 
+### DS4 — Graceful Normal-Mode Expiry
+
+Status: proposed — next item after the current DS3 validation/work boundary
+
+When the five-minute full-mode window expires, preserve a visible active conversation in focused mode while returning inactive or conversationless sessions to the blind overlay. This prevents interruption of typing/audio flow and avoids contaminating awareness data with tool-induced reopenings.
+
+See: [`DS4-graceful-normal-mode-expiry/index.md`](DS4-graceful-normal-mode-expiry/index.md)
+
 ### Later candidates
 
 - Archived unread filter: replicate the main chat unread filter inside Arquivadas.
