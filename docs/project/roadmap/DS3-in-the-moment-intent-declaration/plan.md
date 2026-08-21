@@ -20,6 +20,8 @@ Migrar awareness para armazenamento isolado da extensão e iniciar a Fase 2: col
 - DS3.US3
 - DS3.US4
 - DS3.TS2
+- DS3.US5
+- DS3.TS3
 
 ## Scope
 
@@ -56,6 +58,8 @@ Migrar awareness para armazenamento isolado da extensão e iniciar a Fase 2: col
     - user-authored notes in chronological order;
     - prompt timing/repetition signals for future habituation analysis.
 12. Preserve pause, clear, retention, and privacy controls.
+13. Before validating Phase 2, change five-minute expiry so a visible, focused tab with an open conversation transitions to focused-conversation mode instead of the blind overlay.
+14. Keep the blind overlay as the expiry destination when the tab is hidden/unfocused or no conversation is open, and record which destination was chosen.
 
 ## Storage And Migration Contract
 
@@ -112,6 +116,9 @@ The question is observational, not accusatory. It must not claim that a category
 8. **Given** Phase 1 and Phase 2 events, **when** the mirror is opened, **then** the phases and their metrics are not silently mixed.
 9. **Given** repeated prompt use, **when** data accumulates, **then** prompt response timing and repeated choices remain available for later habituation evaluation.
 10. **Given** collection is paused or cleared, **when** the intent flow is used, **then** controls retain their documented behavior without breaking focus.
+11. **Given** full mode expires while the tab is visible/focused and a conversation is open, **when** the timer completes, **then** the lateral closes but the active conversation remains visible.
+12. **Given** full mode expires in a background/unfocused tab or without an open conversation, **when** the timer completes, **then** the blind overlay returns.
+13. **Given** either expiry route, **when** awareness records the event, **then** focused-conversation and blind-overlay destinations remain distinguishable.
 
 ## Validation Route
 
@@ -144,12 +151,15 @@ Reload the extension because the manifest permission and content-script storage 
 
 ## Implementation Order
 
-1. DS3.TS1 — async isolated storage adapter, migration, v2 schema, tests.
-2. DS3.US1 — structured declaration UI and required category.
-3. DS3.US2 — optional note and safe rendering.
-4. DS3.US3 — final outcome association across all existing paths.
-5. DS3.US4 — intent/outcome/note reflection UI.
-6. DS3.TS2 — phase separation, prompt timing/habituation signals, failure/privacy/regression pass.
+1. **Prerequisite scope correction:** DS3.US5 + DS3.TS3 — graceful expiry and destination instrumentation, completed before further Phase 2 validation so tool-induced reopenings do not contaminate evidence.
+2. DS3.TS1 — async isolated storage adapter, migration, v2 schema, tests.
+3. DS3.US1 — structured declaration UI and required category.
+4. DS3.US2 — optional note and safe rendering.
+5. DS3.US3 — final outcome association across all existing paths.
+6. DS3.US4 — intent/outcome/note reflection UI.
+7. DS3.TS2 — phase separation, prompt timing/habituation signals, failure/privacy/regression pass.
+
+The first six original packages have an implementation commit, but DS3 validation remains blocked until the newly absorbed prerequisite packages are planned/approved by Ariad and implemented.
 
 ## Implementation Contract
 

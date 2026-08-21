@@ -45,7 +45,7 @@ See: [`DS2-adaptive-friction-awareness/index.md`](DS2-adaptive-friction-awarenes
 
 ### DS3 — In-the-Moment Intent Declaration
 
-Status: implementing — isolated storage and intent declaration ready for manual validation
+Status: implementing — validation blocked until graceful-expiry prerequisite is implemented
 
 Capture structured self-reported intent and an optional private note before opening full WhatsApp, then compare intention, final decision, and continued choreography signals without inferring motive from clicks.
 
@@ -53,9 +53,9 @@ See: [`DS3-in-the-moment-intent-declaration/index.md`](DS3-in-the-moment-intent-
 
 ### DS4 — Graceful Normal-Mode Expiry
 
-Status: proposed — next item after the current DS3 validation/work boundary
+Status: absorbed into DS3 as a prerequisite; do not pull independently
 
-When the five-minute full-mode window expires, preserve a visible active conversation in focused mode while returning inactive or conversationless sessions to the blind overlay. This prevents interruption of typing/audio flow and avoids contaminating awareness data with tool-induced reopenings.
+This scope now blocks DS3 validation because forced timer expiry interrupts active work and contaminates Phase 2 evidence. The separate package remains only as decision history.
 
 See: [`DS4-graceful-normal-mode-expiry/index.md`](DS4-graceful-normal-mode-expiry/index.md)
 

@@ -71,6 +71,16 @@ Pass condition: the declaration is neutral, category is required, note is option
 
 Pass condition: the literal text appears and no HTML/script executes.
 
+### Graceful expiry prerequisite
+
+1. Open full mode with a conversation visible and keep the WhatsApp tab focused until the five-minute timer expires.
+2. Confirm the lateral closes while the active conversation remains visible and usable.
+3. Repeat with the tab in the background or without an open conversation.
+4. Confirm those cases return to the blind overlay.
+5. Confirm awareness distinguishes both expiry destinations.
+
+Pass condition: active work is not covered by the overlay, inactive sessions remain blind, and tool-induced transitions are not recorded as indistinguishable expiry events.
+
 ### Data controls and regressions
 
 1. Pause collection and exercise the intent/open flow.

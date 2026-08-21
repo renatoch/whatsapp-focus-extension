@@ -2,9 +2,11 @@
 
 # DS4 — Graceful Normal-Mode Expiry
 
-**Status:** 🟡 Proposed
+**Status:** ⚪ Absorbed into DS3
 
 ---
+
+This scope was reclassified as a prerequisite inside [`DS3 — In-the-Moment Intent Declaration`](../DS3-in-the-moment-intent-declaration/index.md), because forced timer expiries contaminate Phase 2 awareness data. This package remains as decision history and must not be pulled independently.
 
 ## Outcome
 

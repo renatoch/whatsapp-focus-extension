@@ -66,10 +66,12 @@ Before persisting free text, migrate awareness state from page-origin `localStor
 | DS3.US3 | Record the final decision with declared intent | User Story | The extension associates the self-reported intent with opening or not opening while preserving Phase 1 behavioral signals. | Candidate |
 | DS3.US4 | Reflect on intent patterns and notes | User Story | The usage mirror summarizes intent distribution, outcomes, and user-authored notes without diagnosing motivation. | Candidate |
 | DS3.TS2 | Preserve phase boundaries and prompt-habituation signals | Technical Story | Phase 1 and Phase 2 remain distinguishable, and timing/repetition data can later show whether the declaration prompt became choreography. | Candidate |
+| DS3.US5 | Preserve active conversation when full mode expires | User Story | Timer expiry closes the general environment without covering a visible conversation already in use. | Candidate |
+| DS3.TS3 | Record the automatic expiry destination | Technical Story | Awareness distinguishes expiry to focused conversation from expiry to blind overlay, preventing tool-induced reopenings from looking impulsive. | Candidate |
 
 ## Done Condition
 
-DS3 is done when existing awareness data has migrated to extension-isolated storage, the user can declare structured intent and an optional note before choosing to open or not open, the usage mirror can show intention/outcome patterns and notes, and continued behavioral collection can support a later evaluation of prompt habituation. No automatically derived WhatsApp conversation data is collected.
+DS3 is done when existing awareness data has migrated to extension-isolated storage, the user can declare structured intent and an optional note before choosing to open or not open, the usage mirror can show intention/outcome patterns and notes, and continued behavioral collection can support a later evaluation of prompt habituation. Before Phase 2 validation, timer expiry must also preserve a visible active conversation in focused mode and record whether expiry went to focused conversation or blind overlay. No automatically derived WhatsApp conversation data is collected.
 
 ## Validation questions
 
