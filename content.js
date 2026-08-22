@@ -195,8 +195,8 @@
     searchSettleTimer = null;
     pendingSearchText = "";
     revealedSearchText = "";
-    root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_HIDDEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
     ensureOverlay();
     ensureReturnButton();
     ensureSidebarButton();
