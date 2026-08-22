@@ -77,6 +77,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - A válvula “Ver WhatsApp normal por 5 min” passou a ter uma pausa consciente de 8s antes de liberar o ambiente completo, com alternativas “Continuar na conversa”, “Cancelar” e “Abrir agora”. Quando não há conversa aberta, a mensagem não sugere continuar conversa e avisa que a ação abrirá a lista completa. A intenção é quebrar o impulso sem bloquear uso legítimo.
 - A tela de foco passou a mostrar há quanto tempo o WhatsApp normal não é aberto, usando `localStorage` para registrar a última abertura do modo normal. Objetivo: tornar visível o padrão de reabertura por impulso/tédio.
 - Se o usuário tenta abrir o WhatsApp normal novamente menos de 10 minutos após a última abertura, a confirmação troca o countdown automático por uma escolha explícita: “Abrir mesmo assim”. A mensagem destaca há quanto tempo abriu e pergunta se é impulso/tédio, evitando tom acusatório.
+- Ao expirar o modo normal, uma aba visível e focada com conversa aberta passa para conversa focada e esconde apenas a lateral; aba inativa ou sem conversa retorna ao overlay cego. O destino é registrado de forma agregada para não interpretar como impulso uma reabertura causada pela própria extensão.
 
 ## Revisão de privacidade e segurança — análise preliminar
 

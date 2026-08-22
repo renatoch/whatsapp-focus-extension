@@ -41,6 +41,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - oferece **Ver padrão de uso**, uma síntese voluntária e local da coreografia de abertura do modo normal, com retenção máxima de 14 dias e controles para pausar/apagar;
 - antes de abrir o modo normal, pergunta de forma neutra a intenção, com opções estruturadas e nota livre opcional;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, mantendo a pausa consciente de 8s depois da declaração; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
+- ao fim dos 5 minutos, preserva uma conversa aberta quando a aba continua visível e focada, escondendo apenas a lateral; sessões inativas ou sem conversa retornam ao modo foco cego;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
 - adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;

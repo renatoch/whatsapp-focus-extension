@@ -26,7 +26,10 @@
     normal_opened: { durationMs: "duration", route: ["countdown", "immediate", "recent-explicit"] },
     attempt_cancelled: { durationMs: "duration" },
     continued_focused_conversation: { durationMs: "duration" },
-    focus_returned: { reason: ["manual", "expiry"] },
+    focus_returned: {
+      reason: ["manual", "expiry"],
+      expiryDestination: ["focused-conversation", "blind-overlay"],
+    },
     intent_outcome: {
       attemptId: "identifier",
       intent: INTENT_CATEGORIES,
@@ -177,6 +180,14 @@
       continuedFocusedConversation: count("continued_focused_conversation"),
       manualFocusReturns: count("focus_returned", (event) => event.reason === "manual"),
       expiredFocusReturns: count("focus_returned", (event) => event.reason === "expiry"),
+      expiryToFocusedConversation: count(
+        "focus_returned",
+        (event) => event.reason === "expiry" && event.expiryDestination === "focused-conversation"
+      ),
+      expiryToBlindOverlay: count(
+        "focus_returned",
+        (event) => event.reason === "expiry" && event.expiryDestination === "blind-overlay"
+      ),
     };
   }
 

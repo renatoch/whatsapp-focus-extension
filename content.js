@@ -764,7 +764,7 @@
     );
     setText(
       "[data-mwf-awareness-outcomes]",
-      `${behavior.cancelledAttempts} cancelamentos · ${behavior.continuedFocusedConversation} continuidades na conversa · ${behavior.manualFocusReturns} retornos manuais ao foco · ${behavior.expiredFocusReturns} encerramentos automáticos`
+      `${behavior.cancelledAttempts} cancelamentos · ${behavior.continuedFocusedConversation} continuidades na conversa · ${behavior.manualFocusReturns} retornos manuais ao foco · ${behavior.expiryToFocusedConversation} expirações preservaram a conversa · ${behavior.expiryToBlindOverlay} voltaram ao modo foco`
     );
     setText(
       "[data-mwf-awareness-reflection-status]",
@@ -1366,6 +1366,14 @@
     }
   }
 
+  function chooseNormalExpiryDestination() {
+    return globalThis.MirrorFocusState?.chooseExpiryDestination({
+      visibilityState: document.visibilityState,
+      documentHasFocus: document.hasFocus(),
+      hasOpenConversation: hasOpenConversation(),
+    }) || "blind-overlay";
+  }
+
   function setNormalTemporarily(route = "immediate") {
     finishNormalAttempt("normal_opened", { route });
     clearNormalDelay();
@@ -1374,8 +1382,13 @@
     setNormal();
     bypassTimer = window.setTimeout(() => {
       bypassTimer = null;
-      recordAwareness("focus_returned", { reason: "expiry" });
-      setActive({ showOverlay: true });
+      const expiryDestination = chooseNormalExpiryDestination();
+      recordAwareness("focus_returned", { reason: "expiry", expiryDestination });
+      if (expiryDestination === "focused-conversation") {
+        setSearchFocusedConversation();
+      } else {
+        setActive({ showOverlay: true });
+      }
     }, BYPASS_MS);
   }
 

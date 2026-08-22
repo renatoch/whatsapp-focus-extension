@@ -114,7 +114,9 @@ test('summarizes opening routes, repeated openings, fast sequences, and outcomes
   setNow(START + 7 * 60 * 1000);
   store.record('attempt_cancelled', { durationMs: 1300 });
   store.record('focus_returned', { reason: 'manual' });
-  store.record('focus_returned', { reason: 'expiry' });
+  store.record('focus_returned', { reason: 'expiry', expiryDestination: 'focused-conversation' });
+  store.record('focus_returned', { reason: 'expiry', expiryDestination: 'blind-overlay' });
+  store.record('focus_returned', { reason: 'expiry', expiryDestination: 'not-allowed', contactName: 'Someone' });
   store.record('continued_focused_conversation', { durationMs: 500 });
 
   const summary = store.getSummary();
@@ -130,7 +132,13 @@ test('summarizes opening routes, repeated openings, fast sequences, and outcomes
   assert.equal(summary.cancelledAttempts, 1);
   assert.equal(summary.continuedFocusedConversation, 1);
   assert.equal(summary.manualFocusReturns, 1);
-  assert.equal(summary.expiredFocusReturns, 1);
+  assert.equal(summary.expiredFocusReturns, 3);
+  assert.equal(summary.expiryToFocusedConversation, 1);
+  assert.equal(summary.expiryToBlindOverlay, 1);
+  assert.deepEqual(
+    store.getState().events.filter((event) => event.reason === 'expiry').at(-1),
+    { type: 'focus_returned', at: START + 7 * 60 * 1000, phase: 2, reason: 'expiry' }
+  );
 });
 
 test('prioritizes repeated openings as the strongest provisional signal', () => {
