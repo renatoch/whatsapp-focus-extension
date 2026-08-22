@@ -137,6 +137,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
   - Implementação atual: se a última abertura do modo normal foi recente, não há countdown automático; a tela mostra há quanto tempo abriu e pede clique explícito em “Abrir mesmo assim”. Observar se isso quebra melhor o impulso/tédio ou se também vira gesto automático.
   - Avaliar caso específico: quando os 5 min de modo normal acabam e a extensão volta sozinha ao modo foco, faz sentido tratar como “abriu há ~5 min” e exigir confirmação explícita? Pode funcionar como estímulo para continuar na conversa focada em vez de reabrir o painel lateral, mas precisa ser validado em uso real.
 
+- **[Próximo após graceful expiry] Reduzir a espera para revelar resultados da busca**
+  - O primeiro resultado após três letras usa hoje `SEARCH_SETTLE_MS = 2000`. A demora está incentivando abrir o modo full para evitar a própria fricção da busca. Testar uma espera muito menor ou revelação orientada pela estabilização dos resultados, preservando apenas o bloqueio de recentes antes de três letras.
+
 - **[Próximo ajuste] Replicar filtro de não lidas dentro de Arquivadas**
   - O chat principal já tem botão nativo para filtrar conversas não lidas. Ideia: oferecer comportamento equivalente em Arquivadas, para achar não lidas arquivadas sem varrer a lista inteira.
 
