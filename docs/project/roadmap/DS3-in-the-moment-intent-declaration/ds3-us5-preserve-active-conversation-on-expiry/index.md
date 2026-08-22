@@ -2,7 +2,7 @@
 
 # DS3.US5 — Preserve active conversation when full mode expires
 
-**Status:** 🟠 Implemented — awaiting manual validation
+**Status:** 🟢 Validated
 **Type:** User Story
 
 ---

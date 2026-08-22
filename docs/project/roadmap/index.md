@@ -45,7 +45,7 @@ See: [`DS2-adaptive-friction-awareness/index.md`](DS2-adaptive-friction-awarenes
 
 ### DS3 — In-the-Moment Intent Declaration
 
-Status: implementing — validation blocked until graceful-expiry prerequisite is implemented
+Status: implementing — graceful-expiry prerequisite validated; Phase 2 observation can continue
 
 Capture structured self-reported intent and an optional private note before opening full WhatsApp, then compare intention, final decision, and continued choreography signals without inferring motive from clicks.
 

@@ -96,4 +96,8 @@ DS3 passes when Phase 1 data migrates safely to extension-isolated storage, real
 
 ## Validation Evidence
 
-Pending implementation and Navigator validation.
+- Automated suite: 21/21 tests passing after the graceful-expiry correction.
+- Navigator confirmed that expiry with an active focused tab preserves the conversation and hides the lateral.
+- Navigator confirmed that expiry with an inactive tab returns to Modo Foco.
+- CR001 and RS001 were closed after review and coherence checks.
+- Broader DS3 Phase 2 observation remains open; this prerequisite is complete.

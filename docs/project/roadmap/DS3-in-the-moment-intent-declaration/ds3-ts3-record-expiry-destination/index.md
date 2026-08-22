@@ -2,7 +2,7 @@
 
 # DS3.TS3 — Record the automatic expiry destination
 
-**Status:** 🟠 Implemented — awaiting manual validation
+**Status:** 🟢 Validated
 **Type:** Technical Story
 
 ---
