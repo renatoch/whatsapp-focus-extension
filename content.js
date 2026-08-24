@@ -24,7 +24,7 @@
   const BYPASS_MS = 5 * 60 * 1000;
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
-  const SEARCH_SETTLE_MS = 2000;
+  const SEARCH_SETTLE_MS = 1000;
   const NORMAL_DELAY_MS = 8000;
   const RECENT_NORMAL_OPEN_MS = 10 * 60 * 1000;
   const DEBUG = false;
@@ -619,7 +619,8 @@
       "check-reply": "checar se alguém respondeu",
       "see-whats-new": "ver se apareceu algo",
       "pause-escape": "pausar ou escapar",
-      "mixed-unclear": "misto ou não sei",
+      "process-pending": "processar mensagens pendentes ou não lidas",
+      "mixed-unclear": "outro ou ainda não sei",
     }[category] || category;
   }
 
@@ -675,6 +676,15 @@
     pendingIntent = null;
     intentPromptStartedAt = null;
     getOverlay()?.classList.remove("mwf-intent-pending");
+  }
+
+  function returnToFocusBeforeIntent() {
+    const durationMs = intentPromptStartedAt ? Math.max(0, Date.now() - intentPromptStartedAt) : 0;
+    recordAwareness("intent_prompt_exited", { durationMs, destination: "focus-overlay" });
+    pendingIntent = null;
+    intentPromptStartedAt = null;
+    getOverlay()?.classList.remove("mwf-intent-pending");
+    setActive({ showOverlay: true });
   }
 
   function renderIntentNotes(panel, notes) {
@@ -738,7 +748,8 @@
     if (!panel || !awarenessStore) return;
 
     const summary = awarenessStore.getSummary();
-    const behavior = summary.intent.total > 0 ? summary.phases.phase2 : summary.phases.phase1;
+    const hasPhase2Activity = summary.intent.total > 0 || summary.phases.phase2.preDeclarationFocusReturns > 0;
+    const behavior = hasPhase2Activity ? summary.phases.phase2 : summary.phases.phase1;
     const setText = (selector, text) => {
       const element = panel.querySelector(selector);
       if (element) element.textContent = text;
@@ -751,7 +762,7 @@
         ? `Baseline de 7 dias concluído · ${summary.observationDays} dias observados.`
         : `Dia ${Math.min(summary.observationDays, 7)} de 7 da observação inicial.`
     );
-    setText("[data-mwf-awareness-phase]", summary.intent.total > 0 ? "Fase 2 · intenção no momento" : "Fase 1 · baseline passivo");
+    setText("[data-mwf-awareness-phase]", hasPhase2Activity ? "Fase 2 · intenção no momento" : "Fase 1 · baseline passivo");
     setText("[data-mwf-awareness-insight]", insight.headline);
     setText("[data-mwf-awareness-insight-context]", insight.context);
     setText("[data-mwf-awareness-openings]", String(behavior.openings));
@@ -774,7 +785,7 @@
     );
 
     const intentPanel = panel.querySelector("[data-mwf-intent-summary]");
-    intentPanel.hidden = summary.intent.total === 0;
+    intentPanel.hidden = !hasPhase2Activity;
     setText("[data-mwf-intent-declarations]", String(summary.intent.total));
     setText("[data-mwf-intent-opened]", String(summary.intent.decisions.opened));
     setText("[data-mwf-intent-not-open]", String(summary.intent.decisions.notOpen));
@@ -794,6 +805,14 @@
       summary.intent.averagePromptDurationMs === null
         ? "Ainda sem tempo médio de resposta."
         : `Tempo médio para declarar: ${Math.max(1, Math.round(summary.intent.averagePromptDurationMs / 1000))}s.`
+    );
+    setText(
+      "[data-mwf-intent-focus-returns]",
+      behavior.preDeclarationFocusReturns === 0
+        ? "Nenhum retorno ao modo foco antes de declarar."
+        : `${behavior.preDeclarationFocusReturns} retornos ao modo foco antes de declarar · tempo médio ${(
+            behavior.averagePreDeclarationReturnMs / 1000
+          ).toFixed(1)}s.`
     );
     renderIntentNotes(panel, summary.intent.notes);
     panel.querySelector("[data-mwf-intent-notes-details]").hidden = summary.intent.notes.length === 0;
@@ -892,6 +911,7 @@
             </div>
             <p class="mwf-awareness-detail" data-mwf-intent-categories></p>
             <p class="mwf-awareness-detail" data-mwf-intent-speed></p>
+            <p class="mwf-awareness-detail" data-mwf-intent-focus-returns></p>
             <details class="mwf-intent-notes-details" data-mwf-intent-notes-details>
               <summary>Ver minhas notas</summary>
               <ul class="mwf-intent-notes" data-mwf-intent-notes></ul>
@@ -934,7 +954,8 @@
             <label><input type="radio" name="mwf-intent" value="check-reply"> Checar se alguém respondeu</label>
             <label><input type="radio" name="mwf-intent" value="see-whats-new"> Ver se apareceu algo, sem objetivo específico</label>
             <label><input type="radio" name="mwf-intent" value="pause-escape"> Pausar/escapar do que estou fazendo ou sentindo</label>
-            <label><input type="radio" name="mwf-intent" value="mixed-unclear"> Misto / não sei</label>
+            <label><input type="radio" name="mwf-intent" value="process-pending"> Processar mensagens pendentes/não lidas</label>
+            <label><input type="radio" name="mwf-intent" value="mixed-unclear"> Outro / ainda não sei</label>
           </div>
           <label class="mwf-intent-note-label">
             Algo que queira lembrar depois? <span>Opcional</span>
@@ -946,6 +967,7 @@
             <button class="mwf-button mwf-button-primary" data-mwf-action="intent-open">Abrir WhatsApp</button>
             <button class="mwf-button mwf-button-secondary" data-mwf-action="intent-not-open">Não abrir agora</button>
           </div>
+          <button class="mwf-intent-return-focus" data-mwf-action="intent-return-focus">← Voltar ao modo foco</button>
         </section>
         <div class="mwf-normal-confirm" aria-live="polite">
           <h2>Abrir WhatsApp normal?</h2>
@@ -994,6 +1016,9 @@
       }
       if (action === "intent-not-open") {
         declineFromIntent();
+      }
+      if (action === "intent-return-focus") {
+        returnToFocusBeforeIntent();
       }
       if (action === "normal-cancel") {
         finishNormalAttempt("attempt_cancelled");

@@ -31,7 +31,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - esconde o painel lateral (`#side`) por padrão;
 - mostra uma tela neutra de **Modo foco**;
 - inclui uma primeira opção **Buscar conversa**, que abre a busca nativa com tentativa de reduzir previews/badges;
-- durante a busca, oculta resultados até que pelo menos 3 letras sejam digitadas e mostra um indicador breve de filtragem antes da primeira exibição;
+- durante a busca, oculta resultados até que pelo menos 3 letras sejam digitadas e espera 1 segundo antes da primeira exibição, evitando revelar recentes durante a digitação inicial;
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
@@ -39,7 +39,8 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
 - mostra há quanto tempo o WhatsApp normal não é aberto, para aumentar consciência de reaberturas impulsivas;
 - oferece **Ver padrão de uso**, uma síntese voluntária e local da coreografia de abertura do modo normal, com retenção máxima de 14 dias e controles para pausar/apagar;
-- antes de abrir o modo normal, pergunta de forma neutra a intenção, com opções estruturadas e nota livre opcional;
+- antes de abrir o modo normal, pergunta de forma neutra a intenção, com opções estruturadas — incluindo processar pendências/não lidas — e nota livre opcional;
+- permite voltar ao modo foco antes de declarar uma intenção, registrando somente a ocorrência e o tempo levado, sem inferir o motivo;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, mantendo a pausa consciente de 8s depois da declaração; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
 - ao fim dos 5 minutos, preserva uma conversa aberta quando a aba continua visível e focada, escondendo apenas a lateral; sessões inativas ou sem conversa retornam ao modo foco cego;
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;

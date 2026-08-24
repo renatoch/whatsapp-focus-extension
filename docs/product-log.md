@@ -78,6 +78,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - A tela de foco passou a mostrar há quanto tempo o WhatsApp normal não é aberto, usando `localStorage` para registrar a última abertura do modo normal. Objetivo: tornar visível o padrão de reabertura por impulso/tédio.
 - Se o usuário tenta abrir o WhatsApp normal novamente menos de 10 minutos após a última abertura, a confirmação troca o countdown automático por uma escolha explícita: “Abrir mesmo assim”. A mensagem destaca há quanto tempo abriu e pergunta se é impulso/tédio, evitando tom acusatório.
 - Ao expirar o modo normal, uma aba visível e focada com conversa aberta passa para conversa focada e esconde apenas a lateral; aba inativa ou sem conversa retorna ao overlay cego. O destino é registrado de forma agregada para não interpretar como impulso uma reabertura causada pela própria extensão.
+- O prompt de intenção passou a permitir voltar diretamente ao modo foco sem escolher categoria. A extensão registra somente a ocorrência e a duração desse redirecionamento; “Não abrir agora” continua exigindo intenção, preservando a distinção entre retorno antes de declarar e decisão consciente após declarar. Também foi adicionada a intenção de processar pendências/não lidas e “Misto/incerto” virou “Outro / ainda não sei”.
 
 ## Revisão de privacidade e segurança — análise preliminar
 
@@ -137,8 +138,11 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
   - Implementação atual: se a última abertura do modo normal foi recente, não há countdown automático; a tela mostra há quanto tempo abriu e pede clique explícito em “Abrir mesmo assim”. Observar se isso quebra melhor o impulso/tédio ou se também vira gesto automático.
   - Avaliar caso específico: quando os 5 min de modo normal acabam e a extensão volta sozinha ao modo foco, faz sentido tratar como “abriu há ~5 min” e exigir confirmação explícita? Pode funcionar como estímulo para continuar na conversa focada em vez de reabrir o painel lateral, mas precisa ser validado em uso real.
 
-- **[Próximo após graceful expiry] Reduzir a espera para revelar resultados da busca**
-  - O primeiro resultado após três letras usa hoje `SEARCH_SETTLE_MS = 2000`. A demora está incentivando abrir o modo full para evitar a própria fricção da busca. Testar uma espera muito menor ou revelação orientada pela estabilização dos resultados, preservando apenas o bloqueio de recentes antes de três letras.
+- **[Em teste] Reduzir a espera para revelar resultados da busca**
+  - `SEARCH_SETTLE_MS` foi reduzido de 2000ms para 1000ms. Validar se a busca ficou leve sem deixar a lista de recentes aparecer antes de o filtro nativo estabilizar.
+
+- **[Próximo experimento] Sugerir ação focada conforme a intenção declarada**
+  - Depois de escolher uma intenção, oferecer primeiro o caminho focado correspondente — busca, conversa aberta ou futuro lote de pendências — e manter o modo geral como alternativa. Projetar como fricção contextual, sem poluir a tela inicial nem adicionar outro atraso mecânico.
 
 - **[Próximo ajuste] Replicar filtro de não lidas dentro de Arquivadas**
   - O chat principal já tem botão nativo para filtrar conversas não lidas. Ideia: oferecer comportamento equivalente em Arquivadas, para achar não lidas arquivadas sem varrer a lista inteira.

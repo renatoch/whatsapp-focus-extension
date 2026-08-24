@@ -14,3 +14,12 @@ test('focused conversation state explicitly enforces the hidden-sidebar invarian
   );
   assert.match(css, /html\.mwf-sidebar-hidden #side\s*{\s*display: none !important;/);
 });
+
+test('intent prompt keeps focused exit independent and preserves agreed search delay', () => {
+  assert.match(content, /const SEARCH_SETTLE_MS = 1000;/);
+  assert.match(content, /data-mwf-action="intent-return-focus">← Voltar ao modo foco/);
+  assert.match(content, /value="process-pending"> Processar mensagens pendentes\/não lidas/);
+  assert.match(content, /value="mixed-unclear"> Outro \/ ainda não sei/);
+  assert.match(content, /recordAwareness\("intent_prompt_exited", \{ durationMs, destination: "focus-overlay" \}\)/);
+  assert.match(content, /const NORMAL_DELAY_MS = 8000;/);
+});

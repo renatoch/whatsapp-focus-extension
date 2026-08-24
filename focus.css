@@ -625,6 +625,24 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   color: #f7d794 !important;
 }
 
+.mwf-intent-return-focus {
+  display: block;
+  margin: 14px auto 0;
+  border: 0;
+  padding: 6px 10px;
+  background: transparent;
+  color: #8fa8b2;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+}
+
+.mwf-intent-return-focus:hover,
+.mwf-intent-return-focus:focus-visible {
+  color: #d9e7e2;
+  text-decoration: underline;
+}
+
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > h1,
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > p,
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-actions,

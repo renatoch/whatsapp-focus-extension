@@ -18,6 +18,7 @@
     "check-reply",
     "see-whats-new",
     "pause-escape",
+    "process-pending",
     "mixed-unclear",
   ]);
 
@@ -29,6 +30,10 @@
     focus_returned: {
       reason: ["manual", "expiry"],
       expiryDestination: ["focused-conversation", "blind-overlay"],
+    },
+    intent_prompt_exited: {
+      durationMs: "duration",
+      destination: ["focus-overlay"],
     },
     intent_outcome: {
       attemptId: "identifier",
@@ -98,6 +103,7 @@
 
     if (type === "normal_opened" && !event.route) return null;
     if (type === "focus_returned" && !event.reason) return null;
+    if (type === "intent_prompt_exited" && !event.destination) return null;
     if (type === "intent_outcome" && (!event.attemptId || !event.intent || !event.decision)) return null;
     return event;
   }
@@ -161,6 +167,12 @@
 
   function summarizeEvents(events, now) {
     const openings = events.filter((event) => event.type === "normal_opened");
+    const preDeclarationReturns = events.filter(
+      (event) => event.type === "intent_prompt_exited" && event.destination === "focus-overlay"
+    );
+    const preDeclarationDurations = preDeclarationReturns
+      .map((event) => event.durationMs)
+      .filter(Number.isFinite);
     let shortReopenings = 0;
     for (let index = 1; index < openings.length; index += 1) {
       if (openings[index].at - openings[index - 1].at <= SHORT_REOPEN_MS) shortReopenings += 1;
@@ -188,6 +200,10 @@
         "focus_returned",
         (event) => event.reason === "expiry" && event.expiryDestination === "blind-overlay"
       ),
+      preDeclarationFocusReturns: preDeclarationReturns.length,
+      averagePreDeclarationReturnMs: preDeclarationDurations.length
+        ? Math.round(preDeclarationDurations.reduce((total, duration) => total + duration, 0) / preDeclarationDurations.length)
+        : null,
     };
   }
 

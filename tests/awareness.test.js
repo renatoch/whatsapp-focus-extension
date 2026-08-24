@@ -304,3 +304,32 @@ test('records phase 2 intent, caps notes, and separates phase summaries', () => 
   assert.equal(summary.intent.decisions.notOpen, 1);
   assert.equal(summary.phases.phase1.openings, 0);
 });
+
+test('records timed pre-declaration focus returns without inventing intent', () => {
+  const { store, setNow } = setup();
+  store.record('intent_prompt_exited', { durationMs: 1200, destination: 'focus-overlay', note: 'not allowed' });
+  setNow(START + 1000);
+  store.record('intent_prompt_exited', { durationMs: 4800, destination: 'focus-overlay' });
+  store.record('intent_prompt_exited', { durationMs: 500, destination: 'unknown' });
+  store.record('intent_outcome', {
+    attemptId: 'attempt-pending',
+    intent: 'process-pending',
+    decision: 'not-open',
+    promptDurationMs: 2200,
+  });
+
+  const events = store.getState().events;
+  assert.deepEqual(events[0], {
+    type: 'intent_prompt_exited',
+    at: START,
+    phase: 2,
+    durationMs: 1200,
+    destination: 'focus-overlay',
+  });
+  assert.equal(events.filter((event) => event.type === 'intent_prompt_exited').length, 2);
+
+  const summary = store.getSummary();
+  assert.equal(summary.phases.phase2.preDeclarationFocusReturns, 2);
+  assert.equal(summary.phases.phase2.averagePreDeclarationReturnMs, 3000);
+  assert.equal(summary.intent.categories['process-pending'], 1);
+});
