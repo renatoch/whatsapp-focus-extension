@@ -950,7 +950,6 @@
           <p class="mwf-kicker">Declaração no momento</p>
           <h2>Estou abrindo o WhatsApp normal para…</h2>
           <div class="mwf-intent-options">
-            <label><input type="radio" name="mwf-intent" value="specific-task"> Fazer algo específico</label>
             <label><input type="radio" name="mwf-intent" value="check-reply"> Checar se alguém respondeu</label>
             <label><input type="radio" name="mwf-intent" value="see-whats-new"> Ver se apareceu algo, sem objetivo específico</label>
             <label><input type="radio" name="mwf-intent" value="pause-escape"> Pausar/escapar do que estou fazendo ou sentindo</label>

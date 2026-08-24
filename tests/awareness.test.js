@@ -305,6 +305,21 @@ test('records phase 2 intent, caps notes, and separates phase summaries', () => 
   assert.equal(summary.phases.phase1.openings, 0);
 });
 
+test('preserves historical specific-task events after removing the prompt option', () => {
+  const { store } = setup();
+  store.record('intent_outcome', {
+    attemptId: 'historical-specific-task',
+    intent: 'specific-task',
+    decision: 'opened',
+    promptDurationMs: 1800,
+    route: 'immediate',
+  });
+
+  const summary = store.getSummary();
+  assert.equal(summary.intent.categories['specific-task'], 1);
+  assert.equal(summary.intent.decisions.opened, 1);
+});
+
 test('records timed pre-declaration focus returns without inventing intent', () => {
   const { store, setNow } = setup();
   store.record('intent_prompt_exited', { durationMs: 1200, destination: 'focus-overlay', note: 'not allowed' });

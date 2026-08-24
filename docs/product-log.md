@@ -79,6 +79,7 @@ Antes de construir uma busca própria, vale testar uma etapa intermediária: abr
 - Se o usuário tenta abrir o WhatsApp normal novamente menos de 10 minutos após a última abertura, a confirmação troca o countdown automático por uma escolha explícita: “Abrir mesmo assim”. A mensagem destaca há quanto tempo abriu e pergunta se é impulso/tédio, evitando tom acusatório.
 - Ao expirar o modo normal, uma aba visível e focada com conversa aberta passa para conversa focada e esconde apenas a lateral; aba inativa ou sem conversa retorna ao overlay cego. O destino é registrado de forma agregada para não interpretar como impulso uma reabertura causada pela própria extensão.
 - O prompt de intenção passou a permitir voltar diretamente ao modo foco sem escolher categoria. A extensão registra somente a ocorrência e a duração desse redirecionamento; “Não abrir agora” continua exigindo intenção, preservando a distinção entre retorno antes de declarar e decisão consciente após declarar. Também foi adicionada a intenção de processar pendências/não lidas e “Misto/incerto” virou “Outro / ainda não sei”.
+- A opção “Fazer algo específico” foi removida da interface porque era ampla o bastante para legitimar qualquer abertura e virar escape. O identificador histórico permanece no schema e nos detalhes para preservar os eventos já coletados.
 
 ## Revisão de privacidade e segurança — análise preliminar
 
@@ -143,6 +144,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 
 - **[Próximo experimento] Sugerir ação focada conforme a intenção declarada**
   - Depois de escolher uma intenção, oferecer primeiro o caminho focado correspondente — busca, conversa aberta ou futuro lote de pendências — e manter o modo geral como alternativa. Projetar como fricção contextual, sem poluir a tela inicial nem adicionar outro atraso mecânico.
+
+- **[Ideia fraca / decisão pendente] Buscar por nome preservando estado de não lida**
+  - Em casos com múltiplos contatos ou grupos de nomes semelhantes, mostrar um marcador neutro de não lida antes de abrir pode evitar ciclos de abrir, conferir, remarcar e buscar novamente. Decisão pendente: mostrar todos os resultados com indicador ou oferecer filtro **Somente não lidas**. Não implementar sem nova evidência.
 
 - **[Próximo ajuste] Replicar filtro de não lidas dentro de Arquivadas**
   - O chat principal já tem botão nativo para filtrar conversas não lidas. Ideia: oferecer comportamento equivalente em Arquivadas, para achar não lidas arquivadas sem varrer a lista inteira.

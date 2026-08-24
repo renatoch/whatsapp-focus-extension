@@ -19,6 +19,7 @@ test('intent prompt keeps focused exit independent and preserves agreed search d
   assert.match(content, /const SEARCH_SETTLE_MS = 1000;/);
   assert.match(content, /data-mwf-action="intent-return-focus">← Voltar ao modo foco/);
   assert.match(content, /value="process-pending"> Processar mensagens pendentes\/não lidas/);
+  assert.doesNotMatch(content, /name="mwf-intent" value="specific-task"/);
   assert.match(content, /value="mixed-unclear"> Outro \/ ainda não sei/);
   assert.match(content, /recordAwareness\("intent_prompt_exited", \{ durationMs, destination: "focus-overlay" \}\)/);
   assert.match(content, /const NORMAL_DELAY_MS = 8000;/);
