@@ -1409,7 +1409,7 @@
       const expiryDestination = chooseNormalExpiryDestination();
       recordAwareness("focus_returned", { reason: "expiry", expiryDestination });
       if (expiryDestination === "focused-conversation") {
-        setSearchFocusedConversation();
+        goToMainChatsThen("expiry", () => setSearchFocusedConversation());
       } else {
         setActive({ showOverlay: true });
       }

@@ -15,6 +15,13 @@ test('focused conversation state explicitly enforces the hidden-sidebar invarian
   assert.match(css, /html\.mwf-sidebar-hidden #side\s*{\s*display: none !important;/);
 });
 
+test('focused expiry normalizes nested views before applying focused state', () => {
+  assert.match(
+    content,
+    /if \(expiryDestination === "focused-conversation"\) \{\s*goToMainChatsThen\("expiry", \(\) => setSearchFocusedConversation\(\)\);/
+  );
+});
+
 test('intent prompt keeps focused exit independent and preserves agreed search delay', () => {
   assert.match(content, /const SEARCH_SETTLE_MS = 1000;/);
   assert.match(content, /data-mwf-action="intent-return-focus">← Voltar ao modo foco/);
