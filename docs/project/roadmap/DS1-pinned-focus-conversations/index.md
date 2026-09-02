@@ -16,7 +16,9 @@ This preserves the core product decision: the list remains an instrument, not an
 
 The current prototype is good at opening one intentional conversation. The next friction appears when the user legitimately needs a small working set — for example, two collaborators or one active thread plus one reference thread. Repeating search every time adds friction to intentional use; opening the full list reintroduces distraction.
 
-Pinned focus conversations are a middle path: a small, explicit, temporary shelf.
+Real-use evidence sharpened this need: while alternating between 3–4 active conversations, repeated search consumes time and working memory, sometimes making full mode the lower-effort path even when the general list is not desired.
+
+Pinned focus conversations are one middle path: a small, explicit, temporary shelf.
 
 ## Proposed MVP behavior
 
@@ -26,6 +28,12 @@ Pinned focus conversations are a middle path: a small, explicit, temporary shelf
 - Clicking a chip opens that conversation without exposing the full conversation list.
 - Each chip has a small remove action.
 - Pins are session-scoped for the first experiment: they survive mode changes in the current page session but do not need durable storage yet.
+
+## Alternative under exploration: focused recents
+
+Instead of requiring advance pinning, maintain an automatic session-only shelf of the last 3–4 conversations opened through the focused flow. It would exclude conversations visited in full mode and show no previews, unread state, badges, timestamps, or other recency signals beyond membership/order in the small working set.
+
+This may better reduce working-memory cost, but it risks becoming a miniature recent-conversation feed. Before implementation, compare explicit pins, automatic focused recents, and a hybrid where automatic entries can be retained or removed.
 
 ## Product constraints
 
@@ -65,4 +73,6 @@ DS1 is done when a user can pin up to 3 searched conversations, see them from Mo
 - Should pins survive reloads, or is session-only enough?
 - Does opening by searching the stored title select the right conversation reliably?
 - Should pinning happen automatically after search, or only through explicit “Fixar conversa”?
-- Should pinned chips appear in focused conversation state too, or only on the overlay?
+- Does a session-only list of the last 3–4 focused openings solve the real switching cost better than explicit pins?
+- How can automatic focused recents avoid becoming a miniature inbox or stimulus surface?
+- Should pinned/recent chips appear in focused conversation state too, or only on the overlay?

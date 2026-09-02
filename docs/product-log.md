@@ -155,6 +155,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Ideia/Próximo ajuste] Fixar conversas buscadas para manter 2–3 conversas acessíveis**
   - Permitir fixar conversas encontradas pela busca, nem que seja por período ou critério de desfazer/desfixar. Objetivo: trabalhar com poucas conversas simultâneas sem precisar buscar novamente e sem reabrir a lista geral.
 
+- **[Ideia/Próximo experimento] Acessar as 3–4 conversas abertas recentemente pelo modo foco**
+  - Manter uma pequena lista automática, apenas durante a sessão, das conversas abertas pelo fluxo focado — sem previews, badges, timestamps ou sinais de não lida. Objetivo: alternar entre conversas em andamento sem repetir busca, lembrar mentalmente onde estava ou abrir o modo cheio para economizar energia. Antes de implementar, comparar esta opção com fixação explícita e uma possível forma híbrida.
+
 - **[Em teste] Contador de tempo sem abrir WhatsApp normal ajuda ou vira ruído?**
   - Implementação atual: a tela de foco mostra tempo desde a última abertura do modo normal. Observar se aumenta consciência de reabertura impulsiva/tédio ou se passa a ser ignorado. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
 
