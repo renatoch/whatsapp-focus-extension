@@ -24,12 +24,24 @@ test('internal recent navigation hides native sidebar and search affordances', (
   assert.match(css, /html\.mwf-opening-recent #mirror-whatsapp-focus-search-gate,[^}]*{[^}]*display: none !important;/s);
 });
 
-test('recent navigation clicks only one exact classified result', () => {
+test('recent navigation polls promptly and activates only one exact classified result', () => {
   assert.match(content, /classifyExactTitleMatches\(\s*title,\s*candidates\.map\(\(candidate\) => candidate\.title\)\s*\)/);
   assert.match(content, /if \(classification\.status !== "match"\)/);
   assert.match(content, /dispatchEvent\(new MouseEvent\("mousedown"/);
   assert.match(content, /activateFocusedResult\(candidates\[classification\.index\]\.clickTarget\)/);
   assert.doesNotMatch(content, /candidates\[classification\.index\]\.clickTarget\.click\(\)/);
+  assert.match(content, /RECENT_SEARCH_INITIAL_MS = 100/);
+  assert.match(content, /RECENT_SEARCH_RETRY_MS = 150/);
+  assert.doesNotMatch(content, /RECENT_SEARCH_SETTLE_MS = 1400/);
+});
+
+test('internal navigation clears its native query before the next manual search', () => {
+  assert.match(content, /function clearNativeSearchText\(/);
+  assert.match(content, /clearNativeSearchText\(field\);\s*field\.click\(\)/);
+});
+
+test('an empty search hides WhatsApp recent-search suggestions', () => {
+  assert.match(css, /mwf-search-too-short[^}]*\[data-testid="recent-search-item"\][^{]*\{[^}]*display: none !important;/s);
 });
 
 test('failed navigation exposes a copyable privacy-safe diagnostic', () => {

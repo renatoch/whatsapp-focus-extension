@@ -27,8 +27,11 @@
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
   const SEARCH_SETTLE_MS = 1000;
-  const RECENT_SEARCH_SETTLE_MS = 1400;
-  const RECENT_NAVIGATION_RETRIES = 5;
+  const RECENT_SEARCH_INITIAL_MS = 100;
+  const RECENT_SEARCH_RETRY_MS = 150;
+  const RECENT_CONFIRM_RETRY_MS = 150;
+  const RECENT_NAVIGATION_RETRIES = 10;
+  const FOCUSED_CAPTURE_RETRIES = 5;
   const NORMAL_DELAY_MS = 8000;
   const RECENT_NORMAL_OPEN_MS = 10 * 60 * 1000;
   const DEBUG = false;
@@ -273,7 +276,7 @@
       recordAwareness("focused_conversation_opened", { route: "search" });
       return;
     }
-    if (attempt < RECENT_NAVIGATION_RETRIES) {
+    if (attempt < FOCUSED_CAPTURE_RETRIES) {
       window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1), 300);
     }
   }
@@ -423,7 +426,7 @@
       stage: "search-text-dispatched",
       searchTextAccepted: Boolean(normalize && normalize(getSearchText(field)) === normalize(title)),
     });
-    window.setTimeout(() => resolveFocusedRecentSearch(title, token, 0), RECENT_SEARCH_SETTLE_MS);
+    window.setTimeout(() => resolveFocusedRecentSearch(title, token, 0), RECENT_SEARCH_INITIAL_MS);
   }
 
   function focusedResultClickTarget(row) {
@@ -484,7 +487,7 @@
       )).length,
     });
     if (classification.status === "not-found" && attempt < RECENT_NAVIGATION_RETRIES) {
-      window.setTimeout(() => resolveFocusedRecentSearch(title, token, attempt + 1), 350);
+      window.setTimeout(() => resolveFocusedRecentSearch(title, token, attempt + 1), RECENT_SEARCH_RETRY_MS);
       return;
     }
     if (classification.status !== "match") {
@@ -496,7 +499,7 @@
       stage: "exact-result-clicked",
       clickDispatched: true,
     });
-    window.setTimeout(() => confirmFocusedRecentOpened(title, token, 0), 350);
+    window.setTimeout(() => confirmFocusedRecentOpened(title, token, 0), RECENT_CONFIRM_RETRY_MS);
   }
 
   function confirmFocusedRecentOpened(title, token, attempt) {
@@ -516,7 +519,7 @@
       return;
     }
     if (attempt < RECENT_NAVIGATION_RETRIES) {
-      window.setTimeout(() => confirmFocusedRecentOpened(title, token, attempt + 1), 300);
+      window.setTimeout(() => confirmFocusedRecentOpened(title, token, attempt + 1), RECENT_CONFIRM_RETRY_MS);
       return;
     }
     failFocusedRecentNavigation("not-found", token);
@@ -600,7 +603,7 @@
     const field = findNativeSearchField();
     debugLog("focusNativeSearch:field-result", describeElement(field));
     if (field) {
-      field.focus();
+      clearNativeSearchText(field);
       field.click();
       updateSearchGateState(field);
       debugLog("focusNativeSearch:field-focused", describeElement(field));
@@ -623,6 +626,11 @@
     showToast(
       "Por enquanto, o modo busca só funciona na lista principal de mensagens. Feche Arquivadas, Configurações ou outras telas internas e tente de novo."
     );
+  }
+
+  function clearNativeSearchText(field) {
+    if (!field || !getSearchText(field)) return;
+    setNativeSearchText(field, "");
   }
 
   function getSearchText(field = findNativeSearchField()) {
