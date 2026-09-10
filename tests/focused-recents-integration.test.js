@@ -19,7 +19,8 @@ test('loads the pure focused-recents boundary before the content script', () => 
 
 test('internal recent navigation hides native sidebar and search affordances', () => {
   assert.match(content, /const ROOT_OPENING_RECENT = "mwf-opening-recent";/);
-  assert.match(css, /html\.mwf-opening-recent #side\s*{[^}]*visibility: hidden !important;/s);
+  assert.match(css, /html\.mwf-opening-recent #side\s*{[^}]*visibility: visible !important;[^}]*opacity: 0 !important;/s);
+  assert.doesNotMatch(css, /html\.mwf-opening-recent #side\s*{[^}]*visibility: hidden !important;/s);
   assert.match(css, /html\.mwf-opening-recent #mirror-whatsapp-focus-search-gate,[^}]*{[^}]*display: none !important;/s);
 });
 

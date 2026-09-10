@@ -17,7 +17,8 @@ html.mwf-sidebar-hidden #side {
 
 html.mwf-opening-recent #side {
   display: flex !important;
-  visibility: hidden !important;
+  visibility: visible !important;
+  opacity: 0 !important;
   pointer-events: none !important;
 }
 
