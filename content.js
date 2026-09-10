@@ -426,6 +426,16 @@
     window.setTimeout(() => resolveFocusedRecentSearch(title, token, 0), RECENT_SEARCH_SETTLE_MS);
   }
 
+  function focusedResultClickTarget(row) {
+    if (!row) return null;
+    if (row.matches?.('[data-testid="cell-frame-container"], [data-testid="conversation-list-item"]')) {
+      return row;
+    }
+    return row.querySelector?.(
+      '[data-testid="cell-frame-container"], [data-testid="conversation-list-item"], [role="button"]'
+    ) || row;
+  }
+
   function focusedSearchCandidates() {
     const rows = Array.from(document.querySelectorAll(
       '#side [data-testid="cell-frame-container"], #side [data-testid="conversation-list-item"], #side [role="listitem"], #side [role="row"]'
@@ -434,8 +444,12 @@
     return {
       rowCount: outerRows.length,
       candidates: outerRows
-        .map((row) => ({ row, title: readConversationRowTitle(row) }))
-        .filter((candidate) => candidate.title),
+        .map((row) => ({
+          row,
+          clickTarget: focusedResultClickTarget(row),
+          title: readConversationRowTitle(row),
+        }))
+        .filter((candidate) => candidate.title && candidate.clickTarget),
     };
   }
 
@@ -466,7 +480,7 @@
       failFocusedRecentNavigation(classification.status, token);
       return;
     }
-    candidates[classification.index].row.click();
+    candidates[classification.index].clickTarget.click();
     updateRecentNavigationDiagnostic({
       stage: "exact-result-clicked",
       clickDispatched: true,
