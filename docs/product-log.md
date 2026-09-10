@@ -132,6 +132,10 @@ Isso sugere que um app Android mínimo poderia abrir conversas/grupos por `jid`,
 - Ainda não está decidido se contatos devem ser exportados do WhatsApp Web, cadastrados manualmente ou derivados de outra fonte.
 - O caminho por Intent/JID depende de detalhes internos do WhatsApp Android e pode quebrar em atualizações.
 
+## Aprendizado da Fase 2 — declaração de intenção
+
+A validação agregada de 27/08 a 10/09 reuniu 418 eventos permitidos: 103 de 106 declarações terminaram em abertura, 102 foram respondidas em até cinco segundos e 95 escolheram **Ver se apareceu algo**. A pergunta produziu evidência útil, mas também virou coreografia; adicionar mais atraso mecânico não é a resposta. As reaberturas em até dez minutos caíram de 56% no recorte anterior para 26% no atual. O próximo experimento deve reduzir o custo cognitivo de navegar entre poucas conversas focadas.
+
 ## Backlog de produto
 
 Formato: título descritivo no item principal; detalhe curto em subitem; linha em branco entre itens para facilitar leitura em dark mode.

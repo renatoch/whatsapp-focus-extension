@@ -2,7 +2,7 @@
 
 # DS3 — In-the-Moment Intent Declaration
 
-**Status:** 🟠 Implementing
+**Status:** 🟢 Done
 
 ---
 
@@ -60,12 +60,12 @@ Before persisting free text, migrate awareness state from page-origin `localStor
 
 | Code | Story | Type | Outcome | Status |
 |------|-------|------|---------|--------|
-| DS3.TS1 | Migrate awareness data to extension-isolated storage | Technical Story | Existing allowlisted Phase 1 data moves once to `chrome.storage.local`, page-origin awareness data is removed, and the awareness API becomes safely asynchronous. | Candidate |
-| DS3.US1 | Declare intent before opening full WhatsApp | User Story | Each normal-mode attempt offers neutral structured intent choices before the final open/not-open decision. | Candidate |
-| DS3.US2 | Add an optional private note | User Story | The user can add free text to reveal missing categories and see that note in later reflection without exposing it to page scripts. | Candidate |
-| DS3.US3 | Record the final decision with declared intent | User Story | The extension associates the self-reported intent with opening or not opening while preserving Phase 1 behavioral signals. | Candidate |
-| DS3.US4 | Reflect on intent patterns and notes | User Story | The usage mirror summarizes intent distribution, outcomes, and user-authored notes without diagnosing motivation. | Candidate |
-| DS3.TS2 | Preserve phase boundaries and prompt-habituation signals | Technical Story | Phase 1 and Phase 2 remain distinguishable, and timing/repetition data can later show whether the declaration prompt became choreography. | Candidate |
+| DS3.TS1 | Migrate awareness data to extension-isolated storage | Technical Story | Existing allowlisted Phase 1 data moves once to `chrome.storage.local`, page-origin awareness data is removed, and the awareness API becomes safely asynchronous. | Done |
+| DS3.US1 | Declare intent before opening full WhatsApp | User Story | Each normal-mode attempt offers neutral structured intent choices before the final open/not-open decision. | Done |
+| DS3.US2 | Add an optional private note | User Story | The user can add free text to reveal missing categories and see that note in later reflection without exposing it to page scripts. | Done |
+| DS3.US3 | Record the final decision with declared intent | User Story | The extension associates the self-reported intent with opening or not opening while preserving Phase 1 behavioral signals. | Done |
+| DS3.US4 | Reflect on intent patterns and notes | User Story | The usage mirror summarizes intent distribution, outcomes, and user-authored notes without diagnosing motivation. | Done |
+| DS3.TS2 | Preserve phase boundaries and prompt-habituation signals | Technical Story | Phase 1 and Phase 2 remain distinguishable, and timing/repetition data can later show whether the declaration prompt became choreography. | Done |
 | DS3.US5 | Preserve active conversation when full mode expires | User Story | Timer expiry closes the general environment without covering a visible conversation already in use. | Validated |
 | DS3.TS3 | Record the automatic expiry destination | Technical Story | Awareness distinguishes expiry to focused conversation from expiry to blind overlay, preventing tool-induced reopenings from looking impulsive. | Validated |
 

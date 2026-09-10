@@ -45,9 +45,9 @@ See: [`DS2-adaptive-friction-awareness/index.md`](DS2-adaptive-friction-awarenes
 
 ### DS3 — In-the-Moment Intent Declaration
 
-Status: implementing — graceful-expiry prerequisite validated; Phase 2 observation can continue
+Status: done — extended real-use validation completed
 
-Capture structured self-reported intent and an optional private note before opening full WhatsApp, then compare intention, final decision, and continued choreography signals without inferring motive from clicks.
+Captured structured self-reported intent and final outcomes without inferring motive. Phase 2 established that the declaration and fixed delay had become choreography: 103/106 declarations ended in opening and 102/106 prompts were answered within five seconds. The next experiment should lower focused-navigation cost rather than add mechanical friction.
 
 See: [`DS3-in-the-moment-intent-declaration/index.md`](DS3-in-the-moment-intent-declaration/index.md)
 
