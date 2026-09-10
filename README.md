@@ -34,6 +34,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - durante a busca, oculta resultados até que pelo menos 3 letras sejam digitadas e espera 1 segundo antes da primeira exibição, evitando revelar recentes durante a digitação inicial;
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
+- mantém na memória da aba até 4 **Conversas em andamento** abertas pela busca focada, disponíveis no overlay e na conversa focada para alternância sem expor a lista geral; os títulos não são persistidos nem entram no awareness;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;

@@ -159,8 +159,8 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Alternativa futura] Fixar explicitamente conversas buscadas**
   - A fixação manual permanece como possível evolução híbrida caso a lista automática não preserve uma conversa pelo tempo necessário. Não priorizar antes de validar o conjunto recente por sessão.
 
-- **[Próximo experimento] Acessar as 3–4 conversas abertas recentemente pelo modo foco**
-  - Manter uma pequena lista automática, apenas na memória da aba, das conversas abertas pelo fluxo focado — sem previews, badges, timestamps ou sinais de não lida. Objetivo: alternar entre conversas em andamento sem repetir busca, lembrar mentalmente onde estava ou abrir o modo cheio para economizar energia. O Navigator aceitou reter temporariamente apenas os títulos dessas conversas; eles não podem entrar em storage, awareness, logs ou exports.
+- **[Em validação] Acessar as 3–4 conversas abertas recentemente pelo modo foco**
+  - O protótipo mantém até 4 títulos únicos apenas na memória da aba, capturados depois de uma busca focada. A lista aparece no overlay e na conversa focada; reabrir usa busca nativa visualmente escondida e só seleciona um resultado de título exato e inequívoco. Títulos não entram em storage, awareness, logs ou exports. Validar no Chrome nomes comuns, homônimos, Arquivadas, ausência de flashes e redução da necessidade de abrir o modo cheio.
 
 - **[Em teste] Contador de tempo sem abrir WhatsApp normal ajuda ou vira ruído?**
   - Implementação atual: a tela de foco mostra tempo desde a última abertura do modo normal. Observar se aumenta consciência de reabertura impulsiva/tédio ou se passa a ser ignorado. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.

@@ -2,7 +2,7 @@
 
 # DS1.US4 — Remove or clear focused recents
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** User Story
 
 ---

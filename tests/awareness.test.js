@@ -51,6 +51,42 @@ test('creates a versioned empty state without sensitive fields', () => {
   });
 });
 
+test('focused navigation events retain only aggregate route and failure enums', () => {
+  const { store } = setup();
+  store.record('focused_conversation_opened', {
+    route: 'recent',
+    title: 'Private conversation title',
+    contactName: 'Someone',
+  });
+  store.record('focused_recent_navigation_failed', {
+    reason: 'ambiguous',
+    title: 'Private conversation title',
+  });
+
+  const state = store.getState();
+  assert.deepEqual(state.events, [
+    {
+      type: 'focused_conversation_opened',
+      at: START,
+      phase: 2,
+      route: 'recent',
+    },
+    {
+      type: 'focused_recent_navigation_failed',
+      at: START,
+      phase: 2,
+      reason: 'ambiguous',
+    },
+  ]);
+  assert.deepEqual(store.getSummary().focusedNavigation, {
+    search: 0,
+    recent: 1,
+    failures: { notFound: 0, ambiguous: 1, titleUnavailable: 0 },
+    removed: 0,
+    cleared: 0,
+  });
+});
+
 test('records only allowlisted event fields and strips unknown data', () => {
   const { store } = setup();
   store.record('normal_opened', {

@@ -15,6 +15,24 @@ html.mwf-sidebar-hidden #side {
   display: none !important;
 }
 
+html.mwf-opening-recent #side {
+  display: flex !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
+
+html.mwf-opening-recent #mirror-whatsapp-focus-search-gate,
+html.mwf-opening-recent #mirror-whatsapp-focus-search-again,
+html.mwf-opening-recent #mirror-whatsapp-focus-recents,
+html.mwf-opening-recent #mirror-whatsapp-focus-controls {
+  display: none !important;
+}
+
+html.mwf-opening-recent.mwf-searching.mwf-search-too-short #mirror-whatsapp-focus-search-gate,
+html.mwf-opening-recent.mwf-searching.mwf-search-waiting #mirror-whatsapp-focus-search-gate {
+  display: none !important;
+}
+
 #mirror-whatsapp-focus-search-gate {
   position: fixed;
   left: 78px;
@@ -210,6 +228,110 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   border-radius: 18px;
   background: #111b21;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42);
+}
+
+.mwf-focused-recents[hidden] {
+  display: none !important;
+}
+
+.mwf-focused-recents {
+  box-sizing: border-box;
+  color: #e9edef;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.mwf-focused-recents-overlay {
+  margin: 16px 0;
+  padding: 12px;
+  border: 1px solid rgba(233, 237, 239, 0.12);
+  border-radius: 14px;
+  background: rgba(11, 20, 26, 0.5);
+}
+
+.mwf-focused-recents-floating {
+  position: fixed;
+  left: 72px;
+  top: 142px;
+  z-index: 2147483645;
+  display: none;
+  width: min(300px, calc(100vw - 96px));
+  padding: 12px;
+  border: 1px solid rgba(233, 237, 239, 0.14);
+  border-radius: 14px;
+  background: rgba(17, 27, 33, 0.96);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
+}
+
+html.mwf-search-focused .mwf-focused-recents-floating:not([hidden]) {
+  display: block;
+}
+
+.mwf-focused-recents-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+  color: #aebac1;
+  font-size: 12px;
+}
+
+.mwf-focused-recents-clear,
+.mwf-focused-recent-open,
+.mwf-focused-recent-remove {
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+}
+
+.mwf-focused-recents-clear {
+  padding: 2px 4px;
+  background: transparent;
+  color: #8696a0;
+  font-size: 11px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.mwf-focused-recents-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mwf-focused-recent-item {
+  display: flex;
+  align-items: stretch;
+  overflow: hidden;
+  border-radius: 10px;
+  background: rgba(233, 237, 239, 0.08);
+}
+
+.mwf-focused-recent-open {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  padding: 8px 10px;
+  background: transparent;
+  color: #e9edef;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mwf-focused-recent-remove {
+  width: 34px;
+  padding: 0;
+  background: rgba(233, 237, 239, 0.04);
+  color: #8696a0;
+  font-size: 18px;
+}
+
+.mwf-focused-recent-open:hover,
+.mwf-focused-recent-remove:hover,
+.mwf-focused-recents-clear:hover {
+  color: #00a884;
 }
 
 .mwf-kicker {

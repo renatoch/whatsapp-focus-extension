@@ -8,6 +8,7 @@
   const ROOT_SIDEBAR_OPEN = "mwf-sidebar-open";
   const ROOT_SIDEBAR_HIDDEN = "mwf-sidebar-hidden";
   const ROOT_OVERLAY_OPEN = "mwf-overlay-open";
+  const ROOT_OPENING_RECENT = "mwf-opening-recent";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
@@ -19,12 +20,15 @@
   const LAST_NORMAL_OPEN_KEY = "mirror-whatsapp-focus-last-normal-opened-at";
   const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
+  const FOCUSED_RECENTS_ID = "mirror-whatsapp-focus-recents";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
   const BYPASS_MS = 5 * 60 * 1000;
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
   const SEARCH_SETTLE_MS = 1000;
+  const RECENT_SEARCH_SETTLE_MS = 1400;
+  const RECENT_NAVIGATION_RETRIES = 5;
   const NORMAL_DELAY_MS = 8000;
   const RECENT_NORMAL_OPEN_MS = 10 * 60 * 1000;
   const DEBUG = false;
@@ -46,6 +50,8 @@
   let normalAttemptRecent = false;
   let intentPromptStartedAt = null;
   let pendingIntent = null;
+  let focusedRecents = [];
+  let recentNavigationToken = 0;
 
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
@@ -80,19 +86,21 @@
     clearNormalDelay();
     updateFocusStreak();
     root().classList.add(ROOT_ACTIVE);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OPENING_RECENT);
     root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
     ensureOverlay();
     ensureReturnButton();
     ensureSidebarButton();
     ensureSearchAgainButton();
     ensureSearchGateMessage();
+    ensureFocusedRecentsShelf();
+    renderFocusedRecents();
     getOverlay().hidden = !showOverlay;
   }
 
   function setNormal() {
     clearNormalDelay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
     root().classList.add(ROOT_NORMAL);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -115,7 +123,7 @@
     searchSettleTimer = null;
     pendingSearchText = "";
     revealedSearchText = "";
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
     root().classList.add(ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -185,8 +193,11 @@
     if (overlay) overlay.hidden = true;
   }
 
-  function enterFocusedConversationSoon() {
-    window.setTimeout(() => setSearchFocusedConversation(), 250);
+  function enterFocusedConversationSoon(expectedTitle = "") {
+    window.setTimeout(() => {
+      setSearchFocusedConversation();
+      window.setTimeout(() => captureFocusedConversation(expectedTitle, 0), 350);
+    }, 250);
   }
 
   function setSearchFocusedConversation() {
@@ -196,12 +207,258 @@
     pendingSearchText = "";
     revealedSearchText = "";
     root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_HIDDEN);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
+    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
     ensureOverlay();
     ensureReturnButton();
     ensureSidebarButton();
     ensureSearchAgainButton();
+    ensureFocusedRecentsShelf();
+    renderFocusedRecents();
     if (overlay) overlay.hidden = true;
+  }
+
+  function readTitle(element) {
+    if (!element) return "";
+    return String(element.getAttribute?.("title") || element.textContent || "").trim().replace(/\s+/g, " ");
+  }
+
+  function readActiveConversationTitle() {
+    const selectors = [
+      '#main header [data-testid="conversation-info-header-chat-title"]',
+      '#main header [data-testid="conversation-info-header"] [title]',
+      '#main header span[dir="auto"][title]',
+      '#main header span[title]',
+      '#main header [dir="auto"]',
+    ];
+    for (const selector of selectors) {
+      const title = Array.from(document.querySelectorAll(selector))
+        .map(readTitle)
+        .find(Boolean);
+      if (title) return title;
+    }
+    return "";
+  }
+
+  function conversationRow(target) {
+    return target?.closest?.(
+      '[data-testid="cell-frame-container"], [data-testid="conversation-list-item"], [role="listitem"], [role="row"]'
+    ) || null;
+  }
+
+  function readConversationRowTitle(row) {
+    if (!row) return "";
+    const selectors = [
+      '[data-testid="cell-frame-title"] [title]',
+      '[data-testid="cell-frame-title"]',
+      'span[dir="auto"][title]',
+      'span[title]',
+    ];
+    for (const selector of selectors) {
+      const title = Array.from(row.querySelectorAll(selector)).map(readTitle).find(Boolean);
+      if (title) return title;
+    }
+    return "";
+  }
+
+  function captureFocusedConversation(expectedTitle, attempt) {
+    const activeTitle = readActiveConversationTitle();
+    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
+    const expectedMatches = !expectedTitle || (
+      normalize && normalize(activeTitle) === normalize(expectedTitle)
+    );
+    if (activeTitle && expectedMatches) {
+      addFocusedRecent(activeTitle);
+      recordAwareness("focused_conversation_opened", { route: "search" });
+      return;
+    }
+    if (attempt < RECENT_NAVIGATION_RETRIES) {
+      window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1), 300);
+    }
+  }
+
+  function addFocusedRecent(title) {
+    focusedRecents = globalThis.MirrorFocusedRecents?.addRecent(focusedRecents, title) || focusedRecents;
+    renderFocusedRecents();
+  }
+
+  function removeFocusedRecent(title) {
+    focusedRecents = globalThis.MirrorFocusedRecents?.removeRecent(focusedRecents, title) || focusedRecents;
+    recordAwareness("focused_recent_removed");
+    renderFocusedRecents();
+  }
+
+  function clearFocusedRecents() {
+    if (focusedRecents.length === 0) return;
+    focusedRecents = globalThis.MirrorFocusedRecents?.clearRecents() || [];
+    recordAwareness("focused_recents_cleared");
+    renderFocusedRecents();
+  }
+
+  function createFocusedRecentsContents(container) {
+    container.replaceChildren();
+    container.hidden = focusedRecents.length === 0;
+    if (focusedRecents.length === 0) return;
+
+    const heading = document.createElement("div");
+    heading.className = "mwf-focused-recents-heading";
+    const label = document.createElement("strong");
+    label.textContent = "Conversas em andamento";
+    const clear = document.createElement("button");
+    clear.type = "button";
+    clear.className = "mwf-focused-recents-clear";
+    clear.textContent = "Limpar";
+    clear.addEventListener("click", clearFocusedRecents);
+    heading.append(label, clear);
+
+    const list = document.createElement("div");
+    list.className = "mwf-focused-recents-list";
+    for (const title of focusedRecents) {
+      const item = document.createElement("div");
+      item.className = "mwf-focused-recent-item";
+      const open = document.createElement("button");
+      open.type = "button";
+      open.className = "mwf-focused-recent-open";
+      open.textContent = title;
+      open.addEventListener("click", () => openFocusedRecent(title));
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "mwf-focused-recent-remove";
+      remove.textContent = "×";
+      remove.setAttribute("aria-label", "Remover conversa da lista temporária");
+      remove.addEventListener("click", () => removeFocusedRecent(title));
+      item.append(open, remove);
+      list.appendChild(item);
+    }
+    container.append(heading, list);
+  }
+
+  function ensureFocusedRecentsShelf() {
+    if (!document.body || document.getElementById(FOCUSED_RECENTS_ID)) return;
+    const shelf = document.createElement("section");
+    shelf.id = FOCUSED_RECENTS_ID;
+    shelf.className = "mwf-focused-recents mwf-focused-recents-floating";
+    shelf.setAttribute("aria-label", "Conversas em andamento");
+    shelf.hidden = true;
+    document.body.appendChild(shelf);
+  }
+
+  function renderFocusedRecents() {
+    const containers = [
+      document.querySelector("[data-mwf-focused-recents-overlay]"),
+      document.getElementById(FOCUSED_RECENTS_ID),
+    ].filter(Boolean);
+    containers.forEach(createFocusedRecentsContents);
+  }
+
+  function beginFocusedRecentNavigation(title) {
+    recentNavigationToken += 1;
+    const token = recentNavigationToken;
+    resetSearchGate();
+    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
+    root().classList.add(ROOT_SEARCHING, ROOT_OPENING_RECENT);
+    const overlay = getOverlay();
+    if (overlay) overlay.hidden = true;
+    renderFocusedRecents();
+    goToMainChatsThen("focused-recent", () => startFocusedRecentSearch(title, token));
+  }
+
+  function openFocusedRecent(title) {
+    if (!title || root().classList.contains(ROOT_OPENING_RECENT)) return;
+    if (!isWhatsAppReady()) {
+      failFocusedRecentNavigation("title-unavailable", recentNavigationToken + 1);
+      return;
+    }
+    beginFocusedRecentNavigation(title);
+  }
+
+  function setNativeSearchText(field, title) {
+    field.focus();
+    if ("value" in field) {
+      const setter = Object.getOwnPropertyDescriptor(Object.getPrototypeOf(field), "value")?.set;
+      if (setter) setter.call(field, title);
+      else field.value = title;
+    } else {
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(field);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      if (!document.execCommand?.("insertText", false, title)) field.textContent = title;
+      selection.removeAllRanges();
+    }
+    field.dispatchEvent(new InputEvent("input", { bubbles: true, inputType: "insertText", data: title }));
+    field.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, key: title.slice(-1) }));
+  }
+
+  function startFocusedRecentSearch(title, token) {
+    if (token !== recentNavigationToken) return;
+    const field = findNativeSearchField({ allowHidden: true });
+    if (!field) {
+      failFocusedRecentNavigation("title-unavailable", token);
+      return;
+    }
+    setNativeSearchText(field, title);
+    window.setTimeout(() => resolveFocusedRecentSearch(title, token, 0), RECENT_SEARCH_SETTLE_MS);
+  }
+
+  function focusedSearchCandidates() {
+    const rows = Array.from(document.querySelectorAll(
+      '#side [data-testid="cell-frame-container"], #side [data-testid="conversation-list-item"], #side [role="listitem"], #side [role="row"]'
+    ));
+    const outerRows = rows.filter((row) => !rows.some((other) => other !== row && other.contains(row)));
+    return outerRows
+      .map((row) => ({ row, title: readConversationRowTitle(row) }))
+      .filter((candidate) => candidate.title);
+  }
+
+  function resolveFocusedRecentSearch(title, token, attempt) {
+    if (token !== recentNavigationToken) return;
+    const candidates = focusedSearchCandidates();
+    const classification = globalThis.MirrorFocusedRecents?.classifyExactTitleMatches(
+      title,
+      candidates.map((candidate) => candidate.title)
+    ) || { status: "not-found", index: null };
+    if (classification.status === "not-found" && attempt < RECENT_NAVIGATION_RETRIES) {
+      window.setTimeout(() => resolveFocusedRecentSearch(title, token, attempt + 1), 350);
+      return;
+    }
+    if (classification.status !== "match") {
+      failFocusedRecentNavigation(classification.status, token);
+      return;
+    }
+    candidates[classification.index].row.click();
+    window.setTimeout(() => confirmFocusedRecentOpened(title, token, 0), 350);
+  }
+
+  function confirmFocusedRecentOpened(title, token, attempt) {
+    if (token !== recentNavigationToken) return;
+    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
+    const activeTitle = readActiveConversationTitle();
+    if (normalize && normalize(activeTitle) === normalize(title)) {
+      setSearchFocusedConversation();
+      addFocusedRecent(activeTitle);
+      recordAwareness("focused_conversation_opened", { route: "recent" });
+      return;
+    }
+    if (attempt < RECENT_NAVIGATION_RETRIES) {
+      window.setTimeout(() => confirmFocusedRecentOpened(title, token, attempt + 1), 300);
+      return;
+    }
+    failFocusedRecentNavigation("not-found", token);
+  }
+
+  function failFocusedRecentNavigation(reason, token) {
+    if (token !== recentNavigationToken && root().classList.contains(ROOT_OPENING_RECENT)) return;
+    recentNavigationToken += 1;
+    resetSearchGate();
+    root().classList.remove(ROOT_OPENING_RECENT);
+    setActive({ showOverlay: true });
+    recordAwareness("focused_recent_navigation_failed", { reason });
+    showToast(
+      reason === "ambiguous"
+        ? "Há mais de uma conversa com esse nome. Use a busca para escolher com segurança."
+        : "Não consegui reabrir essa conversa com segurança. Use a busca para encontrá-la novamente."
+    );
   }
 
   function continueOpenConversation() {
@@ -343,7 +600,7 @@
     revealedSearchText = "";
   }
 
-  function findNativeSearchField() {
+  function findNativeSearchField({ allowHidden = false } = {}) {
     const selectors = [
       '#side [contenteditable="true"][role="textbox"]',
       '#side [contenteditable="true"]',
@@ -359,8 +616,8 @@
         visibleCount: elements.filter(isVisibleElement).length,
         first: describeElement(elements[0]),
       });
-      const visible = elements.find(isVisibleElement);
-      if (visible) return visible;
+      const candidate = allowHidden ? elements[0] : elements.find(isVisibleElement);
+      if (candidate) return candidate;
     }
 
     return undefined;
@@ -498,7 +755,7 @@
   }
 
   function isMirrorControl(element) {
-    return Boolean(element.closest?.("#mirror-whatsapp-focus-controls, #mirror-whatsapp-focus-overlay, #mirror-whatsapp-focus-toast"));
+    return Boolean(element.closest?.("#mirror-whatsapp-focus-controls, #mirror-whatsapp-focus-overlay, #mirror-whatsapp-focus-toast, #mirror-whatsapp-focus-recents"));
   }
 
   function getOverlay() {
@@ -777,6 +1034,14 @@
       "[data-mwf-awareness-outcomes]",
       `${behavior.cancelledAttempts} cancelamentos · ${behavior.continuedFocusedConversation} continuidades na conversa · ${behavior.manualFocusReturns} retornos manuais ao foco · ${behavior.expiryToFocusedConversation} expirações preservaram a conversa · ${behavior.expiryToBlindOverlay} voltaram ao modo foco`
     );
+    const focusedFailures = Object.values(summary.focusedNavigation.failures).reduce(
+      (total, count) => total + count,
+      0
+    );
+    setText(
+      "[data-mwf-focused-navigation]",
+      `${summary.focusedNavigation.search} aberturas pela busca focada · ${summary.focusedNavigation.recent} pelas conversas em andamento · ${focusedFailures} falhas seguras`
+    );
     setText(
       "[data-mwf-awareness-reflection-status]",
       summary.latestReflection
@@ -876,6 +1141,7 @@
         <h1 id="mwf-title">Modo foco</h1>
         <p>O WhatsApp está cego por padrão. Abra somente o que você veio buscar — sem lista de conversas, arquivadas, badges ou previews.</p>
         <p id="mirror-whatsapp-focus-streak" class="mwf-focus-streak">Você ainda não abriu o WhatsApp normal nesta instalação.</p>
+        <section class="mwf-focused-recents mwf-focused-recents-overlay" data-mwf-focused-recents-overlay aria-label="Conversas em andamento" hidden></section>
         <div class="mwf-loading" aria-label="Carregando WhatsApp Web">
           <progress id="mirror-whatsapp-focus-loading-progress" class="mwf-loading-progress" value="0" max="100"></progress>
         </div>
@@ -927,6 +1193,7 @@
             </div>
             <p class="mwf-awareness-detail" data-mwf-awareness-routes></p>
             <p class="mwf-awareness-detail" data-mwf-awareness-outcomes></p>
+            <p class="mwf-awareness-detail" data-mwf-focused-navigation></p>
           </details>
           <div class="mwf-awareness-reflection" data-mwf-awareness-reflection hidden>
             <h3>O que parece ter predominado?</h3>
@@ -1046,6 +1313,8 @@
     });
 
     document.body.appendChild(overlay);
+    ensureFocusedRecentsShelf();
+    renderFocusedRecents();
     updateFocusStreak();
     updateOverlayState();
   }
@@ -1150,6 +1419,8 @@
     ensureSidebarButton();
     ensureSearchAgainButton();
     ensureSearchGateMessage();
+    ensureFocusedRecentsShelf();
+    renderFocusedRecents();
   }
 
   function ensureStyle(id) {
@@ -1281,15 +1552,15 @@
     document.addEventListener(
       "click",
       (event) => {
-        if (!isSearching()) return;
+        if (!isSearching() || root().classList.contains(ROOT_OPENING_RECENT)) return;
         if (!isConversationListClick(event.target)) return;
-        enterFocusedConversationSoon();
+        enterFocusedConversationSoon(readConversationRowTitle(conversationRow(event.target)));
       },
       true
     );
 
     document.addEventListener("keydown", (event) => {
-      if (!isSearching()) return;
+      if (!isSearching() || root().classList.contains(ROOT_OPENING_RECENT)) return;
       if (event.key !== "Enter") return;
       enterFocusedConversationSoon();
     });
@@ -1434,7 +1705,7 @@
     });
   }
 
-  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL);
+  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL, ROOT_OPENING_RECENT);
   root().classList.add(ROOT_ACTIVE, ROOT_OVERLAY_OPEN);
   boot();
 })();

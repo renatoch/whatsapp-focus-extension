@@ -2,7 +2,7 @@
 
 # DS1.US3 — Reopen a focused recent without exposing the full list
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** User Story
 
 ---

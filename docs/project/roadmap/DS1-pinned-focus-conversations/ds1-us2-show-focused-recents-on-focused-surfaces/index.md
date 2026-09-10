@@ -2,7 +2,7 @@
 
 # DS1.US2 — Show focused recents on focused surfaces
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** User Story
 
 ---

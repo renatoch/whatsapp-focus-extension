@@ -35,6 +35,12 @@
       durationMs: "duration",
       destination: ["focus-overlay"],
     },
+    focused_conversation_opened: { route: ["search", "recent"] },
+    focused_recent_navigation_failed: {
+      reason: ["not-found", "ambiguous", "title-unavailable"],
+    },
+    focused_recent_removed: {},
+    focused_recents_cleared: {},
     intent_outcome: {
       attemptId: "identifier",
       intent: INTENT_CATEGORIES,
@@ -248,6 +254,26 @@
     };
   }
 
+  function summarizeFocusedNavigation(events) {
+    const count = (type, predicate = () => true) => events.filter(
+      (event) => event.type === type && predicate(event)
+    ).length;
+    return {
+      search: count("focused_conversation_opened", (event) => event.route === "search"),
+      recent: count("focused_conversation_opened", (event) => event.route === "recent"),
+      failures: {
+        notFound: count("focused_recent_navigation_failed", (event) => event.reason === "not-found"),
+        ambiguous: count("focused_recent_navigation_failed", (event) => event.reason === "ambiguous"),
+        titleUnavailable: count(
+          "focused_recent_navigation_failed",
+          (event) => event.reason === "title-unavailable"
+        ),
+      },
+      removed: count("focused_recent_removed"),
+      cleared: count("focused_recents_cleared"),
+    };
+  }
+
   function summarize(state, now) {
     const all = summarizeEvents(state.events, now);
     const phase1 = summarizeEvents(state.events.filter((event) => event.phase === 1), now);
@@ -263,6 +289,7 @@
       primarySignal: selectPrimarySignal(all),
       phases: { phase1, phase2 },
       intent: summarizeIntent(state.events),
+      focusedNavigation: summarizeFocusedNavigation(state.events),
       latestReflection: state.reflections.at(-1) || null,
     };
   }

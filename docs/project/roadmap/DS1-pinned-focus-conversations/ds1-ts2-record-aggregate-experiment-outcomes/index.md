@@ -2,7 +2,7 @@
 
 # DS1.TS2 — Record aggregate experiment outcomes
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** Technical Story
 
 ---

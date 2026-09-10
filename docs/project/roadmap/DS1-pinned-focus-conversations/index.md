@@ -2,7 +2,7 @@
 
 # DS1 — Focused Recent Conversations
 
-**Status:** 🟡 Proposed
+**Status:** 🟠 Implemented — pending Navigator validation
 
 ---
 
@@ -63,12 +63,12 @@ No implementation should silently select the first partial match when identity i
 
 | Code | Story | Type | Outcome | Status |
 |------|-------|------|---------|--------|
-| DS1.TS1 | Validate private title capture and exact focused reopening | Technical Story | A small technical experiment determines whether session-only titles can reopen the intended conversation without exposing intermediate results or choosing ambiguous matches. | Candidate |
-| DS1.US1 | Build the automatic session recent set | User Story | Conversations selected through focus search enter a bounded, unique, in-memory set while full-mode visits remain excluded. | Candidate |
-| DS1.US2 | Show focused recents on focused surfaces | User Story | Up to 4 plain-title actions appear on the overlay and in focused-conversation state without inbox signals. | Candidate |
-| DS1.US3 | Reopen a focused recent without exposing the full list | User Story | Selecting a recent conversation navigates through the least-distracting validated path and fails safely when ambiguous. | Candidate |
-| DS1.US4 | Remove or clear focused recents | User Story | The user can remove one retained title or clear the entire temporary set. | Candidate |
-| DS1.TS2 | Record aggregate experiment outcomes | Technical Story | The experiment records only privacy-safe counts needed to compare shelf use, repeated search, and full-mode reopening. | Candidate |
+| DS1.TS1 | Validate private title capture and exact focused reopening | Technical Story | A small technical experiment determines whether session-only titles can reopen the intended conversation without exposing intermediate results or choosing ambiguous matches. | Implemented — validation pending |
+| DS1.US1 | Build the automatic session recent set | User Story | Conversations selected through focus search enter a bounded, unique, in-memory set while full-mode visits remain excluded. | Implemented — validation pending |
+| DS1.US2 | Show focused recents on focused surfaces | User Story | Up to 4 plain-title actions appear on the overlay and in focused-conversation state without inbox signals. | Implemented — validation pending |
+| DS1.US3 | Reopen a focused recent without exposing the full list | User Story | Selecting a recent conversation navigates through the least-distracting validated path and fails safely when ambiguous. | Implemented — validation pending |
+| DS1.US4 | Remove or clear focused recents | User Story | The user can remove one retained title or clear the entire temporary set. | Implemented — validation pending |
+| DS1.TS2 | Record aggregate experiment outcomes | Technical Story | The experiment records only privacy-safe counts needed to compare shelf use, repeated search, and full-mode reopening. | Implemented — validation pending |
 
 ## Done Condition
 

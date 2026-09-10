@@ -2,7 +2,7 @@
 
 # DS1.TS1 — Validate private title capture and exact focused reopening
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** Technical Story
 
 ---
