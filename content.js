@@ -436,6 +436,17 @@
     ) || row;
   }
 
+  function activateFocusedResult(target) {
+    target.dispatchEvent(new MouseEvent("mousedown", {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      button: 0,
+      buttons: 1,
+      view: window,
+    }));
+  }
+
   function focusedSearchCandidates() {
     const rows = Array.from(document.querySelectorAll(
       '#side [data-testid="cell-frame-container"], #side [data-testid="conversation-list-item"], #side [role="listitem"], #side [role="row"]'
@@ -480,7 +491,7 @@
       failFocusedRecentNavigation(classification.status, token);
       return;
     }
-    candidates[classification.index].clickTarget.click();
+    activateFocusedResult(candidates[classification.index].clickTarget);
     updateRecentNavigationDiagnostic({
       stage: "exact-result-clicked",
       clickDispatched: true,
