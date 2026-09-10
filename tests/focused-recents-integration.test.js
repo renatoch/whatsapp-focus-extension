@@ -30,6 +30,12 @@ test('recent navigation clicks only one exact classified result', () => {
   assert.match(content, /candidates\[classification\.index\]\.row\.click\(\)/);
 });
 
+test('failed navigation exposes a copyable privacy-safe diagnostic', () => {
+  assert.match(content, /updateRecentNavigationDiagnostic\(\{[^}]*stage: "results-inspected"/s);
+  assert.match(content, /,\s*recentNavigationDiagnostic\s*\);/);
+  assert.match(content, /button\.textContent = "Copiar diagnóstico";/);
+});
+
 test('focused navigation awareness never receives a title field', () => {
   assert.match(content, /recordAwareness\("focused_conversation_opened", \{ route: "search" \}\)/);
   assert.match(content, /recordAwareness\("focused_conversation_opened", \{ route: "recent" \}\)/);

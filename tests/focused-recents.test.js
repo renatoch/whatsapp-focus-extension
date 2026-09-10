@@ -6,6 +6,8 @@ const {
   removeRecent,
   clearRecents,
   classifyExactTitleMatches,
+  createNavigationDiagnostic,
+  updateNavigationDiagnostic,
   normalizeTitle,
 } = require('../focused-recents.js');
 
@@ -36,6 +38,35 @@ test('rejects empty titles and supports remove and clear', () => {
   assert.deepEqual(addRecent(['Alpha'], '   '), ['Alpha']);
   assert.deepEqual(removeRecent(['Alpha', 'Beta'], ' alpha '), ['Beta']);
   assert.deepEqual(clearRecents(), []);
+});
+
+test('keeps navigation diagnostics structural and strips conversation data', () => {
+  const diagnostic = updateNavigationDiagnostic(createNavigationDiagnostic(), {
+    stage: 'results-inspected',
+    searchFieldFound: true,
+    searchTextAccepted: false,
+    candidateRows: 7,
+    candidateTitles: 3,
+    exactMatches: 0,
+    title: 'Private title',
+    searchText: 'Private title',
+    dom: '<div>Private title</div>',
+  });
+
+  assert.deepEqual(diagnostic, {
+    version: 1,
+    stage: 'results-inspected',
+    searchFieldFound: true,
+    searchTextAccepted: false,
+    candidateRows: 7,
+    candidateTitles: 3,
+    exactMatches: 0,
+    clickDispatched: false,
+    headerMatched: false,
+    failureReason: null,
+    elapsedMs: 0,
+  });
+  assert.equal(JSON.stringify(diagnostic).includes('Private title'), false);
 });
 
 test('classifies exact title matches without accepting partial matches', () => {

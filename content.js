@@ -52,6 +52,8 @@
   let pendingIntent = null;
   let focusedRecents = [];
   let recentNavigationToken = 0;
+  let recentNavigationStartedAt = 0;
+  let recentNavigationDiagnostic = null;
 
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
@@ -350,8 +352,19 @@
     containers.forEach(createFocusedRecentsContents);
   }
 
+  function updateRecentNavigationDiagnostic(patch) {
+    const elapsedMs = recentNavigationStartedAt ? Date.now() - recentNavigationStartedAt : 0;
+    recentNavigationDiagnostic = globalThis.MirrorFocusedRecents?.updateNavigationDiagnostic(
+      recentNavigationDiagnostic,
+      { ...patch, elapsedMs }
+    ) || null;
+  }
+
   function beginFocusedRecentNavigation(title) {
     recentNavigationToken += 1;
+    recentNavigationStartedAt = Date.now();
+    recentNavigationDiagnostic = globalThis.MirrorFocusedRecents?.createNavigationDiagnostic() || null;
+    updateRecentNavigationDiagnostic({ stage: "starting" });
     const token = recentNavigationToken;
     resetSearchGate();
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
@@ -359,7 +372,10 @@
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
     renderFocusedRecents();
-    goToMainChatsThen("focused-recent", () => startFocusedRecentSearch(title, token));
+    goToMainChatsThen("focused-recent", () => {
+      updateRecentNavigationDiagnostic({ stage: "chats-normalized" });
+      startFocusedRecentSearch(title, token);
+    });
   }
 
   function openFocusedRecent(title) {
@@ -393,11 +409,20 @@
   function startFocusedRecentSearch(title, token) {
     if (token !== recentNavigationToken) return;
     const field = findNativeSearchField({ allowHidden: true });
+    updateRecentNavigationDiagnostic({
+      stage: "search-field-ready",
+      searchFieldFound: Boolean(field),
+    });
     if (!field) {
       failFocusedRecentNavigation("title-unavailable", token);
       return;
     }
     setNativeSearchText(field, title);
+    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
+    updateRecentNavigationDiagnostic({
+      stage: "search-text-dispatched",
+      searchTextAccepted: Boolean(normalize && normalize(getSearchText(field)) === normalize(title)),
+    });
     window.setTimeout(() => resolveFocusedRecentSearch(title, token, 0), RECENT_SEARCH_SETTLE_MS);
   }
 
@@ -406,18 +431,33 @@
       '#side [data-testid="cell-frame-container"], #side [data-testid="conversation-list-item"], #side [role="listitem"], #side [role="row"]'
     ));
     const outerRows = rows.filter((row) => !rows.some((other) => other !== row && other.contains(row)));
-    return outerRows
-      .map((row) => ({ row, title: readConversationRowTitle(row) }))
-      .filter((candidate) => candidate.title);
+    return {
+      rowCount: outerRows.length,
+      candidates: outerRows
+        .map((row) => ({ row, title: readConversationRowTitle(row) }))
+        .filter((candidate) => candidate.title),
+    };
   }
 
   function resolveFocusedRecentSearch(title, token, attempt) {
     if (token !== recentNavigationToken) return;
-    const candidates = focusedSearchCandidates();
+    const resultSet = focusedSearchCandidates();
+    const candidates = resultSet.candidates;
     const classification = globalThis.MirrorFocusedRecents?.classifyExactTitleMatches(
       title,
       candidates.map((candidate) => candidate.title)
     ) || { status: "not-found", index: null };
+    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
+    const field = findNativeSearchField({ allowHidden: true });
+    updateRecentNavigationDiagnostic({
+      stage: "results-inspected",
+      searchTextAccepted: Boolean(normalize && field && normalize(getSearchText(field)) === normalize(title)),
+      candidateRows: resultSet.rowCount,
+      candidateTitles: candidates.length,
+      exactMatches: candidates.filter((candidate) => (
+        normalize && normalize(candidate.title) === normalize(title)
+      )).length,
+    });
     if (classification.status === "not-found" && attempt < RECENT_NAVIGATION_RETRIES) {
       window.setTimeout(() => resolveFocusedRecentSearch(title, token, attempt + 1), 350);
       return;
@@ -427,6 +467,10 @@
       return;
     }
     candidates[classification.index].row.click();
+    updateRecentNavigationDiagnostic({
+      stage: "exact-result-clicked",
+      clickDispatched: true,
+    });
     window.setTimeout(() => confirmFocusedRecentOpened(title, token, 0), 350);
   }
 
@@ -434,7 +478,13 @@
     if (token !== recentNavigationToken) return;
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const activeTitle = readActiveConversationTitle();
-    if (normalize && normalize(activeTitle) === normalize(title)) {
+    const headerMatched = Boolean(normalize && normalize(activeTitle) === normalize(title));
+    updateRecentNavigationDiagnostic({
+      stage: "confirming-header",
+      headerMatched,
+    });
+    if (headerMatched) {
+      updateRecentNavigationDiagnostic({ stage: "complete" });
       setSearchFocusedConversation();
       addFocusedRecent(activeTitle);
       recordAwareness("focused_conversation_opened", { route: "recent" });
@@ -449,6 +499,10 @@
 
   function failFocusedRecentNavigation(reason, token) {
     if (token !== recentNavigationToken && root().classList.contains(ROOT_OPENING_RECENT)) return;
+    updateRecentNavigationDiagnostic({
+      stage: "failed",
+      failureReason: reason,
+    });
     recentNavigationToken += 1;
     resetSearchGate();
     root().classList.remove(ROOT_OPENING_RECENT);
@@ -457,7 +511,8 @@
     showToast(
       reason === "ambiguous"
         ? "Há mais de uma conversa com esse nome. Use a busca para escolher com segurança."
-        : "Não consegui reabrir essa conversa com segurança. Use a busca para encontrá-la novamente."
+        : "Não consegui reabrir essa conversa com segurança. Use a busca para encontrá-la novamente.",
+      recentNavigationDiagnostic
     );
   }
 
@@ -1385,7 +1440,25 @@
     document.body.appendChild(button);
   }
 
-  function showToast(message) {
+  async function copyDiagnostic(diagnostic, button) {
+    const text = JSON.stringify(diagnostic, null, 2);
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (_error) {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.setAttribute("readonly", "");
+      textarea.style.position = "fixed";
+      textarea.style.opacity = "0";
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      textarea.remove();
+    }
+    button.textContent = "Diagnóstico copiado";
+  }
+
+  function showToast(message, diagnostic = null) {
     if (!document.body) return;
     let toast = document.getElementById(TOAST_ID);
     if (!toast) {
@@ -1395,12 +1468,22 @@
       document.body.appendChild(toast);
     }
 
-    toast.textContent = message;
+    toast.replaceChildren();
+    const text = document.createElement("span");
+    text.textContent = message;
+    toast.appendChild(text);
+    if (diagnostic) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = "Copiar diagnóstico";
+      button.addEventListener("click", () => copyDiagnostic(diagnostic, button));
+      toast.appendChild(button);
+    }
     toast.hidden = false;
     window.clearTimeout(showToast.timeoutId);
     showToast.timeoutId = window.setTimeout(() => {
       toast.hidden = true;
-    }, 6500);
+    }, diagnostic ? 30000 : 6500);
   }
 
   function getControlsContainer() {

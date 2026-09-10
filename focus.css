@@ -935,6 +935,22 @@ html.mwf-search-focused #mirror-whatsapp-focus-search-again {
   box-shadow: 0 16px 44px rgba(0, 0, 0, 0.32);
 }
 
+#mirror-whatsapp-focus-toast span {
+  display: block;
+}
+
+#mirror-whatsapp-focus-toast button {
+  margin-top: 10px;
+  border: 1px solid rgba(247, 215, 148, 0.36);
+  border-radius: 999px;
+  padding: 7px 11px;
+  background: transparent;
+  color: #f7d794;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+}
+
 #mirror-whatsapp-focus-overlay:not(.mwf-has-conversation) [data-mwf-action="continue"] {
   display: none !important;
 }

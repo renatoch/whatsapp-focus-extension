@@ -2,6 +2,18 @@
   "use strict";
 
   const MAX_RECENTS = 4;
+  const DIAGNOSTIC_STAGES = Object.freeze([
+    "starting",
+    "chats-normalized",
+    "search-field-ready",
+    "search-text-dispatched",
+    "results-inspected",
+    "exact-result-clicked",
+    "confirming-header",
+    "complete",
+    "failed",
+  ]);
+  const FAILURE_REASONS = Object.freeze(["not-found", "ambiguous", "title-unavailable"]);
 
   function cleanDisplayTitle(value) {
     return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
@@ -32,6 +44,38 @@
     return [];
   }
 
+  function createNavigationDiagnostic() {
+    return {
+      version: 1,
+      stage: "starting",
+      searchFieldFound: false,
+      searchTextAccepted: false,
+      candidateRows: 0,
+      candidateTitles: 0,
+      exactMatches: 0,
+      clickDispatched: false,
+      headerMatched: false,
+      failureReason: null,
+      elapsedMs: 0,
+    };
+  }
+
+  function updateNavigationDiagnostic(current, patch = {}) {
+    const diagnostic = { ...createNavigationDiagnostic(), ...(current || {}) };
+    if (DIAGNOSTIC_STAGES.includes(patch.stage)) diagnostic.stage = patch.stage;
+    for (const field of ["searchFieldFound", "searchTextAccepted", "clickDispatched", "headerMatched"]) {
+      if (typeof patch[field] === "boolean") diagnostic[field] = patch[field];
+    }
+    for (const field of ["candidateRows", "candidateTitles", "exactMatches", "elapsedMs"]) {
+      const value = Number(patch[field]);
+      if (Number.isFinite(value) && value >= 0) diagnostic[field] = Math.round(value);
+    }
+    if (patch.failureReason === null || FAILURE_REASONS.includes(patch.failureReason)) {
+      diagnostic.failureReason = patch.failureReason;
+    }
+    return diagnostic;
+  }
+
   function classifyExactTitleMatches(targetTitle, candidateTitles) {
     const target = normalizeTitle(targetTitle);
     if (!target) return { status: "not-found", index: null };
@@ -49,6 +93,8 @@
     addRecent,
     removeRecent,
     clearRecents,
+    createNavigationDiagnostic,
+    updateNavigationDiagnostic,
     classifyExactTitleMatches,
   });
 
