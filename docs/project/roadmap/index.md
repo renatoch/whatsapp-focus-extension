@@ -61,6 +61,8 @@ See: [`DS4-graceful-normal-mode-expiry/index.md`](DS4-graceful-normal-mode-expir
 
 ### Later candidates
 
+- Fixed focused collections: user-curated named sets such as “Casa” that provide one focused surface across conversations in the main list and Arquivadas. Explicitly selected WhatsApp display titles (person or group names) may be persisted in `chrome.storage.local`; messages, previews, search terms, phones, JIDs, URLs, unread state, and other derived data remain excluded. Reopening must require one exact unique title match and fail closed after duplicates or renames.
+- Native mark-unread shortcut: allow an open conversation to be marked as unread without manually searching for it again. This is independent from collections, must mutate WhatsApp's native unread state rather than create an extension-only reminder, and requires real Web-to-mobile synchronization validation.
 - Archived unread filter: replicate the main chat unread filter inside Arquivadas.
 - Configuration and toggles: allow sensitive parameters like delay duration, normal-mode duration, and search minimum letters to be adjusted.
 - Dev ergonomics: local Chrome remote-debugging workflow to reload extension and WhatsApp tab automatically.
