@@ -2,7 +2,7 @@
 
 # DS1.US1 — Build the automatic session recent set
 
-**Status:** 🟠 Implemented — validation pending
+**Status:** 🟢 Done
 **Type:** User Story
 
 ---

@@ -29,7 +29,7 @@ Ariad-governed roadmap for the WhatsApp Focus Mode prototype.
 
 ### DS1 — Focused Recent Conversations
 
-Status: implemented — Navigator validation pending
+Status: done — Navigator accepted as good for now
 
 Maintains an automatic session-only working set of up to 4 conversations opened through focused search, so the user can switch among current conversations without repeating search or reopening the full list. Conversation titles remain only in tab memory; exact reopening uses a visually hidden native-search route and fails closed on missing or ambiguous matches.
 
@@ -59,9 +59,16 @@ This scope now blocks DS3 validation because forced timer expiry interrupts acti
 
 See: [`DS4-graceful-normal-mode-expiry/index.md`](DS4-graceful-normal-mode-expiry/index.md)
 
+### DS5 — Focused Fixed Collections
+
+Status: candidate — promoted exploration ready for Pull
+
+Provides collapsed, user-curated collections such as “Casa” across conversations in the main list and Arquivadas. Only explicitly selected display titles and user-authored collection names may persist locally; exact reopening remains ambiguity-safe.
+
+See: [`DS5-focused-fixed-collections/index.md`](DS5-focused-fixed-collections/index.md)
+
 ### Later candidates
 
-- Fixed focused collections: user-curated named sets such as “Casa” that provide one focused surface across conversations in the main list and Arquivadas. Explicitly selected WhatsApp display titles (person or group names) may be persisted in `chrome.storage.local`; messages, previews, search terms, phones, JIDs, URLs, unread state, and other derived data remain excluded. Reopening must require one exact unique title match and fail closed after duplicates or renames.
 - Native mark-unread shortcut: allow an open conversation to be marked as unread without manually searching for it again. This is independent from collections, must mutate WhatsApp's native unread state rather than create an extension-only reminder, and requires real Web-to-mobile synchronization validation.
 - Archived unread filter: replicate the main chat unread filter inside Arquivadas.
 - Configuration and toggles: allow sensitive parameters like delay duration, normal-mode duration, and search minimum letters to be adjusted.
