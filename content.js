@@ -870,6 +870,7 @@
         nested: isNestedListView(),
       });
       setActive({ showOverlay: false });
+      setSearchFocusedConversation();
       captureFocusedConversation(readActiveConversationTitle(), 0, null);
     });
   }

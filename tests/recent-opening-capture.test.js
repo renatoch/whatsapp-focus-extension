@@ -79,16 +79,20 @@ test('internal hidden navigation is not captured as a native full-mode opening',
   assert.deepEqual(h.added, []);
 });
 
-test('continue captures the confirmed title without calling it a search', () => {
+test('continue normalizes and enters the shared focused surface before capturing without search telemetry', () => {
   const h = harness();
+  const transitions = [];
   Object.assign(h.context, {
     debugLog: () => {}, isWhatsAppReady: () => true,
     hasOpenConversation: () => true, findNativeSearchField: () => null,
     describeElement: () => null, isNestedListView: () => false,
-    goToMainChatsThen: (_source, callback) => callback(), setActive: () => {},
+    goToMainChatsThen: (_source, callback) => { transitions.push('normalize'); callback(); },
+    setActive: () => { transitions.push('clear-overlay-and-pending-confirmation'); },
+    setSearchFocusedConversation: () => { transitions.push('focused-surface'); },
   });
   h.setTitle('Continued');
   vm.runInContext(functionSource('continueOpenConversation') + '\ncontinueOpenConversation();', h.context);
+  assert.deepEqual(transitions, ['normalize', 'clear-overlay-and-pending-confirmation', 'focused-surface']);
   assert.deepEqual(h.added, ['Continued']);
   assert.deepEqual(h.events, []);
 });
