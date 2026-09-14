@@ -1,7 +1,7 @@
 (function exposeFocusedRecents(globalScope) {
   "use strict";
 
-  const MAX_RECENTS = 4;
+  const MAX_RECENTS = 5;
   const DIAGNOSTIC_STAGES = Object.freeze([
     "starting",
     "chats-normalized",

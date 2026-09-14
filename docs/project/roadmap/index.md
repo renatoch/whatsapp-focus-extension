@@ -31,7 +31,7 @@ Ariad-governed roadmap for the WhatsApp Focus Mode prototype.
 
 Status: done — Navigator accepted as good for now
 
-Maintains an automatic session-only working set of up to 4 conversations opened through focused search, so the user can switch among current conversations without repeating search or reopening the full list. Conversation titles remain only in tab memory; exact reopening uses a visually hidden native-search route and fails closed on missing or ambiguous matches.
+DS1 originally delivered four session-only conversations opened through focused search. A subsequent Navigator-approved experiment now keeps the five most recently opened conversations across full-mode selection, search, collections, recents, and Continue. Titles remain only in tab memory; exact reopening uses a visually hidden native-search route and fails closed on missing or ambiguous matches. The new capture rule awaits live validation; DS1's original closure remains historical evidence.
 
 See: [`DS1-pinned-focus-conversations/index.md`](DS1-pinned-focus-conversations/index.md)
 

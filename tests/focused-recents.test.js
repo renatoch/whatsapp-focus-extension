@@ -17,7 +17,7 @@ test('normalizes titles only for equality', () => {
   assert.equal(normalizeTitle(null), '');
 });
 
-test('keeps four unique titles in most-recent-first order', () => {
+test('keeps five unique titles in most-recent-first order', () => {
   let recents = [];
   for (const title of ['Alpha', 'Beta', 'Gamma', 'Delta']) recents = addRecent(recents, title);
   assert.deepEqual(recents, ['Delta', 'Gamma', 'Beta', 'Alpha']);
@@ -26,7 +26,9 @@ test('keeps four unique titles in most-recent-first order', () => {
   assert.deepEqual(recents, ['Beta', 'Delta', 'Gamma', 'Alpha']);
 
   recents = addRecent(recents, 'Epsilon');
-  assert.deepEqual(recents, ['Epsilon', 'Beta', 'Delta', 'Gamma']);
+  assert.deepEqual(recents, ['Epsilon', 'Beta', 'Delta', 'Gamma', 'Alpha']);
+  recents = addRecent(recents, 'Zeta');
+  assert.deepEqual(recents, ['Zeta', 'Epsilon', 'Beta', 'Delta', 'Gamma']);
 });
 
 test('deduplicates normalized titles while preserving the latest display text', () => {

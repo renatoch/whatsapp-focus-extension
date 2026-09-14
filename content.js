@@ -60,6 +60,7 @@
   let intentPromptStartedAt = null;
   let pendingIntent = null;
   let focusedRecents = [];
+  let recentCaptureToken = 0;
   let recentNavigationToken = 0;
   let recentNavigationStartedAt = 0;
   let recentNavigationDiagnostic = null;
@@ -95,6 +96,7 @@
   }
 
   function setActive({ showOverlay }) {
+    recentCaptureToken += 1;
     closeFixedCollectionChooser();
     if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
     intentPromptStartedAt = null;
@@ -127,6 +129,7 @@
   }
 
   function setSearchMode() {
+    recentCaptureToken += 1;
     closeFixedCollectionChooser();
     debugLog("setSearchMode:start", {
       ready: isWhatsAppReady(),
@@ -284,7 +287,8 @@
     return "";
   }
 
-  function captureFocusedConversation(expectedTitle, attempt) {
+  function captureFocusedConversation(expectedTitle, attempt, route = "search", token = ++recentCaptureToken) {
+    if (token !== recentCaptureToken) return;
     const activeTitle = readActiveConversationTitle();
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const expectedMatches = !expectedTitle || (
@@ -292,11 +296,11 @@
     );
     if (activeTitle && expectedMatches) {
       addFocusedRecent(activeTitle);
-      recordAwareness("focused_conversation_opened", { route: "search" });
+      if (route === "search") recordAwareness("focused_conversation_opened", { route: "search" });
       return;
     }
     if (attempt < FOCUSED_CAPTURE_RETRIES) {
-      window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1), 300);
+      window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1, route, token), 300);
     }
   }
 
@@ -664,6 +668,7 @@
   }
 
   function beginFocusedRecentNavigation(title, source = "recent") {
+    recentCaptureToken += 1;
     recentNavigationToken += 1;
     recentNavigationSource = source;
     recentNavigationStartedAt = Date.now();
@@ -815,8 +820,8 @@
     if (headerMatched) {
       updateRecentNavigationDiagnostic({ stage: "complete" });
       setSearchFocusedConversation();
+      addFocusedRecent(activeTitle);
       if (recentNavigationSource === "recent") {
-        addFocusedRecent(activeTitle);
         recordAwareness("focused_conversation_opened", { route: "recent" });
       }
       return;
@@ -865,6 +870,7 @@
         nested: isNestedListView(),
       });
       setActive({ showOverlay: false });
+      captureFocusedConversation(readActiveConversationTitle(), 0, null);
     });
   }
 
@@ -1977,17 +1983,25 @@
     document.addEventListener(
       "click",
       (event) => {
-        if (!isSearching() || root().classList.contains(ROOT_OPENING_RECENT)) return;
+        if (root().classList.contains(ROOT_OPENING_RECENT)) return;
         if (!isConversationListClick(event.target)) return;
-        enterFocusedConversationSoon(readConversationRowTitle(conversationRow(event.target)));
+        const title = readConversationRowTitle(conversationRow(event.target));
+        if (isSearching()) enterFocusedConversationSoon(title);
+        else if (title && (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN))) {
+          captureFocusedConversation(title, 0, null);
+        }
       },
       true
     );
 
     document.addEventListener("keydown", (event) => {
-      if (!isSearching() || root().classList.contains(ROOT_OPENING_RECENT)) return;
+      if (root().classList.contains(ROOT_OPENING_RECENT)) return;
       if (event.key !== "Enter") return;
-      enterFocusedConversationSoon();
+      if (isSearching()) enterFocusedConversationSoon();
+      else if (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN)) {
+        const title = readConversationRowTitle(conversationRow(event.target));
+        if (title) captureFocusedConversation(title, 0, null);
+      }
     });
   }
 
