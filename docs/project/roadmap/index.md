@@ -67,6 +67,14 @@ Provides collapsed, user-curated collections such as “Casa” across conversat
 
 See: [`DS5-focused-fixed-collections/index.md`](DS5-focused-fixed-collections/index.md)
 
+### DS6 — Modular Extension Architecture
+
+Status: candidate — dedicated refactoring requested; implementation not started
+
+Separates WhatsApp DOM access, navigation/state ownership, UI surfaces, and styles into cohesive modules while preserving current behavior and privacy. Includes behavioral characterization and targeted live regression validation rather than a file-size-only split. DS5 remains the active delivery pending validation.
+
+See: [`DS6-modular-extension-architecture/index.md`](DS6-modular-extension-architecture/index.md)
+
 ### Later candidates
 
 - Native mark-unread shortcut: allow an open conversation to be marked as unread without manually searching for it again. This is independent from collections, must mutate WhatsApp's native unread state rather than create an extension-only reminder, and requires real Web-to-mobile synchronization validation.
