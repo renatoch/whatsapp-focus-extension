@@ -53,7 +53,8 @@ test('creates at most five normalized-unique collections', () => {
   assert.equal(createCollection(state, '   ').status, 'invalid-name');
 });
 
-test('adds at most eight normalized-unique member titles', () => {
+test('adds at most ten normalized-unique member titles and preserves them on reload', () => {
+  assert.equal(MAX_MEMBERS, 10);
   let state = createCollection(createEmptyState(), 'Casa').state;
   for (let index = 1; index <= MAX_MEMBERS; index += 1) {
     const result = addMember(state, 'Casa', `Grupo ${index}`);
@@ -61,7 +62,8 @@ test('adds at most eight normalized-unique member titles', () => {
     state = result.state;
   }
   assert.equal(addMember(state, 'Casa', ' grupo 1 ').status, 'exists');
-  assert.equal(addMember(state, 'Casa', 'Grupo 9').status, 'member-limit');
+  assert.equal(addMember(state, 'Casa', 'Grupo 11').status, 'member-limit');
+  assert.deepEqual(sanitizeState(JSON.parse(JSON.stringify(state))), state);
   assert.equal(addMember(state, 'Ausente', 'Grupo').status, 'collection-not-found');
   assert.equal(addMember(state, 'Casa', '').status, 'invalid-title');
 });

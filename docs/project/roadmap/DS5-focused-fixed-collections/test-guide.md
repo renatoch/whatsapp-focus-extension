@@ -8,7 +8,7 @@ Validate the collection model, extension-isolated persistence, collapsed interac
 
 ## Automated Checks
 
-- Pure collection operations: sanitize, create, unique names, add unique member, remove member, delete collection, 5×8 limits.
+- Pure collection operations: sanitize, create, unique names, add unique member, remove member, delete collection, 5×10 limits.
 - Storage boundary: versioned allowlisted schema; malformed or unknown fields are discarded safely.
 - Integration contract: `fixed-collections.js` loads before `content.js`; collection UI never uses `innerHTML` for persisted text.
 - Navigation reuse: collection members pass through the same exact unique classification and hidden-search activation as focused recents.
@@ -31,7 +31,7 @@ Validate the collection model, extension-isolated persistence, collapsed interac
 ## Failure And Limit Route
 
 - Attempt to add the same title twice to one collection: membership remains unique.
-- Attempt a sixth collection and a ninth member: the action is refused without data loss.
+- Attempt a sixth collection and an eleventh member: the action is refused without data loss.
 - Exercise a missing, renamed, or duplicate title: no partial conversation opens and recovery guidance appears.
 - Exercise a malformed stored payload: the extension recovers to an empty safe collection state.
 
@@ -39,7 +39,7 @@ Validate the collection model, extension-isolated persistence, collapsed interac
 
 **Expected observation:** a recurring collection spanning main and Arquivadas survives reload and makes focused switching easier while remaining visually quiet and collapsed by default.
 
-**Pass condition:** the complete create/add/reload/expand/open/remove/delete route works; exact failure safety and 5×8 limits hold; storage contains only approved names and titles; DS1 behavior remains intact.
+**Pass condition:** the complete create/add/reload/expand/open/remove/delete route works; exact failure safety and 5×10 limits hold; storage contains only approved names and titles; DS1 behavior remains intact.
 
 **Fail condition:** the general list flashes, a wrong/partial title opens, unauthorized WhatsApp-derived data persists, collection state leaks into page storage or telemetry, archived members require archival mutation, or the surface behaves like another inbox.
 

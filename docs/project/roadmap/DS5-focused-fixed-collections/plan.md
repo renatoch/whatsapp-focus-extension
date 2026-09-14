@@ -23,7 +23,7 @@ Deliver collapsed, persistent focused collections that let the user explicitly o
 
 ## Scope
 
-- Add a pure `fixed-collections.js` domain boundary for sanitization, uniqueness, 5×8 limits, create/add/remove/delete operations, and recovery from malformed state.
+- Add a pure `fixed-collections.js` domain boundary for sanitization, uniqueness, 5×10 limits, create/add/remove/delete operations, and recovery from malformed state.
 - Persist a versioned collection schema under an extension-owned `chrome.storage.local` key.
 - Persist only user-authored collection names and explicitly selected WhatsApp display titles.
 - Add **Adicionar à coleção** while a focused conversation with a readable title is open.
@@ -59,7 +59,7 @@ Given a missing, renamed, or duplicate title
 When the user tries to open that member
 Then navigation fails closed with a useful recovery message and opens no partial match.
 
-Given the 5-collection or 8-member limit
+Given the 5-collection or 10-member limit
 When the user attempts to exceed it
 Then the extension refuses clearly without altering existing collection data.
 ```
@@ -72,7 +72,7 @@ E2E is required because persistence and WhatsApp DOM navigation cannot be establ
 2. Privacy inspection: inspect the isolated collection key after create/add/remove/delete and verify its exact allowlisted shape.
 3. Live Chrome: create **Casa**, add at least one main-list and one archived conversation, reload, enter a focused conversation, expand the collection on that same surface, and open both without returning to the overlay.
 4. Live failure safety: use or simulate a missing/ambiguous title and confirm that no conversation opens.
-5. Live limits/removal: confirm 5×8 enforcement, remove one member, delete one collection, and verify unrelated data remains.
+5. Live limits/removal: confirm 5×10 enforcement, remove one member, delete one collection, and verify unrelated data remains.
 6. Navigator acceptance: collections feel like a small collapsed map rather than a second inbox.
 
 ## Implementation Contract

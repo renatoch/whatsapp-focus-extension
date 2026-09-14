@@ -438,7 +438,7 @@
       "invalid-name": "Dê um nome curto para a coleção.",
       "collection-limit": "O limite é de 5 coleções.",
       "invalid-title": "Não consegui identificar esta conversa com segurança.",
-      "member-limit": "O limite é de 8 conversas por coleção.",
+      "member-limit": "O limite é de 10 conversas por coleção.",
       "collection-not-found": "Essa coleção não está mais disponível.",
     };
     return messages[status] || "Essa conversa já está nessa coleção.";

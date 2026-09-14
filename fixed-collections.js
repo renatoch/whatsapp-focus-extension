@@ -3,7 +3,7 @@
 
   const VERSION = 1;
   const MAX_COLLECTIONS = 5;
-  const MAX_MEMBERS = 8;
+  const MAX_MEMBERS = 10;
   const MAX_NAME_LENGTH = 64;
   const MAX_TITLE_LENGTH = 512;
 
