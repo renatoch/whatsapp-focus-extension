@@ -4,6 +4,7 @@
   const ROOT_SEARCHING = "mwf-searching";
   const ROOT_SEARCH_FOCUSED = "mwf-search-focused";
   const ROOT_SEARCH_TOO_SHORT = "mwf-search-too-short";
+  const ROOT_SEARCH_NAVIGATION = "mwf-search-navigation";
   const ROOT_SEARCH_WAITING = "mwf-search-waiting";
   const ROOT_SIDEBAR_OPEN = "mwf-sidebar-open";
   const ROOT_SIDEBAR_HIDDEN = "mwf-sidebar-hidden";
@@ -150,6 +151,11 @@
     revealedSearchText = "";
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
     root().classList.add(ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT);
+    expandedFixedCollectionName = "";
+    ensureFocusedRecentsShelf();
+    renderFocusedRecents();
+    renderFixedCollections();
+    updateSearchNavigation("");
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
     window.setTimeout(() => {
@@ -391,6 +397,7 @@
     const recents = shelf.querySelector("[data-mwf-focused-recents-focused]");
     const collections = shelf.querySelector("[data-mwf-fixed-collections-focused]");
     shelf.hidden = Boolean(recents?.hidden && collections?.hidden);
+    if (isSearching()) updateSearchNavigation(getSearchText());
   }
 
   function renderFocusedRecents() {
@@ -961,14 +968,22 @@
     return String(field.textContent || "").trim();
   }
 
+  function updateSearchNavigation(searchText) {
+    const hasChoices = focusedRecents.length > 0 || fixedCollectionsState.collections.length > 0;
+    root().classList.toggle(ROOT_SEARCH_NAVIGATION,
+      isSearching() && !root().classList.contains(ROOT_OPENING_RECENT) && !searchText && hasChoices);
+  }
+
   function updateSearchGateState(field = findNativeSearchField()) {
     if (!isSearching()) {
+      updateSearchNavigation("");
       resetSearchGate();
       root().classList.remove(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
       return;
     }
 
     const searchText = getSearchText(field);
+    updateSearchNavigation(searchText);
     if (searchText.length < MIN_SEARCH_CHARS) {
       resetSearchGate();
       pendingSearchText = searchText;
@@ -2006,6 +2021,7 @@
     );
 
     document.addEventListener("keydown", (event) => {
+      if (isMirrorControl(event.target)) return;
       if (root().classList.contains(ROOT_OPENING_RECENT)) return;
       if (event.key !== "Enter") return;
       if (isSearching()) enterFocusedConversationSoon();

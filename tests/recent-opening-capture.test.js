@@ -27,6 +27,7 @@ function harness() {
     FOCUSED_CAPTURE_RETRIES: 5, recentCaptureToken: 0,
     root: () => ({ classList: { contains: (name) => classes.has(name) } }),
     isSearching: () => classes.has('mwf-searching'),
+    isMirrorControl: () => false,
     isConversationListClick: (target) => Boolean(target?.rowTitle),
     conversationRow: (target) => target?.rowTitle ? target : null,
     readConversationRowTitle: (row) => row?.rowTitle || '',

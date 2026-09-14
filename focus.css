@@ -290,8 +290,13 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
 }
 
 html.mwf-search-focused .mwf-focused-navigation-floating:not([hidden]),
-html.mwf-opening-recent .mwf-focused-navigation-floating:not([hidden]) {
+html.mwf-opening-recent .mwf-focused-navigation-floating:not([hidden]),
+html.mwf-searching.mwf-search-navigation .mwf-focused-navigation-floating:not([hidden]) {
   display: block;
+}
+
+html.mwf-searching.mwf-search-navigation #mirror-whatsapp-focus-search-gate {
+  display: none !important;
 }
 
 .mwf-focused-recents-heading {
