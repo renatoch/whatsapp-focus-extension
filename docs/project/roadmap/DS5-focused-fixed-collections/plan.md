@@ -53,7 +53,11 @@ And the user can switch members without first returning to the Modo Foco overlay
 Given a persisted collection after a page reload
 When the user expands it and selects a uniquely named member
 Then that conversation opens through hidden native search without exposing the general list
-And the collection returns to its collapsed focused surface.
+And the focused shelf remains visible during reopening, preserving collection expansion and scroll position for the next selection.
+
+Given an expanded collection
+When the user reloads the tab or explicitly collapses it (including opening another collection)
+Then it is collapsed; selecting a member alone never collapses it.
 
 Given a missing, renamed, or duplicate title
 When the user tries to open that member

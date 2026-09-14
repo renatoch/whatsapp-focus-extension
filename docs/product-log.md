@@ -170,6 +170,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Em implementação] Coleções focadas fixas**
   - Até 5 coleções de 10 conversas, adicionadas explicitamente e recolhidas por padrão na própria tela de conversa focada. A primeira implementação as colocou no overlay para tratá-las como um mapa separado, mas isso exigia sair da conversa antes de alternar e contrariava o objetivo ergonômico. Elas agora compartilham a superfície lateral das conversas recentes, permitindo alternância direta. A extensão persiste em `chrome.storage.local` somente o nome escrito da coleção e os títulos escolhidos, reutiliza a navegação exata escondida e mantém recência, não lidas, previews e demais dados fora do modelo.
 
+- **[Em validação] Preservar continuidade ao navegar pela coleção**
+  - Abrir um membro não recolhe mais a coleção nem esconde a seção durante a busca interna. O render mantém os nós da coleção quando seu conteúdo/expansão não mudou, preservando a rolagem da superfície compartilhada. Uma segunda abertura enquanto a anterior está em andamento é ignorada. Recolhimento continua explícito (inclusive ao expandir outra coleção) ou após reload; nenhuma expansão é persistida. Falha de navegação continua usando a recuperação segura existente. 62 testes passam; falta validação visual de trocas sequenciais no Chrome.
+
 - **[Validado] Exibir navegação focada ao continuar conversa**
   - **Continuar conversa** agora aplica o mesmo estado focado usado após a busca, mostrando recentes e coleções disponíveis. Preserva a normalização por Conversas/Chats, a limpeza das confirmações pendentes e a captura do título sem classificá-la como busca no awareness. Teste automatizado verifica a sequência compartilhada; Navigator confirmou a exibição correta no Chrome. Mostrar opções antes de selecionar um resultado de busca continua sendo uma decisão separada.
 

@@ -45,10 +45,17 @@ test('renders collapsed collections on the focused conversation shelf as plain t
 
 test('collection opening reuses exact hidden navigation without recent telemetry', () => {
   assert.match(content, /openFixedCollectionMember\(memberTitle\)/);
-  assert.match(content, /openFixedCollectionMember\(memberTitle\)[^{]*\{[^}]*expandedFixedCollectionName = "";[^}]*beginFocusedRecentNavigation\(memberTitle, "collection"\)/s);
+  const opening = content.slice(content.indexOf('  function openFixedCollectionMember('), content.indexOf('  function renderFixedCollections('));
+  assert.doesNotMatch(opening, /expandedFixedCollectionName\s*=/);
+  assert.match(opening, /ROOT_OPENING_RECENT/);
   assert.match(content, /beginFocusedRecentNavigation\(memberTitle, "collection"\)/);
   assert.match(content, /recentNavigationSource === "recent"/);
   assert.doesNotMatch(content, /recordAwareness\([^\n]*collection\.name|recordAwareness\([^\n]*memberTitle/);
+});
+
+test('keeps focused navigation visible during hidden reopening', () => {
+  assert.doesNotMatch(css, /html\.mwf-opening-recent #mirror-whatsapp-focus-recents/);
+  assert.match(css, /html\.mwf-opening-recent \.mwf-focused-navigation-floating:not\(\[hidden\]\)/);
 });
 
 test('supports member removal and collection deletion', () => {

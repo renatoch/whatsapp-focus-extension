@@ -24,7 +24,6 @@ html.mwf-opening-recent #side {
 
 html.mwf-opening-recent #mirror-whatsapp-focus-search-gate,
 html.mwf-opening-recent #mirror-whatsapp-focus-search-again,
-html.mwf-opening-recent #mirror-whatsapp-focus-recents,
 html.mwf-opening-recent #mirror-whatsapp-focus-controls {
   display: none !important;
 }
@@ -267,7 +266,8 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
 }
 
-html.mwf-search-focused .mwf-focused-navigation-floating:not([hidden]) {
+html.mwf-search-focused .mwf-focused-navigation-floating:not([hidden]),
+html.mwf-opening-recent .mwf-focused-navigation-floating:not([hidden]) {
   display: block;
 }
 

@@ -22,7 +22,7 @@ Validate the collection model, extension-isolated persistence, collapsed interac
 3. Add a second conversation to `Casa`, including at least one member currently in Arquivadas.
 4. Stay on the focused conversation and confirm `Casa` appears collapsed beside **Conversas em andamento**, showing only its name and count.
 5. Expand `Casa`; confirm no previews, unread markers, timestamps, or unrelated conversations appear.
-6. Open each member directly from that focused surface and confirm the general list, intermediate search results, and Modo Foco overlay remain hidden.
+6. Open members sequentially from that focused surface. Confirm the shelf stays visible, the collection stays expanded, and its scroll offset is preserved; no need to expand again between clicks. The general list, intermediate search results, and Modo Foco overlay remain hidden on successful navigation. A second opening click while busy is ignored.
 7. Reload the page, enter a focused conversation, and confirm `Casa` and its members remain while the collection is collapsed again.
 8. Remove one member; confirm other members and collections remain unchanged.
 9. Delete `Casa`; confirm it disappears and does not return after reload.

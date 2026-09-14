@@ -67,6 +67,7 @@
   let recentNavigationSource = "recent";
   let fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || { version: 1, collections: [] };
   let expandedFixedCollectionName = "";
+  const fixedCollectionRenderCache = new WeakMap();
   let pendingCollectionTitle = "";
 
   function debugLog(message, details = undefined) {
@@ -393,12 +394,15 @@
   }
 
   function renderFocusedRecents() {
+    const shelf = document.getElementById(FOCUSED_RECENTS_ID);
+    const scrollTop = shelf?.scrollTop || 0;
     const containers = [
       document.querySelector("[data-mwf-focused-recents-overlay]"),
       document.querySelector("[data-mwf-focused-recents-focused]"),
     ].filter(Boolean);
     containers.forEach(createFocusedRecentsContents);
     updateFocusedNavigationShelfVisibility();
+    if (shelf) shelf.scrollTop = scrollTop;
   }
 
   async function loadFixedCollections() {
@@ -502,14 +506,19 @@
   }
 
   function openFixedCollectionMember(memberTitle) {
+    if (root().classList.contains(ROOT_OPENING_RECENT)) return;
     closeFixedCollectionChooser();
-    expandedFixedCollectionName = "";
     beginFocusedRecentNavigation(memberTitle, "collection");
   }
 
   function renderFixedCollections() {
     const container = document.querySelector("[data-mwf-fixed-collections-focused]");
     if (!container) return;
+    const previous = fixedCollectionRenderCache.get(container);
+    if (previous?.state === fixedCollectionsState && previous.expanded === expandedFixedCollectionName) return;
+    fixedCollectionRenderCache.set(container, { state: fixedCollectionsState, expanded: expandedFixedCollectionName });
+    const shelf = document.getElementById(FOCUSED_RECENTS_ID);
+    const scrollTop = shelf?.scrollTop || 0;
     container.replaceChildren();
     container.hidden = fixedCollectionsState.collections.length === 0;
     updateFocusedNavigationShelfVisibility();
@@ -572,6 +581,7 @@
       }
       container.appendChild(item);
     }
+    if (shelf) shelf.scrollTop = scrollTop;
   }
 
   function closeFixedCollectionChooser() {
