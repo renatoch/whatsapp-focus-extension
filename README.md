@@ -100,7 +100,7 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 15. Abra **Ver padrão de uso** e confirme que os contadores refletem somente ações da extensão.
 16. Teste pausar/retomar a coleta; depois teste apagar os dados locais.
 17. Em uma conversa focada, clique em **Adicionar à coleção**, crie uma coleção e adicione outra conversa.
-18. Sem voltar ao overlay, expanda a coleção na tela de conversa focada e abra conversas em sequência; a seção permanece visível e expandida durante a troca, preservando a rolagem.
+18. Sem voltar ao overlay, expanda a coleção na tela de conversa focada e abra conversas em sequência; a seção permanece visível e expandida durante a troca, preservando a rolagem. A área de recentes reserva espaço para cinco itens, mesmo vazia, para não empurrar a coleção ao incluir uma conversa.
 19. Recarregue a página, abra uma conversa focada e confirme que a coleção persiste recolhida nessa tela.
 
 ## Limitações conhecidas

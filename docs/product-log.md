@@ -173,6 +173,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Em validação] Preservar continuidade ao navegar pela coleção**
   - Abrir um membro não recolhe mais a coleção nem esconde a seção durante a busca interna. O render mantém os nós da coleção quando seu conteúdo/expansão não mudou, preservando a rolagem da superfície compartilhada. Uma segunda abertura enquanto a anterior está em andamento é ignorada. Recolhimento continua explícito (inclusive ao expandir outra coleção) ou após reload; nenhuma expansão é persistida. Falha de navegação continua usando a recuperação segura existente. 62 testes passam; falta validação visual de trocas sequenciais no Chrome.
 
+- **[Em validação] Reservar altura dos cinco recentes para não deslocar coleções**
+  - Navigator confirmou a continuidade de expansão, mas a coleção ainda descia ao incluir um recente quando havia menos de cinco. A superfície focada agora reserva altura fixa para cinco linhas, inclusive quando vazia, mantendo o espaçamento antes das coleções. O overlay não ganha essa reserva. Há espaço vazio intencional até completar os cinco itens. Teste de contrato CSS cobre dimensões e lista vazia; falta conferir no Chrome que o ponteiro permanece no mesmo membro ao abrir sucessivamente conversas ainda ausentes dos recentes.
+
 - **[Validado] Exibir navegação focada ao continuar conversa**
   - **Continuar conversa** agora aplica o mesmo estado focado usado após a busca, mostrando recentes e coleções disponíveis. Preserva a normalização por Conversas/Chats, a limpeza das confirmações pendentes e a captura do título sem classificá-la como busca no awareness. Teste automatizado verifica a sequência compartilhada; Navigator confirmou a exibição correta no Chrome. Mostrar opções antes de selecionar um resultado de busca continua sendo uma decisão separada.
 
