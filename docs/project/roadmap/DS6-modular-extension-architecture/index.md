@@ -2,7 +2,7 @@
 
 # DS6 — Modular Extension Architecture
 
-**Status:** 🟡 DS Plan — awaiting Navigator approval
+**Status:** 🟠 Implementing — approved DS Plan, isolated worktree
 
 ---
 
@@ -16,7 +16,7 @@ The Navigator requested a dedicated refactoring Delivery Story after DS5's colle
 
 Planning baseline at code commit `2f9f6e3`, accepted in `469a85c`: `content.js` has 2,214 lines and `focus.css` has 1,187 lines. The last automated run passed 77 tests, including source-level and source-sliced VM contracts; those contracts alone do not establish runtime equivalence.
 
-Navigator requested DS6 planning after accepting the stabilized reopening adjustment. DS6 is now the active planning item in Delivery Story flow. See [plan.md](plan.md) and [test-guide.md](test-guide.md). Implementation remains blocked until plan approval. DS5's separate aggregate lifecycle evidence is not retroactively closed by this request.
+Navigator requested DS6 planning after accepting the stabilized reopening adjustment. DS6 is now the active planning item in Delivery Story flow. See [plan.md](plan.md) and [test-guide.md](test-guide.md). Navigator approved implementation on `refactor/ds6-modular-architecture`; see [implementation-notes.md](implementation-notes.md) for worktree isolation and evidence. No merge or push is authorized. DS5's separate aggregate lifecycle evidence is not retroactively closed by this request.
 
 ## Scope
 
