@@ -2,7 +2,7 @@
 
 # DS5.US1 — Add a focused conversation to a collection
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** User Story
 
 ---

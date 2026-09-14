@@ -13,7 +13,8 @@ Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 - A extensão roda localmente no navegador e não possui backend.
 - O código atual não envia mensagens, contatos ou dados de uso para servidores externos.
 - O experimento **Padrão de uso** registra horários, ações na barreira e somente a intenção/nota que o usuário decide escrever. Esses dados ficam em `chrome.storage.local`, isolados dos scripts da página do WhatsApp, e podem ser pausados ou apagados pela interface.
-- A extensão não extrai mensagens, pessoas, conversas, buscas, telefones ou identificadores do WhatsApp.
+- As **Coleções** persistem somente os nomes escritos pelo usuário e os títulos exibidos das conversas adicionadas explicitamente. Não guardam mensagens, previews, termos de busca, telefones, JIDs, URLs, estado de não lida ou outros dados derivados.
+- Fora dessa seleção explícita, a extensão não extrai ou persiste pessoas, conversas ou buscas do WhatsApp.
 - Por ser uma extensão que roda em `web.whatsapp.com`, ela tem acesso técnico ao DOM visível do WhatsApp Web. Isso inclui elementos da interface, nomes de conversas e conteúdo exibido na tela.
 - Esse acesso é necessário para ocultar a lateral, limpar previews e controlar o modo foco, mas significa que qualquer pessoa instalando a extensão precisa confiar no código.
 - O hot-refresh de desenvolvimento (`focus.css` e `dev-config.json` em `web_accessible_resources`) é uma conveniência de prototipagem. Antes de uma versão pública/distribuível, ele deve ser removido ou protegido por build/flag de desenvolvimento.
@@ -35,6 +36,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - mantém na memória da aba até 4 **Conversas em andamento** abertas pela busca focada, disponíveis no overlay e na conversa focada para alternância sem expor a lista geral; os títulos não são persistidos nem entram no awareness;
+- permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 8 conversas, recolhidas por padrão no overlay; somente nomes de coleção e títulos escolhidos ficam no armazenamento isolado da extensão;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
@@ -97,7 +99,9 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 14. Confirme que a tela de foco mostra há quanto tempo o WhatsApp normal não é aberto.
 15. Abra **Ver padrão de uso** e confirme que os contadores refletem somente ações da extensão.
 16. Teste pausar/retomar a coleta; depois teste apagar os dados locais.
-17. Recarregue a página e confirme que ela volta ao modo foco imediatamente.
+17. Em uma conversa focada, clique em **Adicionar à coleção**, crie uma coleção e adicione outra conversa.
+18. Volte ao overlay, expanda a coleção e confirme que somente seus títulos aparecem; abra uma conversa pela coleção.
+19. Recarregue a página e confirme que ela volta ao modo foco imediatamente, com a coleção persistida e recolhida.
 
 ## Limitações conhecidas
 

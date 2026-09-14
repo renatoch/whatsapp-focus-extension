@@ -2,7 +2,7 @@
 
 # DS5.TS1 — Define the private persisted collection model
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** Technical Story
 
 ---

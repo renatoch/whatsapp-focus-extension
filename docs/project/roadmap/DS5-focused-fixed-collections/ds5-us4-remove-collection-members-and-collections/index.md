@@ -2,7 +2,7 @@
 
 # DS5.US4 — Remove collection members and collections
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** User Story
 
 ---

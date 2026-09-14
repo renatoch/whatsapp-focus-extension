@@ -2,7 +2,7 @@
 
 # DS5.TS2 — Verify collection privacy and persistence boundaries
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** Technical Story
 
 ---

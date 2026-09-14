@@ -45,4 +45,11 @@ Validate the collection model, extension-isolated persistence, collapsed interac
 
 ## Validation Evidence
 
-Pending implementation, automated checks, privacy inspection, live Chrome execution, and Navigator acceptance.
+Implementation evidence:
+
+- Pure collection model and integration contracts implemented test-first.
+- Full automated suite passes 51/51.
+- JavaScript syntax, manifest JSON, and diff checks pass.
+- Static privacy contracts confirm isolated extension storage, allowlisted model fields, plain-text rendering, and no title-bearing awareness calls.
+
+Pending: live Chrome create/add/reload/open/remove/delete route, cross-archive behavior, storage inspection, limit/failure checks, and Navigator acceptance.

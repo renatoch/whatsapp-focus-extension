@@ -2,7 +2,7 @@
 
 # DS5.US2 — Browse collapsed focused collections
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** User Story
 
 ---

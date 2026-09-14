@@ -21,6 +21,9 @@
   const TOAST_ID = "mirror-whatsapp-focus-toast";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
   const FOCUSED_RECENTS_ID = "mirror-whatsapp-focus-recents";
+  const FIXED_COLLECTIONS_KEY = "mirror-whatsapp-focus-fixed-collections-v1";
+  const ADD_COLLECTION_ID = "mirror-whatsapp-focus-add-collection";
+  const COLLECTION_CHOOSER_ID = "mirror-whatsapp-focus-collection-chooser";
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
   const BYPASS_MS = 5 * 60 * 1000;
@@ -41,6 +44,9 @@
   const awarenessStore = awarenessAdapter
     ? globalThis.MirrorAwareness?.createPersistentStore(awarenessAdapter)
     : null;
+  const fixedCollectionsAdapter = globalThis.chrome?.storage?.local
+    ? globalThis.MirrorAwareness?.createChromeStorageAdapter(globalThis.chrome.storage.local)
+    : null;
   let bypassTimer = null;
   let normalDelayTimer = null;
   let normalDelayInterval = null;
@@ -57,6 +63,10 @@
   let recentNavigationToken = 0;
   let recentNavigationStartedAt = 0;
   let recentNavigationDiagnostic = null;
+  let recentNavigationSource = "recent";
+  let fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || { version: 1, collections: [] };
+  let expandedFixedCollectionName = "";
+  let pendingCollectionTitle = "";
 
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
@@ -85,6 +95,7 @@
   }
 
   function setActive({ showOverlay }) {
+    closeFixedCollectionChooser();
     if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
     intentPromptStartedAt = null;
     getOverlay()?.classList.remove("mwf-intent-pending");
@@ -99,11 +110,15 @@
     ensureSearchAgainButton();
     ensureSearchGateMessage();
     ensureFocusedRecentsShelf();
+    ensureAddCollectionButton();
+    ensureFixedCollectionChooser();
     renderFocusedRecents();
+    renderFixedCollections();
     getOverlay().hidden = !showOverlay;
   }
 
   function setNormal() {
+    closeFixedCollectionChooser();
     clearNormalDelay();
     root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
     root().classList.add(ROOT_NORMAL);
@@ -112,6 +127,7 @@
   }
 
   function setSearchMode() {
+    closeFixedCollectionChooser();
     debugLog("setSearchMode:start", {
       ready: isWhatsAppReady(),
       searching: isSearching(),
@@ -218,7 +234,10 @@
     ensureSidebarButton();
     ensureSearchAgainButton();
     ensureFocusedRecentsShelf();
+    ensureAddCollectionButton();
+    ensureFixedCollectionChooser();
     renderFocusedRecents();
+    renderFixedCollections();
     if (overlay) overlay.hidden = true;
   }
 
@@ -355,6 +374,263 @@
     containers.forEach(createFocusedRecentsContents);
   }
 
+  async function loadFixedCollections() {
+    if (!fixedCollectionsAdapter) return;
+    try {
+      const raw = await fixedCollectionsAdapter.getItem(FIXED_COLLECTIONS_KEY);
+      const nextState = globalThis.MirrorFixedCollections?.sanitizeState(raw);
+      if (!nextState) return;
+      fixedCollectionsState = nextState;
+      if (JSON.stringify(raw) !== JSON.stringify(nextState)) {
+        await fixedCollectionsAdapter.setItem(FIXED_COLLECTIONS_KEY, nextState);
+      }
+    } catch (_error) {
+      fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || fixedCollectionsState;
+    }
+  }
+
+  async function persistFixedCollections(nextState) {
+    if (!fixedCollectionsAdapter) {
+      showToast("Não consegui acessar o armazenamento isolado da extensão.");
+      return false;
+    }
+    try {
+      await fixedCollectionsAdapter.setItem(FIXED_COLLECTIONS_KEY, nextState);
+      fixedCollectionsState = nextState;
+      renderFixedCollections();
+      renderFixedCollectionChooser();
+      return true;
+    } catch (_error) {
+      showToast("Não consegui salvar essa coleção neste navegador.");
+      return false;
+    }
+  }
+
+  function fixedCollectionStatusMessage(status) {
+    const messages = {
+      "invalid-name": "Dê um nome curto para a coleção.",
+      "collection-limit": "O limite é de 5 coleções.",
+      "invalid-title": "Não consegui identificar esta conversa com segurança.",
+      "member-limit": "O limite é de 8 conversas por coleção.",
+      "collection-not-found": "Essa coleção não está mais disponível.",
+    };
+    return messages[status] || "Essa conversa já está nessa coleção.";
+  }
+
+  async function addTitleToFixedCollection(collectionName, title) {
+    const result = globalThis.MirrorFixedCollections?.addMember(
+      fixedCollectionsState,
+      collectionName,
+      title
+    );
+    if (!result || result.status !== "added") {
+      showToast(fixedCollectionStatusMessage(result?.status));
+      return false;
+    }
+    const saved = await persistFixedCollections(result.state);
+    if (saved) {
+      closeFixedCollectionChooser();
+      showToast("Conversa adicionada à coleção.");
+    }
+    return saved;
+  }
+
+  async function createFixedCollection(name, title) {
+    const created = globalThis.MirrorFixedCollections?.createCollection(fixedCollectionsState, name);
+    if (!created || created.status !== "created") {
+      showToast(fixedCollectionStatusMessage(created?.status));
+      return false;
+    }
+    const added = globalThis.MirrorFixedCollections?.addMember(created.state, name, title);
+    if (!added || added.status !== "added") {
+      showToast(fixedCollectionStatusMessage(added?.status));
+      return false;
+    }
+    const saved = await persistFixedCollections(added.state);
+    if (saved) {
+      closeFixedCollectionChooser();
+      showToast("Coleção criada.");
+    }
+    return saved;
+  }
+
+  async function removeFixedCollectionMember(collectionName, memberTitle) {
+    const result = globalThis.MirrorFixedCollections?.removeMember(
+      fixedCollectionsState,
+      collectionName,
+      memberTitle
+    );
+    if (result?.status === "removed") await persistFixedCollections(result.state);
+  }
+
+  async function deleteFixedCollection(collectionName) {
+    if (!window.confirm("Apagar esta coleção?")) return;
+    const result = globalThis.MirrorFixedCollections?.deleteCollection(
+      fixedCollectionsState,
+      collectionName
+    );
+    if (result?.status !== "deleted") return;
+    if (expandedFixedCollectionName === collectionName) expandedFixedCollectionName = "";
+    await persistFixedCollections(result.state);
+  }
+
+  function openFixedCollectionMember(memberTitle) {
+    closeFixedCollectionChooser();
+    expandedFixedCollectionName = "";
+    beginFocusedRecentNavigation(memberTitle, "collection");
+  }
+
+  function renderFixedCollections() {
+    const container = document.querySelector("[data-mwf-fixed-collections-overlay]");
+    if (!container) return;
+    container.replaceChildren();
+    container.hidden = fixedCollectionsState.collections.length === 0;
+    if (container.hidden) return;
+
+    const label = document.createElement("strong");
+    label.className = "mwf-fixed-collections-label";
+    label.textContent = "Coleções";
+    container.appendChild(label);
+
+    for (const collection of fixedCollectionsState.collections) {
+      const item = document.createElement("section");
+      item.className = "mwf-fixed-collection";
+      const row = document.createElement("div");
+      row.className = "mwf-fixed-collection-row";
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "mwf-fixed-collection-toggle";
+      const heading = document.createElement("span");
+      heading.textContent = collection.name;
+      const count = document.createElement("span");
+      count.textContent = String(collection.members.length);
+      toggle.append(heading, count);
+      const expanded = expandedFixedCollectionName === collection.name;
+      toggle.setAttribute("aria-expanded", String(expanded));
+      toggle.addEventListener("click", () => {
+        expandedFixedCollectionName = expanded ? "" : collection.name;
+        renderFixedCollections();
+      });
+      const removeCollection = document.createElement("button");
+      removeCollection.type = "button";
+      removeCollection.className = "mwf-fixed-collection-delete";
+      removeCollection.textContent = "×";
+      removeCollection.setAttribute("aria-label", "Apagar coleção");
+      removeCollection.addEventListener("click", () => deleteFixedCollection(collection.name));
+      row.append(toggle, removeCollection);
+      item.appendChild(row);
+
+      if (expanded) {
+        const members = document.createElement("div");
+        members.className = "mwf-fixed-collection-members";
+        for (const memberTitle of collection.members) {
+          const member = document.createElement("div");
+          member.className = "mwf-fixed-collection-member";
+          const memberButton = document.createElement("button");
+          memberButton.type = "button";
+          memberButton.className = "mwf-fixed-collection-open";
+          memberButton.textContent = memberTitle;
+          memberButton.addEventListener("click", () => openFixedCollectionMember(memberTitle));
+          const remove = document.createElement("button");
+          remove.type = "button";
+          remove.className = "mwf-fixed-collection-remove";
+          remove.textContent = "×";
+          remove.setAttribute("aria-label", "Remover conversa da coleção");
+          remove.addEventListener("click", () => removeFixedCollectionMember(collection.name, memberTitle));
+          member.append(memberButton, remove);
+          members.appendChild(member);
+        }
+        item.appendChild(members);
+      }
+      container.appendChild(item);
+    }
+  }
+
+  function closeFixedCollectionChooser() {
+    pendingCollectionTitle = "";
+    const chooser = document.getElementById(COLLECTION_CHOOSER_ID);
+    if (chooser) chooser.hidden = true;
+  }
+
+  function renderFixedCollectionChooser() {
+    const chooser = document.getElementById(COLLECTION_CHOOSER_ID);
+    if (!chooser) return;
+    const list = chooser.querySelector("[data-mwf-collection-options]");
+    list.replaceChildren();
+    for (const collection of fixedCollectionsState.collections) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "mwf-collection-option";
+      button.textContent = collection.name;
+      button.addEventListener("click", () => addTitleToFixedCollection(collection.name, pendingCollectionTitle));
+      list.appendChild(button);
+    }
+    chooser.querySelector("[data-mwf-new-collection]").hidden =
+      fixedCollectionsState.collections.length >= (globalThis.MirrorFixedCollections?.MAX_COLLECTIONS || 5);
+  }
+
+  function openFixedCollectionChooser() {
+    const title = readActiveConversationTitle();
+    if (!title) {
+      showToast("Não consegui identificar esta conversa com segurança.");
+      return;
+    }
+    pendingCollectionTitle = title;
+    ensureFixedCollectionChooser();
+    renderFixedCollectionChooser();
+    const chooser = document.getElementById(COLLECTION_CHOOSER_ID);
+    chooser.hidden = false;
+    chooser.querySelector("input")?.focus();
+  }
+
+  function ensureAddCollectionButton() {
+    if (!document.body || document.getElementById(ADD_COLLECTION_ID)) return;
+    const button = document.createElement("button");
+    button.id = ADD_COLLECTION_ID;
+    button.type = "button";
+    button.textContent = "Adicionar à coleção";
+    button.addEventListener("click", openFixedCollectionChooser);
+    document.body.appendChild(button);
+  }
+
+  function ensureFixedCollectionChooser() {
+    if (!document.body || document.getElementById(COLLECTION_CHOOSER_ID)) return;
+    const chooser = document.createElement("section");
+    chooser.id = COLLECTION_CHOOSER_ID;
+    chooser.hidden = true;
+    chooser.setAttribute("role", "dialog");
+    chooser.setAttribute("aria-label", "Adicionar conversa à coleção");
+
+    const title = document.createElement("strong");
+    title.textContent = "Adicionar à coleção";
+    const options = document.createElement("div");
+    options.className = "mwf-collection-options";
+    options.setAttribute("data-mwf-collection-options", "");
+    const form = document.createElement("form");
+    form.setAttribute("data-mwf-new-collection", "");
+    const input = document.createElement("input");
+    input.type = "text";
+    input.maxLength = 64;
+    input.placeholder = "Nova coleção";
+    input.setAttribute("aria-label", "Nome da nova coleção");
+    const create = document.createElement("button");
+    create.type = "submit";
+    create.textContent = "Criar";
+    form.append(input, create);
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const created = await createFixedCollection(input.value, pendingCollectionTitle);
+      if (created) input.value = "";
+    });
+    const cancel = document.createElement("button");
+    cancel.type = "button";
+    cancel.className = "mwf-collection-cancel";
+    cancel.textContent = "Cancelar";
+    cancel.addEventListener("click", closeFixedCollectionChooser);
+    chooser.append(title, options, form, cancel);
+    document.body.appendChild(chooser);
+  }
+
   function updateRecentNavigationDiagnostic(patch) {
     const elapsedMs = recentNavigationStartedAt ? Date.now() - recentNavigationStartedAt : 0;
     recentNavigationDiagnostic = globalThis.MirrorFocusedRecents?.updateNavigationDiagnostic(
@@ -363,8 +639,9 @@
     ) || null;
   }
 
-  function beginFocusedRecentNavigation(title) {
+  function beginFocusedRecentNavigation(title, source = "recent") {
     recentNavigationToken += 1;
+    recentNavigationSource = source;
     recentNavigationStartedAt = Date.now();
     recentNavigationDiagnostic = globalThis.MirrorFocusedRecents?.createNavigationDiagnostic() || null;
     updateRecentNavigationDiagnostic({ stage: "starting" });
@@ -514,8 +791,10 @@
     if (headerMatched) {
       updateRecentNavigationDiagnostic({ stage: "complete" });
       setSearchFocusedConversation();
-      addFocusedRecent(activeTitle);
-      recordAwareness("focused_conversation_opened", { route: "recent" });
+      if (recentNavigationSource === "recent") {
+        addFocusedRecent(activeTitle);
+        recordAwareness("focused_conversation_opened", { route: "recent" });
+      }
       return;
     }
     if (attempt < RECENT_NAVIGATION_RETRIES) {
@@ -535,7 +814,9 @@
     resetSearchGate();
     root().classList.remove(ROOT_OPENING_RECENT);
     setActive({ showOverlay: true });
-    recordAwareness("focused_recent_navigation_failed", { reason });
+    if (recentNavigationSource === "recent") {
+      recordAwareness("focused_recent_navigation_failed", { reason });
+    }
     showToast(
       reason === "ambiguous"
         ? "Há mais de uma conversa com esse nome. Use a busca para escolher com segurança."
@@ -843,7 +1124,7 @@
   }
 
   function isMirrorControl(element) {
-    return Boolean(element.closest?.("#mirror-whatsapp-focus-controls, #mirror-whatsapp-focus-overlay, #mirror-whatsapp-focus-toast, #mirror-whatsapp-focus-recents"));
+    return Boolean(element.closest?.("#mirror-whatsapp-focus-controls, #mirror-whatsapp-focus-overlay, #mirror-whatsapp-focus-toast, #mirror-whatsapp-focus-recents, #mirror-whatsapp-focus-add-collection, #mirror-whatsapp-focus-collection-chooser"));
   }
 
   function getOverlay() {
@@ -1230,6 +1511,7 @@
         <p>O WhatsApp está cego por padrão. Abra somente o que você veio buscar — sem lista de conversas, arquivadas, badges ou previews.</p>
         <p id="mirror-whatsapp-focus-streak" class="mwf-focus-streak">Você ainda não abriu o WhatsApp normal nesta instalação.</p>
         <section class="mwf-focused-recents mwf-focused-recents-overlay" data-mwf-focused-recents-overlay aria-label="Conversas em andamento" hidden></section>
+        <section class="mwf-fixed-collections" data-mwf-fixed-collections-overlay aria-label="Coleções" hidden></section>
         <div class="mwf-loading" aria-label="Carregando WhatsApp Web">
           <progress id="mirror-whatsapp-focus-loading-progress" class="mwf-loading-progress" value="0" max="100"></progress>
         </div>
@@ -1402,7 +1684,10 @@
 
     document.body.appendChild(overlay);
     ensureFocusedRecentsShelf();
+    ensureAddCollectionButton();
+    ensureFixedCollectionChooser();
     renderFocusedRecents();
+    renderFixedCollections();
     updateFocusStreak();
     updateOverlayState();
   }
@@ -1816,6 +2101,7 @@
       } catch (_error) {
         // Isolated awareness storage must not block the focus overlay.
       }
+      await loadFixedCollections();
       ensureControls();
       setActive({ showOverlay: true });
     });

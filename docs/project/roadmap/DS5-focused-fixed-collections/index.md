@@ -2,7 +2,7 @@
 
 # DS5 — Focused Fixed Collections
 
-**Status:** ⚪ Candidate
+**Status:** 🟠 Implemented — pending Navigator validation
 
 ---
 
@@ -54,12 +54,12 @@ The Navigator explicitly authorized local persistence for this experiment.
 
 | Code | Story | Type | Outcome | Status |
 |------|-------|------|---------|--------|
-| DS5.TS1 | Define the private persisted collection model | Technical Story | A versioned, sanitized `chrome.storage.local` schema enforces the 5×8 limits and admits only collection names and explicitly selected display titles. | Candidate |
-| DS5.US1 | Add a focused conversation to a collection | User Story | From the open focused conversation, the user can choose an existing collection or create a new one without exposing the general inbox. | Candidate |
-| DS5.US2 | Browse collapsed focused collections | User Story | The overlay shows collapsed collection names and counts, with no more than one explicitly expanded member list. | Candidate |
-| DS5.US3 | Reopen a collection member safely | User Story | A selected member reopens through one exact unique hidden-search match across the main list and Arquivadas, failing closed otherwise. | Candidate |
-| DS5.US4 | Remove collection members and collections | User Story | The user can remove a member or delete a collection while preserving all unrelated collections. | Candidate |
-| DS5.TS2 | Verify collection privacy and persistence boundaries | Technical Story | Automated and live checks confirm reload persistence, schema sanitization, title-safe rendering, and exclusion of unauthorized WhatsApp-derived data. | Candidate |
+| DS5.TS1 | Define the private persisted collection model | Technical Story | A versioned, sanitized `chrome.storage.local` schema enforces the 5×8 limits and admits only collection names and explicitly selected display titles. | Implemented — validation pending |
+| DS5.US1 | Add a focused conversation to a collection | User Story | From the open focused conversation, the user can choose an existing collection or create a new one without exposing the general inbox. | Implemented — validation pending |
+| DS5.US2 | Browse collapsed focused collections | User Story | The overlay shows collapsed collection names and counts, with no more than one explicitly expanded member list. | Implemented — validation pending |
+| DS5.US3 | Reopen a collection member safely | User Story | A selected member reopens through one exact unique hidden-search match across the main list and Arquivadas, failing closed otherwise. | Implemented — validation pending |
+| DS5.US4 | Remove collection members and collections | User Story | The user can remove a member or delete a collection while preserving all unrelated collections. | Implemented — validation pending |
+| DS5.TS2 | Verify collection privacy and persistence boundaries | Technical Story | Automated and live checks confirm reload persistence, schema sanitization, title-safe rendering, and exclusion of unauthorized WhatsApp-derived data. | Implemented — validation pending |
 
 ## Done Condition
 

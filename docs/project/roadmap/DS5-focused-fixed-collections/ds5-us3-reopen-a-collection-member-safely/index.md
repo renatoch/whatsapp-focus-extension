@@ -2,7 +2,7 @@
 
 # DS5.US3 — Reopen a collection member safely
 
-**Status:** 🟡 Planned
+**Status:** 🟠 Implemented — validation pending
 **Type:** User Story
 
 ---

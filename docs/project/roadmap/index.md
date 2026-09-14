@@ -61,7 +61,7 @@ See: [`DS4-graceful-normal-mode-expiry/index.md`](DS4-graceful-normal-mode-expir
 
 ### DS5 — Focused Fixed Collections
 
-Status: candidate — promoted exploration ready for Pull
+Status: implemented — Navigator validation pending
 
 Provides collapsed, user-curated collections such as “Casa” across conversations in the main list and Arquivadas. Only explicitly selected display titles and user-authored collection names may persist locally; exact reopening remains ambiguity-safe.
 

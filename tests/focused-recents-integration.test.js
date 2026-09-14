@@ -13,6 +13,7 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'awareness.js',
     'focus-state.js',
     'focused-recents.js',
+    'fixed-collections.js',
     'content.js',
   ]);
 });
