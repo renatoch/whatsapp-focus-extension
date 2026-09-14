@@ -165,6 +165,18 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Em implementação] Coleções focadas fixas**
   - Até 5 coleções de 8 conversas, adicionadas explicitamente e recolhidas por padrão na própria tela de conversa focada. A primeira implementação as colocou no overlay para tratá-las como um mapa separado, mas isso exigia sair da conversa antes de alternar e contrariava o objetivo ergonômico. Elas agora compartilham a superfície lateral das conversas recentes, permitindo alternância direta. A extensão persiste em `chrome.storage.local` somente o nome escrito da coleção e os títulos escolhidos, reutiliza a navegação exata escondida e mantém recência, não lidas, previews e demais dados fora do modelo.
 
+- **[Correção pendente] Exibir navegação focada ao continuar conversa**
+  - Relato do Navigator: **Continuar conversa** não mostra recentes nem coleções, ao contrário da entrada após selecionar um resultado de busca. Corrigir a equivalência entre essas entradas; registro autorizado, implementação ainda não iniciada.
+
+- **[Proposta pendente] Escolher conversas sem precisar buscar primeiro**
+  - A entrada **Buscar** só disponibiliza recentes e coleções depois de selecionar alguém. Propor o comportamento antes de implementar: avaliar uma escolha explícita entre **Minhas conversas** e **Buscar outra**, com coleções recolhidas e sem indicadores de atividade, em vez de mostrar todos os títulos sempre. Discutir visibilidade inicial, coexistência com a busca e acesso sem conversa aberta. Não presumir aprovação de exposição permanente.
+
+- **[Exploração] Consultar não lidas de uma coleção sob demanda**
+  - Necessidade confirmada: saber quais conversas da coleção têm não lidas somente quando o usuário pedir, não sempre que a coleção aparecer ou for expandida. Consultar o estado nativo, sem filtrar por autor, sem previews e sem persistir estado de não lida. A viabilidade de consultar sem abrir cada conversa e sem alterar leitura/arquivamento ainda precisa ser investigada. Não implementar como parte implícita da DS5 nem confundir com o atalho nativo de marcar como não lida.
+
+- **[Ajuste de escopo pendente] Ampliar capacidade de membros por coleção**
+  - O caso real que inspirou a funcionalidade já excede oito conversas temáticas relacionadas. O limite atual é insuficiente; definir um limite maior antes de alterar código e testes. Nenhum novo número foi aprovado. A ampliação é independente da consulta de não lidas e não resolve essa necessidade sozinha.
+
 - **[Em teste] Contador de tempo sem abrir WhatsApp normal ajuda ou vira ruído?**
   - Implementação atual: a tela de foco mostra tempo desde a última abertura do modo normal. Observar se aumenta consciência de reabertura impulsiva/tédio ou se passa a ser ignorado. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
 
