@@ -790,7 +790,7 @@
     };
   }
 
-  function resolveFocusedRecentSearch(title, token, attempt) {
+  function resolveFocusedRecentSearch(title, token, attempt, previousUniqueTarget = null) {
     if (token !== recentNavigationToken) return;
     const resultSet = focusedSearchCandidates();
     const candidates = resultSet.candidates;
@@ -800,21 +800,31 @@
     ) || { status: "not-found", index: null };
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const field = findNativeSearchField({ allowHidden: true });
-    updateRecentNavigationDiagnostic({
-      stage: "results-inspected",
-      searchTextAccepted: Boolean(normalize && field && normalize(getSearchText(field)) === normalize(title)),
+    const searchTextAccepted = Boolean(normalize && field && normalize(getSearchText(field)) === normalize(title));
+    const sample = {
+      attempt,
+      searchTextAccepted,
       candidateRows: resultSet.rowCount,
       candidateTitles: candidates.length,
       exactMatches: candidates.filter((candidate) => (
         normalize && normalize(candidate.title) === normalize(title)
       )).length,
+    };
+    updateRecentNavigationDiagnostic({
+      stage: "results-inspected",
+      ...sample,
+      resultSample: sample,
     });
-    if (classification.status === "not-found" && attempt < RECENT_NAVIGATION_RETRIES) {
-      window.setTimeout(() => resolveFocusedRecentSearch(title, token, attempt + 1), RECENT_SEARCH_RETRY_MS);
-      return;
-    }
-    if (classification.status !== "match") {
-      failFocusedRecentNavigation(classification.status, token);
+    const uniqueTarget = classification.status === "match" && searchTextAccepted
+      ? candidates[classification.index].clickTarget : null;
+    // A transient duplicate is not proof of permanent ambiguity. Conversely,
+    // one unique snapshot is not enough: require the same target next poll.
+    if (!uniqueTarget || uniqueTarget !== previousUniqueTarget) {
+      if (attempt < RECENT_NAVIGATION_RETRIES) {
+        window.setTimeout(() => resolveFocusedRecentSearch(title, token, attempt + 1, uniqueTarget), RECENT_SEARCH_RETRY_MS);
+      } else {
+        failFocusedRecentNavigation(classification.status === "ambiguous" ? "ambiguous" : "not-found", token);
+      }
       return;
     }
     activateFocusedResult(candidates[classification.index].clickTarget);

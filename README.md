@@ -38,6 +38,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - mantém na memória da aba até 5 **Conversas em andamento**, ordenadas pela última abertura: seleção no modo completo, busca focada, coleção, recentes ou **Continuar conversa**; receber mensagens ou aparecer na lista não adiciona conversas; os títulos não são persistidos nem entram no awareness;
 - permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 10 conversas, recolhidas por padrão na própria tela de conversa focada para alternância direta; somente nomes de coleção e títulos escolhidos ficam no armazenamento isolado da extensão;
 - ao entrar em **Buscar** com campo vazio, oferece recentes e coleções recolhidas para escolha direta, mesmo sem conversa aberta; oculta os ramos nativos concorrentes abaixo da busca sem mover a seção, que tem fundo opaco; ao digitar, esconde essas opções, e ao limpar o campo volta a mostrá-las;
+- na reabertura por recentes/coleções, aguarda um alvo exato único em duas sondagens consecutivas; duplicidade persistente falha fechada, com diagnóstico estrutural copiável sem nomes;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;

@@ -27,7 +27,8 @@ test('internal recent navigation hides native sidebar and search affordances', (
 
 test('recent navigation polls promptly and activates only one exact classified result', () => {
   assert.match(content, /classifyExactTitleMatches\(\s*title,\s*candidates\.map\(\(candidate\) => candidate\.title\)\s*\)/);
-  assert.match(content, /if \(classification\.status !== "match"\)/);
+  assert.match(content, /classification\.status === "match" && searchTextAccepted/);
+  assert.match(content, /uniqueTarget !== previousUniqueTarget/);
   assert.match(content, /dispatchEvent\(new MouseEvent\("mousedown"/);
   assert.match(content, /activateFocusedResult\(candidates\[classification\.index\]\.clickTarget\)/);
   assert.doesNotMatch(content, /candidates\[classification\.index\]\.clickTarget\.click\(\)/);

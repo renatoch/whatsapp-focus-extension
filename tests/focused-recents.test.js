@@ -67,6 +67,7 @@ test('keeps navigation diagnostics structural and strips conversation data', () 
     headerMatched: false,
     failureReason: null,
     elapsedMs: 0,
+    resultSamples: [],
   });
   assert.equal(JSON.stringify(diagnostic).includes('Private title'), false);
 });

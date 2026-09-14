@@ -57,6 +57,7 @@
       headerMatched: false,
       failureReason: null,
       elapsedMs: 0,
+      resultSamples: [],
     };
   }
 
@@ -70,6 +71,18 @@
       const value = Number(patch[field]);
       if (Number.isFinite(value) && value >= 0) diagnostic[field] = Math.round(value);
     }
+    const samples = Array.isArray(diagnostic.resultSamples) ? diagnostic.resultSamples : [];
+    diagnostic.resultSamples = [...samples, ...(patch.resultSample ? [patch.resultSample] : [])]
+      .slice(-12)
+      .filter((sample) => sample && typeof sample === "object")
+      .map((sample) => {
+        const clean = { searchTextAccepted: sample.searchTextAccepted === true };
+        for (const field of ["attempt", "candidateRows", "candidateTitles", "exactMatches"]) {
+          const value = Number(sample[field]);
+          clean[field] = Number.isFinite(value) && value >= 0 ? Math.round(value) : 0;
+        }
+        return clean;
+      });
     if (patch.failureReason === null || FAILURE_REASONS.includes(patch.failureReason)) {
       diagnostic.failureReason = patch.failureReason;
     }
