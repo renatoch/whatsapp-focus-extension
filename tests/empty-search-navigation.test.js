@@ -19,6 +19,7 @@ function harness() {
     ROOT_SEARCH_TOO_SHORT: 'short', ROOT_SEARCH_WAITING: 'waiting',
     focusedRecents: ['Example'], fixedCollectionsState: { collections: [] },
     isSearching: () => classes.has('searching'),
+    isolateEmptySearchControls: () => {},
     root: () => ({ classList: {
       contains: (value) => classes.has(value),
       toggle: (value, on) => on ? classes.add(value) : classes.delete(value),

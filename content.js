@@ -968,10 +968,34 @@
     return String(field.textContent || "").trim();
   }
 
+  function isolateEmptySearchControls() {
+    const side = document.querySelector("#side");
+    const field = findNativeSearchField();
+    if (!side || !field || !side.contains(field)) return;
+    // Preserve the native search row (including clear/back controls), but hide
+    // sibling branches rather than guessing translated labels or WhatsApp classes.
+    document.querySelectorAll("#side [data-mwf-empty-search-hidden]").forEach((element) => {
+      element.removeAttribute("data-mwf-empty-search-hidden");
+    });
+    let branch = field.closest('[role="search"]') || field.parentElement;
+    if (!branch || branch === side || !side.contains(branch)) return;
+    while (branch && branch !== side) {
+      const parent = branch.parentElement;
+      if (!parent) break;
+      for (const sibling of parent.children) {
+        if (sibling !== branch && !sibling.matches("header")) {
+          sibling.setAttribute("data-mwf-empty-search-hidden", "");
+        }
+      }
+      branch = parent;
+    }
+  }
+
   function updateSearchNavigation(searchText) {
     const hasChoices = focusedRecents.length > 0 || fixedCollectionsState.collections.length > 0;
     root().classList.toggle(ROOT_SEARCH_NAVIGATION,
       isSearching() && !root().classList.contains(ROOT_OPENING_RECENT) && !searchText && hasChoices);
+    if (root().classList.contains(ROOT_SEARCH_NAVIGATION)) isolateEmptySearchControls();
   }
 
   function updateSearchGateState(field = findNativeSearchField()) {
@@ -1196,6 +1220,8 @@
   }
 
   function updateOverlayState() {
+    if (isSearching() && root().classList.contains(ROOT_SEARCH_NAVIGATION) &&
+        !root().classList.contains(ROOT_OPENING_RECENT)) isolateEmptySearchControls();
     const overlay = getOverlay();
     if (!overlay) return;
     const ready = isWhatsAppReady();

@@ -285,7 +285,7 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   padding: 12px;
   border: 1px solid rgba(233, 237, 239, 0.14);
   border-radius: 14px;
-  background: rgba(17, 27, 33, 0.96);
+  background: #111b21;
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
 }
 
@@ -297,6 +297,13 @@ html.mwf-searching.mwf-search-navigation .mwf-focused-navigation-floating:not([h
 
 html.mwf-searching.mwf-search-navigation #mirror-whatsapp-focus-search-gate {
   display: none !important;
+}
+
+/* Retain native layout and search controls, not the competing inbox surface. */
+html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mwf-empty-search-hidden],
+html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mwf-empty-search-hidden] * {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 
 .mwf-focused-recents-heading {
