@@ -36,7 +36,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - mantém na memória da aba até 4 **Conversas em andamento** abertas pela busca focada, disponíveis no overlay e na conversa focada para alternância sem expor a lista geral; os títulos não são persistidos nem entram no awareness;
-- permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 8 conversas, recolhidas por padrão no overlay; somente nomes de coleção e títulos escolhidos ficam no armazenamento isolado da extensão;
+- permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 8 conversas, recolhidas por padrão na própria tela de conversa focada para alternância direta; somente nomes de coleção e títulos escolhidos ficam no armazenamento isolado da extensão;
 - permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
 - oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
@@ -100,8 +100,8 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 15. Abra **Ver padrão de uso** e confirme que os contadores refletem somente ações da extensão.
 16. Teste pausar/retomar a coleta; depois teste apagar os dados locais.
 17. Em uma conversa focada, clique em **Adicionar à coleção**, crie uma coleção e adicione outra conversa.
-18. Volte ao overlay, expanda a coleção e confirme que somente seus títulos aparecem; abra uma conversa pela coleção.
-19. Recarregue a página e confirme que ela volta ao modo foco imediatamente, com a coleção persistida e recolhida.
+18. Sem voltar ao overlay, expanda a coleção na tela de conversa focada e confirme que somente seus títulos aparecem; abra outra conversa pela coleção.
+19. Recarregue a página, abra uma conversa focada e confirme que a coleção persiste recolhida nessa tela.
 
 ## Limitações conhecidas
 

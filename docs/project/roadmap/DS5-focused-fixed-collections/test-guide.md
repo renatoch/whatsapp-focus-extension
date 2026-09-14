@@ -20,10 +20,10 @@ Validate the collection model, extension-isolated persistence, collapsed interac
 1. Reload the unpacked extension and WhatsApp tab.
 2. Open a normal focused conversation and choose **Adicionar à coleção** → **Nova coleção** → `Casa`.
 3. Add a second conversation to `Casa`, including at least one member currently in Arquivadas.
-4. Return to Modo Foco and confirm `Casa` is collapsed and shows only its name and count.
+4. Stay on the focused conversation and confirm `Casa` appears collapsed beside **Conversas em andamento**, showing only its name and count.
 5. Expand `Casa`; confirm no previews, unread markers, timestamps, or unrelated conversations appear.
-6. Open each member and confirm the general list and intermediate search results remain hidden.
-7. Reload the page; confirm `Casa` and its members remain while the collection is collapsed again.
+6. Open each member directly from that focused surface and confirm the general list, intermediate search results, and Modo Foco overlay remain hidden.
+7. Reload the page, enter a focused conversation, and confirm `Casa` and its members remain while the collection is collapsed again.
 8. Remove one member; confirm other members and collections remain unchanged.
 9. Delete `Casa`; confirm it disappears and does not return after reload.
 10. Inspect `chrome.storage.local`; confirm only the approved version, collection names, and selected display titles exist under the collection key.
@@ -52,4 +52,4 @@ Implementation evidence:
 - JavaScript syntax, manifest JSON, and diff checks pass.
 - Static privacy contracts confirm isolated extension storage, allowlisted model fields, plain-text rendering, and no title-bearing awareness calls.
 
-Pending: live Chrome create/add/reload/open/remove/delete route, cross-archive behavior, storage inspection, limit/failure checks, and Navigator acceptance.
+Pending: live Chrome create/add/reload/open/remove/delete route on the focused-conversation shelf, cross-archive behavior, storage inspection, limit/failure checks, and Navigator acceptance.

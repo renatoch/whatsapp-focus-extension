@@ -25,7 +25,7 @@ This Delivery Story translates the promoted exploration in [`../../explorations/
 - From an open focused conversation, offer **Adicionar à coleção**.
 - Use a compact popover to choose an existing collection or create a new named collection.
 - Support at most 5 collections with at most 8 unique conversations each.
-- Show collections collapsed by default on the Modo Foco overlay, exposing only collection name and member count.
+- Show collections collapsed by default on the focused-conversation navigation shelf, exposing only collection name and member count.
 - Allow at most one collection to be expanded at a time.
 - Reuse the exact, visually hidden native-search route to open a selected member without exposing the general list.
 - Allow a member to be removed and a collection to be deleted.
@@ -56,7 +56,7 @@ The Navigator explicitly authorized local persistence for this experiment.
 |------|-------|------|---------|--------|
 | DS5.TS1 | Define the private persisted collection model | Technical Story | A versioned, sanitized `chrome.storage.local` schema enforces the 5×8 limits and admits only collection names and explicitly selected display titles. | Implemented — validation pending |
 | DS5.US1 | Add a focused conversation to a collection | User Story | From the open focused conversation, the user can choose an existing collection or create a new one without exposing the general inbox. | Implemented — validation pending |
-| DS5.US2 | Browse collapsed focused collections | User Story | The overlay shows collapsed collection names and counts, with no more than one explicitly expanded member list. | Implemented — validation pending |
+| DS5.US2 | Browse collapsed focused collections | User Story | The focused-conversation shelf shows collapsed collection names and counts, with no more than one explicitly expanded member list. | Implemented — validation pending |
 | DS5.US3 | Reopen a collection member safely | User Story | A selected member reopens through one exact unique hidden-search match across the main list and Arquivadas, failing closed otherwise. | Implemented — validation pending |
 | DS5.US4 | Remove collection members and collections | User Story | The user can remove a member or delete a collection while preserving all unrelated collections. | Implemented — validation pending |
 | DS5.TS2 | Verify collection privacy and persistence boundaries | Technical Story | Automated and live checks confirm reload persistence, schema sanitization, title-safe rendering, and exclusion of unauthorized WhatsApp-derived data. | Implemented — validation pending |

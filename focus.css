@@ -250,13 +250,16 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   background: rgba(11, 20, 26, 0.5);
 }
 
-.mwf-focused-recents-floating {
+.mwf-focused-navigation-floating {
   position: fixed;
   left: 72px;
   top: 142px;
   z-index: 2147483645;
   display: none;
   width: min(300px, calc(100vw - 96px));
+  max-height: calc(100vh - 170px);
+  overflow-y: auto;
+  box-sizing: border-box;
   padding: 12px;
   border: 1px solid rgba(233, 237, 239, 0.14);
   border-radius: 14px;
@@ -264,7 +267,7 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   box-shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
 }
 
-html.mwf-search-focused .mwf-focused-recents-floating:not([hidden]) {
+html.mwf-search-focused .mwf-focused-navigation-floating:not([hidden]) {
   display: block;
 }
 
@@ -342,12 +345,16 @@ html.mwf-search-focused .mwf-focused-recents-floating:not([hidden]) {
 }
 
 .mwf-fixed-collections {
-  margin: 16px 0;
-  padding: 12px;
-  border: 1px solid rgba(233, 237, 239, 0.12);
-  border-radius: 14px;
-  background: rgba(11, 20, 26, 0.5);
+  margin: 12px 0 0;
+  padding: 12px 0 0;
+  border-top: 1px solid rgba(233, 237, 239, 0.12);
   color: #e9edef;
+}
+
+.mwf-focused-recents[hidden] + .mwf-fixed-collections {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: 0;
 }
 
 .mwf-fixed-collections-label {

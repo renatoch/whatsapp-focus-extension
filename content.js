@@ -358,20 +358,43 @@
 
   function ensureFocusedRecentsShelf() {
     if (!document.body || document.getElementById(FOCUSED_RECENTS_ID)) return;
-    const shelf = document.createElement("section");
+    const shelf = document.createElement("aside");
     shelf.id = FOCUSED_RECENTS_ID;
-    shelf.className = "mwf-focused-recents mwf-focused-recents-floating";
-    shelf.setAttribute("aria-label", "Conversas em andamento");
+    shelf.className = "mwf-focused-navigation-floating";
+    shelf.setAttribute("aria-label", "Navegação entre conversas focadas");
     shelf.hidden = true;
+
+    const recents = document.createElement("section");
+    recents.className = "mwf-focused-recents";
+    recents.setAttribute("data-mwf-focused-recents-focused", "");
+    recents.setAttribute("aria-label", "Conversas em andamento");
+    recents.hidden = true;
+
+    const collections = document.createElement("section");
+    collections.className = "mwf-fixed-collections";
+    collections.setAttribute("data-mwf-fixed-collections-focused", "");
+    collections.setAttribute("aria-label", "Coleções");
+    collections.hidden = true;
+
+    shelf.append(recents, collections);
     document.body.appendChild(shelf);
+  }
+
+  function updateFocusedNavigationShelfVisibility() {
+    const shelf = document.getElementById(FOCUSED_RECENTS_ID);
+    if (!shelf) return;
+    const recents = shelf.querySelector("[data-mwf-focused-recents-focused]");
+    const collections = shelf.querySelector("[data-mwf-fixed-collections-focused]");
+    shelf.hidden = Boolean(recents?.hidden && collections?.hidden);
   }
 
   function renderFocusedRecents() {
     const containers = [
       document.querySelector("[data-mwf-focused-recents-overlay]"),
-      document.getElementById(FOCUSED_RECENTS_ID),
+      document.querySelector("[data-mwf-focused-recents-focused]"),
     ].filter(Boolean);
     containers.forEach(createFocusedRecentsContents);
+    updateFocusedNavigationShelfVisibility();
   }
 
   async function loadFixedCollections() {
@@ -481,10 +504,11 @@
   }
 
   function renderFixedCollections() {
-    const container = document.querySelector("[data-mwf-fixed-collections-overlay]");
+    const container = document.querySelector("[data-mwf-fixed-collections-focused]");
     if (!container) return;
     container.replaceChildren();
     container.hidden = fixedCollectionsState.collections.length === 0;
+    updateFocusedNavigationShelfVisibility();
     if (container.hidden) return;
 
     const label = document.createElement("strong");
@@ -1511,7 +1535,6 @@
         <p>O WhatsApp está cego por padrão. Abra somente o que você veio buscar — sem lista de conversas, arquivadas, badges ou previews.</p>
         <p id="mirror-whatsapp-focus-streak" class="mwf-focus-streak">Você ainda não abriu o WhatsApp normal nesta instalação.</p>
         <section class="mwf-focused-recents mwf-focused-recents-overlay" data-mwf-focused-recents-overlay aria-label="Conversas em andamento" hidden></section>
-        <section class="mwf-fixed-collections" data-mwf-fixed-collections-overlay aria-label="Coleções" hidden></section>
         <div class="mwf-loading" aria-label="Carregando WhatsApp Web">
           <progress id="mirror-whatsapp-focus-loading-progress" class="mwf-loading-progress" value="0" max="100"></progress>
         </div>
@@ -1822,6 +1845,7 @@
     ensureSearchGateMessage();
     ensureFocusedRecentsShelf();
     renderFocusedRecents();
+    renderFixedCollections();
   }
 
   function ensureStyle(id) {

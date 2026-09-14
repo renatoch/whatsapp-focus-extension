@@ -32,8 +32,11 @@ test('offers add-to-collection only from a focused conversation', () => {
   assert.match(content, /openFixedCollectionChooser/);
 });
 
-test('renders collapsed collections and persisted names as plain text', () => {
-  assert.match(content, /data-mwf-fixed-collections-overlay/);
+test('renders collapsed collections on the focused conversation shelf as plain text', () => {
+  assert.match(content, /data-mwf-fixed-collections-focused/);
+  assert.doesNotMatch(content, /data-mwf-fixed-collections-overlay/);
+  assert.match(content, /mwf-focused-navigation-floating/);
+  assert.match(css, /html\.mwf-search-focused \.mwf-focused-navigation-floating:not\(\[hidden\]\)/);
   assert.match(content, /expandedFixedCollectionName/);
   assert.match(content, /heading\.textContent = collection\.name/);
   assert.match(content, /memberButton\.textContent = memberTitle/);
