@@ -2,7 +2,7 @@
 
 # DS6 — Modular Extension Architecture
 
-**Status:** ⚪ Candidate
+**Status:** 🟡 DS Plan — awaiting Navigator approval
 
 ---
 
@@ -14,9 +14,9 @@ Make the extension safer and cheaper to change by separating WhatsApp DOM access
 
 The Navigator requested a dedicated refactoring Delivery Story after DS5's collection surface correction. Pure rules already live in `awareness.js`, `focus-state.js`, `focused-recents.js`, and `fixed-collections.js`, but DOM orchestration and UI remain concentrated in `content.js`.
 
-Baseline at commit `7598f99`: `content.js` has 2,137 lines and `focus.css` has 1,158 lines. The automated suite passes 51 tests, including source-level integration contracts; those contracts alone do not establish runtime equivalence.
+Planning baseline at code commit `2f9f6e3`, accepted in `469a85c`: `content.js` has 2,214 lines and `focus.css` has 1,187 lines. The last automated run passed 77 tests, including source-level and source-sliced VM contracts; those contracts alone do not establish runtime equivalence.
 
-This is a candidate only. DS5 remains the active delivery awaiting live validation. Pull, detailed planning, and implementation approval remain separate lifecycle steps.
+Navigator requested DS6 planning after accepting the stabilized reopening adjustment. DS6 is now the active planning item in Delivery Story flow. See [plan.md](plan.md) and [test-guide.md](test-guide.md). Implementation remains blocked until plan approval. DS5's separate aggregate lifecycle evidence is not retroactively closed by this request.
 
 ## Scope
 
@@ -47,7 +47,8 @@ This is a candidate only. DS5 remains the active delivery awaiting live validati
 - Preserve exact unique hidden-search reopening, bounded polling, the evidenced `mousedown` activation, and fail-closed recovery.
 - Preserve normal-mode timing, intent outcomes, graceful expiry, and existing storage keys/schema compatibility.
 - Recent titles remain session-only; collections persist only explicitly selected titles and authored collection names.
-- Collections remain on the focused-conversation surface, not the overlay.
+- Collections remain on the focused surface and in empty manual search, not the overlay. Preserve five recents, five collections × ten members, fixed recent-slot height, retained expansion/scroll during switching, opaque panel and empty-search native isolation.
+- Preserve two consecutive unique-target observations before activation, bounded retries and structural sample diagnostics.
 - No title-bearing telemetry, broader WhatsApp data collection, archival mutation, or persistence expansion.
 
 ## Non-Goals
