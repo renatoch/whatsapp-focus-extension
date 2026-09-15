@@ -57,6 +57,20 @@ The stable worktree remains untouched so its existing Chrome installation and CS
 - Added manifest-order/bootstrap execution test verifying import-time DOM inertness and blind entry before body exists.
 - Full suite: 98 passing. No new dependency or user-visible change intended.
 
+## Resume checkpoint — explicitly paused by Navigator
+
+Navigator requested verification and continuity notes only, not further implementation. Wait for a new instruction to resume; the earlier autonomous-work request must not override this pause.
+
+Verified at this pause:
+
+- DS6 worktree was clean at `84786c7` (documentation checkpoint); latest code change remains `3997ee5`.
+- Stable `main` remains at `4dd73e1`. Its only untracked entry is runtime `.mirror/`; do not commit or remove it.
+- Current sizes: `content.js` 1,779 lines; `scripts/whatsapp-dom.js` 236; `scripts/focused-navigation.js` 102; `scripts/search-gate.js` 42.
+- Last executed verification: 98/98 tests, JS syntax checks, manifest parsing and diff checks passed before `84786c7`. Tests were not rerun during this pause-only inspection.
+- No implementation is stranded in uncommitted files. Refactoring is partial; Chrome validation of DS6 has not happened.
+
+To resume after explicit authorization: work in the DS6 worktree, inspect `git status`/`git log`, read this file plus `plan.md` and `docs/architecture.md`, rerun `node --test tests/*.test.js`, then take the first remaining extraction below. Do not recreate the branch, reapprove the already-approved plan, switch the stable installation, or start from the original monolithic code.
+
 ## Remaining
 
 Next safe implementation boundary:
