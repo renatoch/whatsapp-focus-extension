@@ -806,7 +806,8 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 #mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > h1,
 #mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > p,
 #mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > .mwf-actions,
-#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > .mwf-awareness-link {
+#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > .mwf-awareness-link,
+#mirror-whatsapp-focus-overlay.mwf-intent-pending .mwf-card > .mwf-focused-recents-overlay {
   display: none !important;
 }
 
@@ -901,7 +902,8 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > h1,
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > p,
 #mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-actions,
-#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-awareness-link {
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-awareness-link,
+#mirror-whatsapp-focus-overlay.mwf-normal-pending .mwf-card > .mwf-focused-recents-overlay {
   display: none !important;
 }
 
