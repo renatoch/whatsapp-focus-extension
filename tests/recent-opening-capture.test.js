@@ -108,7 +108,7 @@ test('collection and recent navigation both update recency on header confirmatio
       updateRecentNavigationDiagnostic: () => {}, setSearchFocusedConversation: () => {},
       addFocusedRecent: (title) => added.push(title), recordAwareness: () => {},
     });
-    vm.runInContext(functionSource('confirmFocusedRecentOpened') + '\nconfirmFocusedRecentOpened("Selected", 1, 0);', context);
+    vm.runInContext(functionSource('focusedConversationOpened') + `\nfocusedConversationOpened("Selected", "${source}");`, context);
     assert.deepEqual(added, ['Selected']);
   }
 });

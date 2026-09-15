@@ -11,7 +11,8 @@ Manifest content scripts load synchronously at `document_start`:
 
 1. `awareness.js`, `focus-state.js`, `focused-recents.js`, `fixed-collections.js`: existing pure rules/storage adapters.
 2. `scripts/whatsapp-dom.js`: exports an injected factory; no import-time DOM access.
-3. `content.js`: constructs the adapter and currently still owns remaining controllers, UI, timers and bootstrap.
+3. `scripts/focused-navigation.js`: injected hidden-search controller; owns its bounded polling and confirmation timers.
+4. `content.js`: constructs both factories and still owns the remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -30,6 +31,22 @@ navigation nor persists titles. Debug behavior remains governed by the existing
 The same six assertions were first run against the pre-extraction code.
 Nested-view helpers, readiness/progress and empty-search isolation remain in
 `content.js` for the next adapter slice. Search policy remains outside the adapter.
+
+## Focused hidden navigation
+
+`createFocusedNavigation({ native, rules, scheduler, now?, normalizeChats,
+onBegin, onOpened, onFailure })` owns one active hidden reopening, structural
+diagnostics and target stabilization. UI callbacks receive the outcome; the
+controller never reads root classes, persists titles or renders DOM. Initial
+inspection remains 100 ms, retries 150 ms, at most 11 inspections. Header
+confirmation remains mandatory. `cancel` clears pending timers and invalidates
+late normalization callbacks; `dispose` additionally rejects new requests until
+`start`. Mode exits in composition cancel pending hidden navigation. Existing
+recency and telemetry policy stays in the success/failure callbacks.
+
+The public-factory stability suite also covers persistent/transient ambiguity,
+changing target identity, mismatched query/header, missing fields, disposal and
+restart. No source extraction is used for polling tests now.
 
 ## Invariants during extraction
 

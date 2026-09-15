@@ -31,10 +31,6 @@
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
   const SEARCH_SETTLE_MS = 1000;
-  const RECENT_SEARCH_INITIAL_MS = 100;
-  const RECENT_SEARCH_RETRY_MS = 150;
-  const RECENT_CONFIRM_RETRY_MS = 150;
-  const RECENT_NAVIGATION_RETRIES = 10;
   const FOCUSED_CAPTURE_RETRIES = 5;
   const NORMAL_DELAY_MS = 8000;
   const RECENT_NORMAL_OPEN_MS = 10 * 60 * 1000;
@@ -62,18 +58,21 @@
   let pendingIntent = null;
   let focusedRecents = [];
   let recentCaptureToken = 0;
-  let recentNavigationToken = 0;
-  let recentNavigationStartedAt = 0;
-  let recentNavigationDiagnostic = null;
-  let recentNavigationSource = "recent";
   let fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || { version: 1, collections: [] };
   let expandedFixedCollectionName = "";
   const fixedCollectionRenderCache = new WeakMap();
   let pendingCollectionTitle = "";
-  const { readTitle, readActiveConversationTitle, conversationRow, readConversationRowTitle,
-    focusedResultClickTarget, activateFocusedResult, focusedSearchCandidates,
-    setNativeSearchText, clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement,
-  } = globalThis.MirrorWhatsAppDom.createWhatsAppDom({ document, window, debugLog, describeElement });
+  const nativeAdapter = globalThis.MirrorWhatsAppDom.createWhatsAppDom({ document, window, debugLog, describeElement });
+  const { readActiveConversationTitle, conversationRow, readConversationRowTitle,
+    clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement,
+  } = nativeAdapter;
+  const focusedNavigation = globalThis.MirrorFocusedNavigation.createFocusedNavigation({
+    native: nativeAdapter, rules: globalThis.MirrorFocusedRecents, scheduler: window,
+    normalizeChats: (callback) => goToMainChatsThen("focused-recent", callback),
+    onBegin: beginHiddenNavigationSurface,
+    onOpened: focusedConversationOpened,
+    onFailure: failFocusedRecentNavigation,
+  });
 
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
@@ -102,6 +101,7 @@
   }
 
   function setActive({ showOverlay }) {
+    focusedNavigation.cancel();
     recentCaptureToken += 1;
     closeFixedCollectionChooser();
     if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
@@ -126,6 +126,7 @@
   }
 
   function setNormal() {
+    focusedNavigation.cancel();
     closeFixedCollectionChooser();
     clearNormalDelay();
     root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
@@ -135,6 +136,7 @@
   }
 
   function setSearchMode() {
+    focusedNavigation.cancel();
     recentCaptureToken += 1;
     closeFixedCollectionChooser();
     debugLog("setSearchMode:start", {
@@ -637,151 +639,49 @@
     document.body.appendChild(chooser);
   }
 
-  function updateRecentNavigationDiagnostic(patch) {
-    const elapsedMs = recentNavigationStartedAt ? Date.now() - recentNavigationStartedAt : 0;
-    recentNavigationDiagnostic = globalThis.MirrorFocusedRecents?.updateNavigationDiagnostic(
-      recentNavigationDiagnostic,
-      { ...patch, elapsedMs }
-    ) || null;
+  function beginFocusedRecentNavigation(title, source = "recent") {
+    focusedNavigation.open(title, source);
   }
 
-  function beginFocusedRecentNavigation(title, source = "recent") {
+  function beginHiddenNavigationSurface() {
     recentCaptureToken += 1;
-    recentNavigationToken += 1;
-    recentNavigationSource = source;
-    recentNavigationStartedAt = Date.now();
-    recentNavigationDiagnostic = globalThis.MirrorFocusedRecents?.createNavigationDiagnostic() || null;
-    updateRecentNavigationDiagnostic({ stage: "starting" });
-    const token = recentNavigationToken;
     resetSearchGate();
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SEARCHING, ROOT_OPENING_RECENT);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
     renderFocusedRecents();
-    goToMainChatsThen("focused-recent", () => {
-      updateRecentNavigationDiagnostic({ stage: "chats-normalized" });
-      startFocusedRecentSearch(title, token);
-    });
   }
 
   function openFocusedRecent(title) {
     if (!title || root().classList.contains(ROOT_OPENING_RECENT)) return;
     if (!isWhatsAppReady()) {
-      failFocusedRecentNavigation("title-unavailable", recentNavigationToken + 1);
+      failFocusedRecentNavigation("title-unavailable", "recent");
       return;
     }
     beginFocusedRecentNavigation(title);
   }
 
-  function startFocusedRecentSearch(title, token) {
-    if (token !== recentNavigationToken) return;
-    const field = findNativeSearchField({ allowHidden: true });
-    updateRecentNavigationDiagnostic({
-      stage: "search-field-ready",
-      searchFieldFound: Boolean(field),
-    });
-    if (!field) {
-      failFocusedRecentNavigation("title-unavailable", token);
-      return;
+  function focusedConversationOpened(activeTitle, source) {
+    setSearchFocusedConversation();
+    addFocusedRecent(activeTitle);
+    if (source === "recent") {
+      recordAwareness("focused_conversation_opened", { route: "recent" });
     }
-    setNativeSearchText(field, title);
-    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
-    updateRecentNavigationDiagnostic({
-      stage: "search-text-dispatched",
-      searchTextAccepted: Boolean(normalize && normalize(getSearchText(field)) === normalize(title)),
-    });
-    window.setTimeout(() => resolveFocusedRecentSearch(title, token, 0), RECENT_SEARCH_INITIAL_MS);
   }
 
-  function resolveFocusedRecentSearch(title, token, attempt, previousUniqueTarget = null) {
-    if (token !== recentNavigationToken) return;
-    const resultSet = focusedSearchCandidates();
-    const candidates = resultSet.candidates;
-    const classification = globalThis.MirrorFocusedRecents?.classifyExactTitleMatches(
-      title,
-      candidates.map((candidate) => candidate.title)
-    ) || { status: "not-found", index: null };
-    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
-    const field = findNativeSearchField({ allowHidden: true });
-    const searchTextAccepted = Boolean(normalize && field && normalize(getSearchText(field)) === normalize(title));
-    const sample = {
-      attempt,
-      searchTextAccepted,
-      candidateRows: resultSet.rowCount,
-      candidateTitles: candidates.length,
-      exactMatches: candidates.filter((candidate) => (
-        normalize && normalize(candidate.title) === normalize(title)
-      )).length,
-    };
-    updateRecentNavigationDiagnostic({
-      stage: "results-inspected",
-      ...sample,
-      resultSample: sample,
-    });
-    const uniqueTarget = classification.status === "match" && searchTextAccepted
-      ? candidates[classification.index].clickTarget : null;
-    // A transient duplicate is not proof of permanent ambiguity. Conversely,
-    // one unique snapshot is not enough: require the same target next poll.
-    if (!uniqueTarget || uniqueTarget !== previousUniqueTarget) {
-      if (attempt < RECENT_NAVIGATION_RETRIES) {
-        window.setTimeout(() => resolveFocusedRecentSearch(title, token, attempt + 1, uniqueTarget), RECENT_SEARCH_RETRY_MS);
-      } else {
-        failFocusedRecentNavigation(classification.status === "ambiguous" ? "ambiguous" : "not-found", token);
-      }
-      return;
-    }
-    activateFocusedResult(candidates[classification.index].clickTarget);
-    updateRecentNavigationDiagnostic({
-      stage: "exact-result-clicked",
-      clickDispatched: true,
-    });
-    window.setTimeout(() => confirmFocusedRecentOpened(title, token, 0), RECENT_CONFIRM_RETRY_MS);
-  }
-
-  function confirmFocusedRecentOpened(title, token, attempt) {
-    if (token !== recentNavigationToken) return;
-    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
-    const activeTitle = readActiveConversationTitle();
-    const headerMatched = Boolean(normalize && normalize(activeTitle) === normalize(title));
-    updateRecentNavigationDiagnostic({
-      stage: "confirming-header",
-      headerMatched,
-    });
-    if (headerMatched) {
-      updateRecentNavigationDiagnostic({ stage: "complete" });
-      setSearchFocusedConversation();
-      addFocusedRecent(activeTitle);
-      if (recentNavigationSource === "recent") {
-        recordAwareness("focused_conversation_opened", { route: "recent" });
-      }
-      return;
-    }
-    if (attempt < RECENT_NAVIGATION_RETRIES) {
-      window.setTimeout(() => confirmFocusedRecentOpened(title, token, attempt + 1), RECENT_CONFIRM_RETRY_MS);
-      return;
-    }
-    failFocusedRecentNavigation("not-found", token);
-  }
-
-  function failFocusedRecentNavigation(reason, token) {
-    if (token !== recentNavigationToken && root().classList.contains(ROOT_OPENING_RECENT)) return;
-    updateRecentNavigationDiagnostic({
-      stage: "failed",
-      failureReason: reason,
-    });
-    recentNavigationToken += 1;
+  function failFocusedRecentNavigation(reason, source, diagnostic = null) {
     resetSearchGate();
     root().classList.remove(ROOT_OPENING_RECENT);
     setActive({ showOverlay: true });
-    if (recentNavigationSource === "recent") {
+    if (source === "recent") {
       recordAwareness("focused_recent_navigation_failed", { reason });
     }
     showToast(
       reason === "ambiguous"
         ? "Há mais de uma conversa com esse nome. Use a busca para escolher com segurança."
         : "Não consegui reabrir essa conversa com segurança. Use a busca para encontrá-la novamente.",
-      recentNavigationDiagnostic
+      diagnostic
     );
   }
 

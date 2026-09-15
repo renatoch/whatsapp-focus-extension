@@ -6,6 +6,7 @@ const path = require('node:path');
 const projectRoot = path.join(__dirname, '..');
 const content = fs.readFileSync(path.join(projectRoot, 'content.js'), 'utf8');
 const nativeAdapter = fs.readFileSync(path.join(projectRoot, 'scripts/whatsapp-dom.js'), 'utf8');
+const navigation = fs.readFileSync(path.join(projectRoot, 'scripts/focused-navigation.js'), 'utf8');
 const css = fs.readFileSync(path.join(projectRoot, 'focus.css'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, 'manifest.json'), 'utf8'));
 
@@ -16,6 +17,7 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'focused-recents.js',
     'fixed-collections.js',
     'scripts/whatsapp-dom.js',
+    'scripts/focused-navigation.js',
     'content.js',
   ]);
 });
@@ -28,14 +30,14 @@ test('internal recent navigation hides native sidebar and search affordances', (
 });
 
 test('recent navigation polls promptly and activates only one exact classified result', () => {
-  assert.match(content, /classifyExactTitleMatches\(\s*title,\s*candidates\.map\(\(candidate\) => candidate\.title\)\s*\)/);
-  assert.match(content, /classification\.status === "match" && searchTextAccepted/);
-  assert.match(content, /uniqueTarget !== previousUniqueTarget/);
+  assert.match(navigation, /classifyExactTitleMatches\(\s*title,\s*candidates\.map\(\(candidate\) => candidate\.title\)\s*\)/);
+  assert.match(navigation, /classification\.status === "match" && searchTextAccepted/);
+  assert.match(navigation, /uniqueTarget !== previousUniqueTarget/);
   assert.match(nativeAdapter, /dispatchEvent\(new MouseEvent\("mousedown"/);
-  assert.match(content, /activateFocusedResult\(candidates\[classification\.index\]\.clickTarget\)/);
+  assert.match(navigation, /activateFocusedResult\(uniqueTarget\)/);
   assert.doesNotMatch(content, /candidates\[classification\.index\]\.clickTarget\.click\(\)/);
-  assert.match(content, /RECENT_SEARCH_INITIAL_MS = 100/);
-  assert.match(content, /RECENT_SEARCH_RETRY_MS = 150/);
+  assert.match(navigation, /INITIAL_MS = 100/);
+  assert.match(navigation, /RETRY_MS = 150/);
   assert.doesNotMatch(content, /RECENT_SEARCH_SETTLE_MS = 1400/);
 });
 
@@ -49,8 +51,8 @@ test('an empty search hides WhatsApp recent-search suggestions', () => {
 });
 
 test('failed navigation exposes a copyable privacy-safe diagnostic', () => {
-  assert.match(content, /updateRecentNavigationDiagnostic\(\{[^}]*stage: "results-inspected"/s);
-  assert.match(content, /,\s*recentNavigationDiagnostic\s*\);/);
+  assert.match(navigation, /update\(\{[^}]*stage: "results-inspected"/s);
+  assert.match(content, /,\s*diagnostic\s*\);/);
   assert.match(content, /button\.textContent = "Copiar diagnóstico";/);
 });
 

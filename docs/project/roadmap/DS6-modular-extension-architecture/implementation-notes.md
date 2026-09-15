@@ -36,6 +36,14 @@ The stable worktree remains untouched so its existing Chrome installation and CS
 - Manifest and source ownership contracts updated. Native target identity remains unchanged; current stability tests exercise the existing controller.
 - Architecture documentation started in `docs/architecture.md`.
 
+## Hidden-navigation controller
+
+- Extracted bounded exact search, unique-target stabilization, header confirmation and diagnostics to `scripts/focused-navigation.js`.
+- Injected native operations, rules, scheduler, clock, normalization and outcome callbacks. No root-class or renderer dependency.
+- Owned timers are cancelled on cancel/dispose and guarded by a generation token, including late normalization callbacks. Mode exits cancel pending hidden operations.
+- Stability tests now exercise the public factory, not source slices; additional header mismatch, missing-field, disposal/restart and route cases pass.
+- Full automated suite: 89 passing. Manual search gating and capture still await extraction; no live Chrome refactor validation claimed.
+
 ## Remaining
 
 Continue characterization where existing coverage is thin, extract native adapter then navigation, and follow TS3–TS6. No whole-story completion or post-refactor live validation is claimed by these initial checks.

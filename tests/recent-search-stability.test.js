@@ -1,80 +1,104 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const path = require('node:path');
-const api = require('../focused-recents.js');
-const source = fs.readFileSync(path.join(__dirname, '../content.js'), 'utf8');
-const start = source.indexOf('  function resolveFocusedRecentSearch(');
-const implementation = source.slice(start, source.indexOf('\n  function ', start + 1));
+const rules = require('../focused-recents.js');
+const { createFocusedNavigation } = require('../scripts/focused-navigation.js');
 
-function run(counts, { accepted = true, cancel = false, changingTargets = false } = {}) {
-  const timers = [], clicks = [], failures = [];
-  const target = {};
-  let sample = 0, confirmed = 0;
-  let diagnostic = api.createNavigationDiagnostic();
-  const context = vm.createContext({
-    recentNavigationToken: 1, RECENT_NAVIGATION_RETRIES: 10,
-    RECENT_SEARCH_RETRY_MS: 150, RECENT_CONFIRM_RETRY_MS: 150,
-    MirrorFocusedRecents: api,
+function setup(counts, { accepted = true, changingTargets = false, headerMatches = true } = {}) {
+  const timers = new Map(), clicks = [], failures = [], openings = [], samples = [];
+  const target = {}; let inspection = 0, timerId = 0, lastDiagnostic;
+  const scheduler = {
+    setTimeout: (callback, ms) => { timers.set(++timerId, { callback, ms }); return timerId; },
+    clearTimeout: (id) => timers.delete(id),
+  };
+  const native = {
+    findNativeSearchField: () => ({}), setNativeSearchText() {}, getSearchText: () => accepted ? 'Example' : 'Previous',
     focusedSearchCandidates: () => {
-      const count = counts[Math.min(sample++, counts.length - 1)];
-      return { rowCount: count, candidates: Array.from({ length: count }, (_, index) => ({ title: 'Example', clickTarget: index === 0 && !changingTargets ? target : {} })) };
+      const count = counts[Math.min(inspection++, counts.length - 1)];
+      samples.push(count);
+      return { rowCount: count, candidates: Array.from({ length: count }, (_, index) => ({
+        title: 'Example', clickTarget: index === 0 && !changingTargets ? target : {},
+      })) };
     },
-    findNativeSearchField: () => ({}), getSearchText: () => accepted ? 'Example' : 'Previous',
-    updateRecentNavigationDiagnostic: (patch) => { diagnostic = api.updateNavigationDiagnostic(diagnostic, patch); },
     activateFocusedResult: (element) => clicks.push(element),
-    failFocusedRecentNavigation: (reason) => failures.push(reason),
-    confirmFocusedRecentOpened: () => confirmed++,
-    window: { setTimeout: (callback) => timers.push(callback) },
+    readActiveConversationTitle: () => headerMatches ? 'Example' : 'Previous',
+  };
+  const controller = createFocusedNavigation({ native, rules, scheduler, now: () => 1000,
+    normalizeChats: (callback) => callback(), onBegin() {},
+    onOpened: (title, source, diagnostic) => { openings.push({ title, source }); lastDiagnostic = diagnostic; },
+    onFailure: (reason, source, diagnostic) => { failures.push(reason); lastDiagnostic = diagnostic; },
   });
-  vm.runInContext(implementation + '\nresolveFocusedRecentSearch("Example", 1, 0);', context);
-  const initialClicks = clicks.length;
-  if (cancel) context.recentNavigationToken = 2;
-  let budget = 30;
-  while (timers.length && budget--) timers.shift()();
-  assert.ok(budget > 0, 'bounded polling');
-  return { clicks, initialClicks, failures, sample, confirmed, diagnostic };
+  function tick() {
+    const [id, timer] = timers.entries().next().value || [];
+    if (!timer) return;
+    timers.delete(id); timer.callback(); return timer.ms;
+  }
+  function flush() { let budget = 50; while (timers.size && budget--) tick(); assert.ok(budget > 0); }
+  return { controller, native, clicks, failures, openings, samples, timers, tick, flush,
+    get diagnostic() { return lastDiagnostic; } };
+}
+function run(counts, options) {
+  const h = setup(counts, options); h.controller.open('Example'); h.flush(); return h;
 }
 
 test('waits through transient ambiguity and clicks only after two unique observations', () => {
-  const result = run([2, 1, 1]);
-  assert.equal(result.initialClicks, 0);
-  assert.equal(result.sample, 3);
-  assert.equal(result.clicks.length, 1);
-  assert.equal(result.confirmed, 1);
-  assert.deepEqual(result.failures, []);
-  assert.deepEqual(result.diagnostic.resultSamples.map((item) => item.exactMatches), [2, 1, 1]);
+  const h = setup([2, 1, 1]); h.controller.open('Example');
+  assert.equal(h.tick(), 100); assert.equal(h.clicks.length, 0);
+  assert.equal(h.tick(), 150); assert.equal(h.clicks.length, 0);
+  h.flush();
+  assert.equal(h.samples.length, 3); assert.equal(h.clicks.length, 1);
+  assert.equal(h.openings.length, 1); assert.deepEqual(h.failures, []);
+  assert.deepEqual(h.diagnostic.resultSamples.map((item) => item.exactMatches), [2, 1, 1]);
 });
 test('persistent ambiguity fails closed after the bounded sample window', () => {
-  const result = run([2]);
-  assert.equal(result.sample, 11);
-  assert.equal(result.clicks.length, 0);
-  assert.deepEqual(result.failures, ['ambiguous']);
+  const h = run([2]);
+  assert.equal(h.samples.length, 11); assert.equal(h.clicks.length, 0);
+  assert.deepEqual(h.failures, ['ambiguous']);
 });
 test('a first unique observation cannot trigger a click if ambiguity appears next', () => {
-  const result = run([1, 2]);
-  assert.equal(result.initialClicks, 0);
-  assert.equal(result.clicks.length, 0);
+  assert.equal(run([1, 2]).clicks.length, 0);
 });
 test('absence resets stability and a unique result at the deadline is insufficient', () => {
-  const result = run([1, 0, 1, 1]);
-  assert.equal(result.sample, 4);
-  assert.equal(result.clicks.length, 1);
+  const h = run([1, 0, 1, 1]);
+  assert.equal(h.samples.length, 4); assert.equal(h.clicks.length, 1);
   assert.equal(run([...Array(10).fill(0), 1]).clicks.length, 0);
 });
-test('unaccepted search text and superseded navigation never activate a candidate', () => {
+test('unaccepted search text and cancelled navigation never activate a candidate', () => {
   assert.equal(run([1], { accepted: false }).clicks.length, 0);
-  assert.equal(run([1], { cancel: true }).clicks.length, 0);
+  const h = setup([1]); h.controller.open('Example'); h.tick(); h.controller.cancel(); h.flush();
+  assert.equal(h.clicks.length, 0); assert.equal(h.timers.size, 0);
 });
 test('replaced native targets do not count as a stable unique result', () => {
   assert.equal(run([1], { changingTargets: true }).clicks.length, 0);
 });
-
+test('header mismatch after activation still fails closed', () => {
+  const h = run([1], { headerMatches: false });
+  assert.equal(h.clicks.length, 1); assert.equal(h.openings.length, 0);
+  assert.deepEqual(h.failures, ['not-found']);
+});
+test('collection and recent routes have equivalent confirmation with distinct source callbacks', () => {
+  for (const source of ['collection', 'recent']) {
+    const h = setup([1]); h.controller.open('Example', source); h.flush();
+    assert.deepEqual(h.openings, [{ title: 'Example', source }]);
+  }
+});
+test('dispose invalidates even an already queued callback and start allows a fresh session', () => {
+  const h = setup([1]); h.controller.open('Example');
+  const pending = [...h.timers.values()][0].callback;
+  h.controller.dispose(); pending();
+  assert.equal(h.samples.length, 0); assert.equal(h.timers.size, 0);
+  assert.equal(h.controller.open('Example'), false);
+  h.controller.start(); h.controller.open('Example'); h.flush();
+  assert.equal(h.openings.length, 1);
+});
+test('missing native field reports structural failure without activating anything', () => {
+  const h = setup([1]); h.native.findNativeSearchField = () => undefined;
+  h.controller.open('Example'); h.flush();
+  assert.deepEqual(h.failures, ['title-unavailable']); assert.equal(h.clicks.length, 0);
+});
 test('result samples are bounded and strip all nonstructural fields', () => {
-  let diagnostic = api.createNavigationDiagnostic();
+  let diagnostic = rules.createNavigationDiagnostic();
   for (let attempt = 0; attempt < 50; attempt++) {
-    diagnostic = api.updateNavigationDiagnostic(diagnostic, { resultSample: {
+    diagnostic = rules.updateNavigationDiagnostic(diagnostic, { resultSample: {
       attempt, candidateRows: 2, candidateTitles: 2, exactMatches: 2,
       searchTextAccepted: true, title: 'Private', dom: 'Private', query: 'Private',
     } });

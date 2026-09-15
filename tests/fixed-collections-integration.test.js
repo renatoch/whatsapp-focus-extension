@@ -15,6 +15,7 @@ test('loads fixed collections before the content integration', () => {
     'focused-recents.js',
     'fixed-collections.js',
     'scripts/whatsapp-dom.js',
+    'scripts/focused-navigation.js',
     'content.js',
   ]);
 });
@@ -50,7 +51,7 @@ test('collection opening reuses exact hidden navigation without recent telemetry
   assert.doesNotMatch(opening, /expandedFixedCollectionName\s*=/);
   assert.match(opening, /ROOT_OPENING_RECENT/);
   assert.match(content, /beginFocusedRecentNavigation\(memberTitle, "collection"\)/);
-  assert.match(content, /recentNavigationSource === "recent"/);
+  assert.match(content, /source === "recent"/);
   assert.doesNotMatch(content, /recordAwareness\([^\n]*collection\.name|recordAwareness\([^\n]*memberTitle/);
 });
 
