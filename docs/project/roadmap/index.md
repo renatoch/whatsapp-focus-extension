@@ -69,9 +69,9 @@ See: [`DS5-focused-fixed-collections/index.md`](DS5-focused-fixed-collections/in
 
 ### DS6 — Modular Extension Architecture
 
-Status: DS Plan — detailed plan awaiting Navigator approval; implementation not started
+Status: implementing approved plan on refactor/ds6-modular-architecture in an isolated worktree
 
-Separates WhatsApp DOM access, navigation/state ownership, UI surfaces, and styles into cohesive modules while preserving current behavior and privacy. Includes behavioral characterization and targeted live regression validation rather than a file-size-only split. DS6 is the active planning item. Accepted navigation fixes form its regression baseline; DS5's aggregate closure evidence remains separate.
+Separates WhatsApp DOM access, navigation/state ownership, UI surfaces, and styles into cohesive modules while preserving current behavior and privacy. Includes behavioral characterization and targeted live regression validation rather than a file-size-only split. DS6 is the active implementation item. Accepted navigation fixes form its regression baseline; DS5's aggregate closure evidence remains separate.
 
 See: [`DS6-modular-extension-architecture/index.md`](DS6-modular-extension-architecture/index.md)
 

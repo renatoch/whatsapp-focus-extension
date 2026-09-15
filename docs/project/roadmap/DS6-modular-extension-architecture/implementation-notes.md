@@ -59,4 +59,12 @@ The stable worktree remains untouched so its existing Chrome installation and CS
 
 ## Remaining
 
-Continue characterization where existing coverage is thin, extract native adapter then navigation, and follow TS3–TS6. No whole-story completion or post-refactor live validation is claimed by these initial checks.
+Next safe implementation boundary:
+
+1. Extract recent capture (including bounded confirmation retries and cancellation) into a controller using the native adapter; migrate `recent-opening-capture.test.js` from its remaining VM bridge without weakening source-route and passive-change tests.
+2. Finish timer/listener lifecycle ownership as mode/normal-intent controllers are extracted. Some delayed search entry/capture and normalization callbacks are still scheduled by `content.js`; module-local disposal is implemented, but application-level start/dispose is not complete.
+3. Extract conversation store and UI surfaces via data/action callbacks, not a global mutable context. Preserve exact collection render cache and fixed five-slot layout.
+4. Split CSS and the development asset loader only after auditing cascade order; retain the current CSS untouched until that boundary.
+5. Complete docs, full automated verification and one compact Chrome validation route before Debt Review. No whole-story completion, live validation, merge, push or release is claimed.
+
+Latest code checkpoint: `3997ee5` (manual search gate); prior slices `7a43576`, `83ed9d5`, `951a7b3`, characterization `30a3be8`. All work is in the DS6 worktree. The stable main worktree must remain unchanged. No uncommitted implementation is intentionally left at this checkpoint.
