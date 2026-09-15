@@ -12,7 +12,8 @@ Manifest content scripts load synchronously at `document_start`:
 1. `awareness.js`, `focus-state.js`, `focused-recents.js`, `fixed-collections.js`: existing pure rules/storage adapters.
 2. `scripts/whatsapp-dom.js`: exports an injected factory; no import-time DOM access.
 3. `scripts/focused-navigation.js`: injected hidden-search controller; owns its bounded polling and confirmation timers.
-4. `content.js`: constructs both factories and still owns the remaining controllers, UI, timers and bootstrap.
+4. `scripts/search-gate.js`: isolated manual-search settlement policy and timer.
+5. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -50,6 +51,20 @@ recency and telemetry policy stays in the success/failure callbacks.
 The public-factory stability suite also covers persistent/transient ambiguity,
 changing target identity, mismatched query/header, missing fields, disposal and
 restart. No source extraction is used for polling tests now.
+
+## Manual search gate
+
+`createSearchGate({ readText, isSearching, onState, scheduler, minimum, delayMs })`
+reports gate state without constructing UI. It preserves the one-second initial
+reveal, three-character threshold and no repeated delay once results are visible.
+Reset/dispose invalidate stale settlement callbacks. Composition renders the
+reported flags and keeps the independent empty-search navigation choice.
+`tests/search-gate.test.js` exercises time and cancellation directly; the
+empty-search integration suite connects this real factory to the UI bridge.
+
+`tests/bootstrap.test.js` loads scripts in actual manifest order, verifies no
+factory module reads the DOM at import time, then checks blind root classes
+before `document.body` exists. This is a composition check, not live Chrome E2E.
 
 ## Invariants during extraction
 

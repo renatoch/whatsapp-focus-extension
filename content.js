@@ -47,9 +47,6 @@
   let bypassTimer = null;
   let normalDelayTimer = null;
   let normalDelayInterval = null;
-  let searchSettleTimer = null;
-  let pendingSearchText = "";
-  let revealedSearchText = "";
   let lastHotCss = "";
   let lastConfigCss = "";
   let normalAttemptStartedAt = null;
@@ -74,6 +71,11 @@
     onBegin: beginHiddenNavigationSurface,
     onOpened: focusedConversationOpened,
     onFailure: failFocusedRecentNavigation,
+  });
+  const searchGate = globalThis.MirrorSearchGate.createSearchGate({
+    readText: getSearchText, isSearching, scheduler: window,
+    minimum: MIN_SEARCH_CHARS, delayMs: SEARCH_SETTLE_MS,
+    onState: applySearchGateState,
   });
 
   function debugLog(message, details = undefined) {
@@ -153,10 +155,7 @@
       return;
     }
 
-    window.clearTimeout(searchSettleTimer);
-    searchSettleTimer = null;
-    pendingSearchText = "";
-    revealedSearchText = "";
+    resetSearchGate();
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
     root().classList.add(ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT);
     expandedFixedCollectionName = "";
@@ -241,10 +240,7 @@
 
   function setSearchFocusedConversation() {
     const overlay = getOverlay();
-    window.clearTimeout(searchSettleTimer);
-    searchSettleTimer = null;
-    pendingSearchText = "";
-    revealedSearchText = "";
+    resetSearchGate();
     root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_HIDDEN);
     root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
     ensureOverlay();
@@ -781,54 +777,20 @@
   }
 
   function updateSearchGateState(field = findNativeSearchField()) {
-    if (!isSearching()) {
-      updateSearchNavigation("");
-      resetSearchGate();
-      root().classList.remove(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
-      return;
-    }
+    const text = getSearchText(field);
+    updateSearchNavigation(text);
+    searchGate.update(text);
+  }
 
-    const searchText = getSearchText(field);
-    updateSearchNavigation(searchText);
-    if (searchText.length < MIN_SEARCH_CHARS) {
-      resetSearchGate();
-      pendingSearchText = searchText;
-      updateSearchGateMessage(searchText);
-      root().classList.remove(ROOT_SEARCH_WAITING);
-      root().classList.add(ROOT_SEARCH_TOO_SHORT);
-      return;
-    }
-
-    // Once a specific-enough query is revealed, keep results visible while the
-    // user keeps refining it. Re-hiding on every DOM mutation/keystroke creates
-    // flicker and fights WhatsApp's native filtering.
-    if (revealedSearchText) {
-      root().classList.remove(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
-      return;
-    }
-
-    if (searchText === pendingSearchText && searchSettleTimer) return;
-
-    window.clearTimeout(searchSettleTimer);
-    pendingSearchText = searchText;
-    updateSearchGateMessage(searchText);
-    root().classList.add(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
-    searchSettleTimer = window.setTimeout(() => {
-      if (!isSearching() || getSearchText().length < MIN_SEARCH_CHARS) {
-        updateSearchGateState();
-        return;
-      }
-      searchSettleTimer = null;
-      revealedSearchText = getSearchText();
-      root().classList.remove(ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING);
-    }, SEARCH_SETTLE_MS);
+  function applySearchGateState({ text, tooShort, waiting, searching }) {
+    if (!searching) updateSearchNavigation("");
+    if (tooShort || waiting) updateSearchGateMessage(text);
+    root().classList.toggle(ROOT_SEARCH_TOO_SHORT, tooShort);
+    root().classList.toggle(ROOT_SEARCH_WAITING, waiting);
   }
 
   function resetSearchGate() {
-    window.clearTimeout(searchSettleTimer);
-    searchSettleTimer = null;
-    pendingSearchText = "";
-    revealedSearchText = "";
+    searchGate.reset();
   }
 
   function isMirrorControl(element) {

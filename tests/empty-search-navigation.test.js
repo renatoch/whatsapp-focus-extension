@@ -3,6 +3,7 @@ const assert = require('node:assert/strict');
 const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
+const { createSearchGate } = require('../scripts/search-gate.js');
 const source = fs.readFileSync(path.join(__dirname, '../content.js'), 'utf8');
 const css = fs.readFileSync(path.join(__dirname, '../focus.css'), 'utf8');
 function extract(name) {
@@ -34,7 +35,9 @@ function harness() {
       assert.equal(delay, 1000); return 1;
     } },
   });
-  vm.runInContext(extract('updateSearchNavigation') + '\n' + extract('updateSearchGateState'), context);
+  vm.runInContext(extract('updateSearchNavigation') + '\n' + extract('applySearchGateState') + '\n' + extract('updateSearchGateState'), context);
+  context.searchGate = createSearchGate({ readText: context.getSearchText, isSearching: context.isSearching,
+    scheduler: context.window, onState: context.applySearchGateState });
   return { context, classes, update(value) { text = value; vm.runInContext('updateSearchGateState();', context); } };
 }
 

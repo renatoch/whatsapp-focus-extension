@@ -50,6 +50,13 @@ The stable worktree remains untouched so its existing Chrome installation and CS
 - Added four direct-factory normalization tests. Empty-search isolation test now uses the public adapter and synthetic field visibility rather than a source bridge.
 - 93 tests pass. `content.js` is now 1,817 lines; adapter 236, hidden navigation 102. Counts are progress evidence, not completion criteria.
 
+## Manual-search gate
+
+- Extracted query settlement/timer policy into `scripts/search-gate.js`, preserving three characters, one-second initial reveal and non-flickering refinement.
+- UI classes/message updates remain in composition callbacks. Reset/dispose invalidate queued callbacks; tests connect the real public gate to empty-search integration.
+- Added manifest-order/bootstrap execution test verifying import-time DOM inertness and blind entry before body exists.
+- Full suite: 98 passing. No new dependency or user-visible change intended.
+
 ## Remaining
 
 Continue characterization where existing coverage is thin, extract native adapter then navigation, and follow TS3–TS6. No whole-story completion or post-refactor live validation is claimed by these initial checks.

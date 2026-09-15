@@ -18,6 +18,7 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'fixed-collections.js',
     'scripts/whatsapp-dom.js',
     'scripts/focused-navigation.js',
+    'scripts/search-gate.js',
     'content.js',
   ]);
 });
