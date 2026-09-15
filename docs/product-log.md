@@ -196,6 +196,12 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Implementado] Ampliar capacidade de membros por coleção para 10**
   - Navigator aprovou dez membros porque o caso original excede oito. Limite, mensagem e teste de sanitização/reload atualizados; cinco coleções continuam permitidas. Sem mudança de schema ou de privacidade. A ampliação é independente da consulta de não lidas; não encerra por si só a validação agregada da DS5.
 
+- **[Em validação] Ocultar recentes durante declaração e confirmação de modo completo**
+  - O overlay acumulava navegação e decisão, deixando as justificativas visualmente poluídas. Os recentes agora ficam ocultos somente enquanto a declaração de intenção ou a confirmação do modo completo estiver ativa. Ao voltar ao foco, a mesma lista reaparece; nenhum título é removido nem o contador é alterado. Correção CSS pontual na `main`, com testes de contrato para ambos os estados, a incorporar também no worktree DS6 sem retomar o refactor.
+
+- **[Experimento futuro] Testar abertura sem o contador de oito segundos**
+  - A barreira já mostrou sinais de coreografia, mas isso não prova que retirá-la melhora o uso. Proposta para depois: testar sem a espera de oito segundos, mantendo inicialmente declaração de intenção, opções de não abrir/voltar ao foco, janela de cinco minutos e retorno automático. Observar se reduz burocracia ou aumenta aberturas automáticas; não presumir que a declaração deva permanecer para sempre. Definir separadamente como fica a confirmação de uso recente antes do experimento. Nenhuma remoção do contador foi autorizada ou implementada neste ajuste visual.
+
 - **[Em teste] Contador de tempo sem abrir WhatsApp normal ajuda ou vira ruído?**
   - Implementação atual: a tela de foco mostra tempo desde a última abertura do modo normal. Observar se aumenta consciência de reabertura impulsiva/tédio ou se passa a ser ignorado. Variação futura: separar “tempo sem abrir geral” de “tempo sem qualquer ação no WhatsApp”.
 
