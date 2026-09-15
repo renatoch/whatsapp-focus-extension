@@ -5,6 +5,7 @@ const path = require('node:path');
 
 const projectRoot = path.join(__dirname, '..');
 const content = fs.readFileSync(path.join(projectRoot, 'content.js'), 'utf8');
+const nativeAdapter = fs.readFileSync(path.join(projectRoot, 'scripts/whatsapp-dom.js'), 'utf8');
 const css = fs.readFileSync(path.join(projectRoot, 'focus.css'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, 'manifest.json'), 'utf8'));
 
@@ -14,6 +15,7 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'focus-state.js',
     'focused-recents.js',
     'fixed-collections.js',
+    'scripts/whatsapp-dom.js',
     'content.js',
   ]);
 });
@@ -29,7 +31,7 @@ test('recent navigation polls promptly and activates only one exact classified r
   assert.match(content, /classifyExactTitleMatches\(\s*title,\s*candidates\.map\(\(candidate\) => candidate\.title\)\s*\)/);
   assert.match(content, /classification\.status === "match" && searchTextAccepted/);
   assert.match(content, /uniqueTarget !== previousUniqueTarget/);
-  assert.match(content, /dispatchEvent\(new MouseEvent\("mousedown"/);
+  assert.match(nativeAdapter, /dispatchEvent\(new MouseEvent\("mousedown"/);
   assert.match(content, /activateFocusedResult\(candidates\[classification\.index\]\.clickTarget\)/);
   assert.doesNotMatch(content, /candidates\[classification\.index\]\.clickTarget\.click\(\)/);
   assert.match(content, /RECENT_SEARCH_INITIAL_MS = 100/);
@@ -38,7 +40,7 @@ test('recent navigation polls promptly and activates only one exact classified r
 });
 
 test('internal navigation clears its native query before the next manual search', () => {
-  assert.match(content, /function clearNativeSearchText\(/);
+  assert.match(nativeAdapter, /function clearNativeSearchText\(/);
   assert.match(content, /clearNativeSearchText\(field\);\s*field\.click\(\)/);
 });
 

@@ -28,6 +28,14 @@ The stable worktree remains untouched so its existing Chrome installation and CS
 - Overlay, awareness, shared controls and focused shelf: surface renderers accepting snapshots and action callbacks.
 - CSS/dev assets/bootstrap: later composition slice, not part of the first adapter change.
 
+## Native adapter — first slice
+
+- Extracted title/row reading, input discovery/read/write/clear, candidate enumeration and mousedown activation to `scripts/whatsapp-dom.js`.
+- Factory takes document/window and optional debug callbacks; no import-time DOM work, storage or scheduling.
+- Switched the six native characterization tests from source-sliced VM execution to the public factory without weakening assertions.
+- Manifest and source ownership contracts updated. Native target identity remains unchanged; current stability tests exercise the existing controller.
+- Architecture documentation started in `docs/architecture.md`.
+
 ## Remaining
 
 Continue characterization where existing coverage is thin, extract native adapter then navigation, and follow TS3–TS6. No whole-story completion or post-refactor live validation is claimed by these initial checks.

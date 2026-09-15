@@ -1,25 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const fs = require('node:fs');
-const vm = require('node:vm');
-const path = require('node:path');
-
-// Temporary characterization bridge; replace with the public adapter factory
-// during extraction, keeping these behavior assertions unchanged.
-function createWhatsAppDom({ document, window }) {
-  const source = fs.readFileSync(path.join(__dirname, '../content.js'), 'utf8');
-  const names = ['readTitle', 'readActiveConversationTitle', 'conversationRow', 'readConversationRowTitle',
-    'focusedResultClickTarget', 'activateFocusedResult', 'focusedSearchCandidates',
-    'setNativeSearchText', 'clearNativeSearchText', 'getSearchText', 'findNativeSearchField', 'isVisibleElement'];
-  const code = names.map((name) => {
-    const start = source.indexOf(`  function ${name}(`);
-    return source.slice(start, source.indexOf('\n  function ', start + 1));
-  }).join('\n');
-  return vm.runInNewContext(code + `\n({ ${names.join(', ')} })`, {
-    document, window, InputEvent: window.InputEvent, KeyboardEvent: window.KeyboardEvent,
-    MouseEvent: window.MouseEvent, debugLog: () => {}, describeElement: () => null,
-  });
-}
+const { createWhatsAppDom } = require('../scripts/whatsapp-dom.js');
 
 class SyntheticEvent {
   constructor(type, options) { this.type = type; Object.assign(this, options); }

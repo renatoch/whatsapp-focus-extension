@@ -14,6 +14,7 @@ test('loads fixed collections before the content integration', () => {
     'focus-state.js',
     'focused-recents.js',
     'fixed-collections.js',
+    'scripts/whatsapp-dom.js',
     'content.js',
   ]);
 });
