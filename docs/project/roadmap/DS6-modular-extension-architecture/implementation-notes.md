@@ -71,6 +71,16 @@ Verified at this pause:
 
 To resume after explicit authorization: work in the DS6 worktree, inspect `git status`/`git log`, read this file plus `plan.md` and `docs/architecture.md`, rerun `node --test tests/*.test.js`, then take the first remaining extraction below. Do not recreate the branch, reapprove the already-approved plan, switch the stable installation, or start from the original monolithic code.
 
+## Authorized hotfix synchronization while DS6 stays paused
+
+After the pause checkpoint, Navigator authorized one isolated stable-worktree fix and its incorporation here: hide overlay recents during intent declaration and normal-mode confirmation. No DS6 implementation was resumed.
+
+- Main hotfix: `6b2cd0a`; incorporated into DS6 as `e7684c5` via cherry-pick, including regression tests and backlog notes.
+- Main suite: 80 passing. DS6 suite after incorporation: 101 passing. Both diff checks pass; no implementation is left uncommitted.
+- The eight-second timer remains unchanged. A future experiment without it is recorded in `docs/product-log.md`, not authorized for implementation.
+- During later CSS extraction, preserve the two decision-state selectors hiding `.mwf-focused-recents-overlay`; normal overlay navigation must reappear with its contents intact.
+- The explicit DS6 pause remains in effect. Resume only on a new instruction; preserve this hotfix rather than restoring the older CSS baseline.
+
 ## Remaining
 
 Next safe implementation boundary:
