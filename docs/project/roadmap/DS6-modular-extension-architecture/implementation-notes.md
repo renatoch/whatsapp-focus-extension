@@ -44,6 +44,12 @@ The stable worktree remains untouched so its existing Chrome installation and CS
 - Stability tests now exercise the public factory, not source slices; additional header mismatch, missing-field, disposal/restart and route cases pass.
 - Full automated suite: 89 passing. Manual search gating and capture still await extraction; no live Chrome refactor validation claimed.
 
+## Native adapter — remaining selectors
+
+- Moved nested-view discovery/exit, Back/Chats selection, readiness/progress and empty-search sibling isolation into the native adapter. Preserved selector priority and Escape fallback.
+- Added four direct-factory normalization tests. Empty-search isolation test now uses the public adapter and synthetic field visibility rather than a source bridge.
+- 93 tests pass. `content.js` is now 1,817 lines; adapter 236, hidden navigation 102. Counts are progress evidence, not completion criteria.
+
 ## Remaining
 
 Continue characterization where existing coverage is thin, extract native adapter then navigation, and follow TS3–TS6. No whole-story completion or post-refactor live validation is claimed by these initial checks.

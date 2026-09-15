@@ -1,7 +1,7 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
-const vm = require('node:vm');
+const { createWhatsAppDom } = require('../scripts/whatsapp-dom.js');
 const path = require('node:path');
 const source = fs.readFileSync(path.join(__dirname, '../content.js'), 'utf8');
 const css = fs.readFileSync(path.join(__dirname, '../focus.css'), 'utf8');
@@ -25,16 +25,17 @@ test('isolates search controls from native suggestions and filters without chang
   const filters = node(wrapper); const results = node(side);
   field.closest = () => row;
   const all = [header, wrapper, row, field, clearButton, filters, results];
-  const context = vm.createContext({
-    findNativeSearchField: () => field,
-    document: { querySelector: () => side, querySelectorAll: () => all.filter((item) => item.marked) },
+  field.getBoundingClientRect = () => ({ width: 100, height: 30 });
+  const adapter = createWhatsAppDom({
+    document: { querySelector: () => side, querySelectorAll: (selector) => selector.includes('empty-search-hidden') ? all.filter((item) => item.marked) : [field] },
+    window: { getComputedStyle: () => ({ visibility: 'visible', display: 'block' }) },
   });
-  vm.runInContext(extract('isolateEmptySearchControls') + '\nisolateEmptySearchControls();', context);
+  adapter.isolateEmptySearchControls();
   assert.ok(filters.marked); assert.ok(results.marked);
   assert.ok(!row.marked); assert.ok(!field.marked); assert.ok(!clearButton.marked); assert.ok(!header.marked);
   // New native suggestions inserted on focus must be hidden too.
   const suggestions = node(wrapper);
-  vm.runInContext('isolateEmptySearchControls();', context);
+  adapter.isolateEmptySearchControls();
   assert.ok(suggestions.marked);
 });
 

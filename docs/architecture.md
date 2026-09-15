@@ -29,8 +29,11 @@ navigation nor persists titles. Debug behavior remains governed by the existing
 
 `tests/whatsapp-dom.test.js` exercises the public factory with synthetic fixtures.
 The same six assertions were first run against the pre-extraction code.
-Nested-view helpers, readiness/progress and empty-search isolation remain in
-`content.js` for the next adapter slice. Search policy remains outside the adapter.
+The adapter also owns nested-view discovery/exit, Chats button selection,
+readiness/progress and empty-search structural isolation. Composition injects
+`isMirrorControl` and the overlay ID so native discovery never selects extension
+controls. Scheduling the Chats normalization callback remains a controller
+responsibility. Search policy remains outside the adapter.
 
 ## Focused hidden navigation
 
