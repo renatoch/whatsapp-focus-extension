@@ -196,6 +196,11 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Implementado] Ampliar capacidade de membros por coleção para 10**
   - Navigator aprovou dez membros porque o caso original excede oito. Limite, mensagem e teste de sanitização/reload atualizados; cinco coleções continuam permitidas. Sem mudança de schema ou de privacidade. A ampliação é independente da consulta de não lidas; não encerra por si só a validação agregada da DS5.
 
+- **[Em validação] Distinguir maiúsculas/minúsculas nos títulos de conversas**
+  - Abertura, confirmação do cabeçalho, captura/deduplicação/remoção dos recentes e membros de coleções agora preservam a distinção de capitalização. A normalização de espaços e Unicode continua; títulos realmente idênticos permanecem ambíguos, sem escolher o primeiro resultado. Nomes de coleções continuam sem distinguir maiúsculas/minúsculas.
+  - Não há novos dados armazenados nem mudança de schema. Títulos já salvos mantêm a escrita existente; variantes descartadas pela deduplicação antiga precisam ser adicionadas novamente. Se a conversa mudar de capitalização posteriormente, o título salvo pode deixar de corresponder; não há fallback silencioso ignorando a diferença.
+  - Testes cobrem seleção, deduplicação, remoção independente, persistência/reload e ambiguidade verdadeira. Validação visual ainda pendente. Identificadores adicionais de conversa não fazem parte deste ajuste.
+
 - **[Validado] Ocultar recentes durante declaração e confirmação de modo completo**
   - O overlay acumulava navegação e decisão, deixando as justificativas visualmente poluídas. Os recentes agora ficam ocultos somente enquanto a declaração de intenção ou a confirmação do modo completo estiver ativa. Ao voltar ao foco, a mesma lista reaparece; nenhum título é removido nem o contador é alterado. Correção CSS pontual na `main`, com testes de contrato para ambos os estados, incorporada também no worktree DS6 sem retomar o refactor. Navigator confirmou o visual: “Ficou ótimo, pode concluir”. Ajuste concluído; experimento sem contador permanece no backlog.
 
