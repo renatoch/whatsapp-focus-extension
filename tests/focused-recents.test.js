@@ -12,7 +12,7 @@ const {
 } = require('../focused-recents.js');
 
 test('normalizes titles only for equality', () => {
-  assert.equal(normalizeTitle('  Equipe   Produto  '), 'equipe produto');
+  assert.equal(normalizeTitle('  Equipe   Produto  '), 'Equipe Produto');
   assert.equal(normalizeTitle(''), '');
   assert.equal(normalizeTitle(null), '');
 });
@@ -32,14 +32,24 @@ test('keeps five unique titles in most-recent-first order', () => {
 });
 
 test('deduplicates normalized titles while preserving the latest display text', () => {
-  const recents = addRecent(['Equipe Produto', 'Outra'], '  equipe   produto ');
-  assert.deepEqual(recents, ['equipe produto', 'Outra']);
+  const recents = addRecent(['Equipe Produto', 'Outra'], '  Equipe   Produto ');
+  assert.deepEqual(recents, ['Equipe Produto', 'Outra']);
 });
 
 test('rejects empty titles and supports remove and clear', () => {
   assert.deepEqual(addRecent(['Alpha'], '   '), ['Alpha']);
-  assert.deepEqual(removeRecent(['Alpha', 'Beta'], ' alpha '), ['Beta']);
+  assert.deepEqual(removeRecent(['Alpha', 'Beta'], ' Alpha '), ['Beta']);
   assert.deepEqual(clearRecents(), []);
+});
+
+test('case-distinct titles remain independently selectable and removable', () => {
+  const recents = addRecent(addRecent([], 'Forja'), 'FORJA');
+  assert.deepEqual(recents, ['FORJA', 'Forja']);
+  assert.deepEqual(removeRecent(recents, 'Forja'), ['FORJA']);
+  assert.deepEqual(classifyExactTitleMatches('Forja', ['FORJA', 'Forja']), { status: 'match', index: 1 });
+  assert.deepEqual(classifyExactTitleMatches('FORJA', ['FORJA', 'Forja']), { status: 'match', index: 0 });
+  assert.deepEqual(classifyExactTitleMatches('Forja', ['FORJA']), { status: 'not-found', index: null });
+  assert.deepEqual(classifyExactTitleMatches('Forja', ['Forja', 'Forja', 'FORJA']), { status: 'ambiguous', index: null });
 });
 
 test('keeps navigation diagnostics structural and strips conversation data', () => {
@@ -81,7 +91,7 @@ test('classifies exact title matches without accepting partial matches', () => {
     status: 'not-found',
     index: null,
   });
-  assert.deepEqual(classifyExactTitleMatches('Equipe', ['Equipe', ' equipe ']), {
+  assert.deepEqual(classifyExactTitleMatches('Equipe', ['Equipe', ' Equipe ']), {
     status: 'ambiguous',
     index: null,
   });

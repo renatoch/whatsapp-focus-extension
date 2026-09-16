@@ -21,6 +21,8 @@
     return cleanText(value, MAX_TITLE_LENGTH);
   }
 
+  // Collection names remain case-insensitive; conversation titles use cleanTitle
+  // directly so case-distinct native conversations remain separate members.
   function normalize(value) {
     return String(value || "").normalize("NFKC").toLocaleLowerCase();
   }
@@ -47,7 +49,7 @@
       for (const rawTitle of rawCollection.members) {
         if (members.length >= MAX_MEMBERS) break;
         const title = cleanTitle(rawTitle);
-        const titleKey = normalize(title);
+        const titleKey = title;
         if (!titleKey || seenMembers.has(titleKey)) continue;
         seenMembers.add(titleKey);
         members.push(title);
@@ -83,7 +85,7 @@
     );
     if (index < 0) return result(state, "collection-not-found");
     const collection = state.collections[index];
-    if (collection.members.some((member) => normalize(member) === normalize(title))) {
+    if (collection.members.some((member) => member === title)) {
       return result(state, "exists");
     }
     if (collection.members.length >= MAX_MEMBERS) return result(state, "member-limit");
@@ -96,11 +98,11 @@
   function removeMember(current, collectionName, memberTitle) {
     const state = sanitizeState(current);
     const collectionKey = normalize(cleanName(collectionName));
-    const titleKey = normalize(cleanTitle(memberTitle));
+    const titleKey = cleanTitle(memberTitle);
     const index = state.collections.findIndex((collection) => normalize(collection.name) === collectionKey);
     if (index < 0) return result(state, "collection-not-found");
     const collection = state.collections[index];
-    const members = collection.members.filter((member) => normalize(member) !== titleKey);
+    const members = collection.members.filter((member) => member !== titleKey);
     if (members.length === collection.members.length) return result(state, "member-not-found");
 
     const collections = state.collections.slice();

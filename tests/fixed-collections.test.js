@@ -18,7 +18,7 @@ test('sanitizes persisted collections to the allowlisted schema', () => {
     version: VERSION,
     collections: [{
       name: '  Casa  ',
-      members: ['  Gatos  ', 'gatos', 'Apartamento'],
+      members: ['  Gatos  ', 'Gatos', 'gatos', 'Apartamento'],
       previews: ['private'],
       unread: true,
       jid: 'private',
@@ -29,7 +29,7 @@ test('sanitizes persisted collections to the allowlisted schema', () => {
 
   assert.deepEqual(state, {
     version: VERSION,
-    collections: [{ name: 'Casa', members: ['Gatos', 'Apartamento'] }],
+    collections: [{ name: 'Casa', members: ['Gatos', 'gatos', 'Apartamento'] }],
   });
   assert.equal(JSON.stringify(state).includes('private'), false);
 });
@@ -61,7 +61,7 @@ test('adds at most ten normalized-unique member titles and preserves them on rel
     assert.equal(result.status, 'added');
     state = result.state;
   }
-  assert.equal(addMember(state, 'Casa', ' grupo 1 ').status, 'exists');
+  assert.equal(addMember(state, 'Casa', ' Grupo 1 ').status, 'exists');
   assert.equal(addMember(state, 'Casa', 'Grupo 11').status, 'member-limit');
   assert.deepEqual(sanitizeState(JSON.parse(JSON.stringify(state))), state);
   assert.equal(addMember(state, 'Ausente', 'Grupo').status, 'collection-not-found');
@@ -75,7 +75,7 @@ test('removes one member or collection without changing unrelated data', () => {
   state = addMember(state, 'Casa', 'Apartamento').state;
   state = addMember(state, 'Trabalho', 'Equipe').state;
 
-  const withoutMember = removeMember(state, 'Casa', ' gatos ');
+  const withoutMember = removeMember(state, 'Casa', ' Gatos ');
   assert.equal(withoutMember.status, 'removed');
   assert.deepEqual(withoutMember.state.collections, [
     { name: 'Casa', members: ['Apartamento'] },
@@ -87,6 +87,19 @@ test('removes one member or collection without changing unrelated data', () => {
   assert.deepEqual(withoutCollection.state.collections, [
     { name: 'Trabalho', members: ['Equipe'] },
   ]);
+});
+
+test('case-distinct members survive reload and can be removed independently', () => {
+  let state = createCollection(createEmptyState(), 'Trabalho').state;
+  state = addMember(state, 'trabalho', 'Forja').state;
+  const added = addMember(state, 'Trabalho', 'FORJA');
+  assert.equal(added.status, 'added');
+  state = sanitizeState(JSON.parse(JSON.stringify(added.state)));
+  assert.deepEqual(state.collections[0].members, ['Forja', 'FORJA']);
+  assert.equal(addMember(state, 'Trabalho', ' Forja ').status, 'exists');
+  assert.deepEqual(removeMember(state, 'Trabalho', 'Forja').state.collections[0].members, ['FORJA']);
+  assert.deepEqual(removeMember(state, 'Trabalho', 'FORJA').state.collections[0].members, ['Forja']);
+  assert.equal(removeMember(state, 'Trabalho', 'forja').status, 'member-not-found');
 });
 
 test('rejects overlong values instead of truncating exact titles', () => {

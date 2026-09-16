@@ -20,7 +20,7 @@
   }
 
   function normalizeTitle(value) {
-    return cleanDisplayTitle(value).normalize("NFKC").toLocaleLowerCase();
+    return cleanDisplayTitle(value).normalize("NFKC");
   }
 
   function addRecent(recents, title, limit = MAX_RECENTS) {
