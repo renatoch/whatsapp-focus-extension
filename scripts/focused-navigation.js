@@ -58,6 +58,7 @@
         exactMatches: candidates.filter((candidate) => rules.normalizeTitle(candidate.title) === rules.normalizeTitle(title)).length,
       };
       update({ stage: "results-inspected", ...sample, resultSample: sample,
+        conversationSectionFound: resultSet.conversationSectionFound,
         matchStructure: rules.describeExactMatches(title, candidates) });
       const uniqueTarget = classification.status === "match" && searchTextAccepted ? candidates[classification.index].clickTarget : null;
       if (!uniqueTarget || uniqueTarget !== previousUniqueTarget) {

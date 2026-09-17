@@ -67,13 +67,17 @@ test('contenteditable fallback preserves selection clearing and text entry', () 
 test('candidate enumeration retains outer rows and stable native target identities', () => {
   const target = { matches: () => true, contains: () => false,
     querySelectorAll: () => [titleNode('Example')] };
-  const outer = { contains: (other) => other === target,
-    querySelector: () => target, querySelectorAll: () => [titleNode('Example')] };
+  const grid = { matches: (selector) => selector === '[role="grid"]' };
+  const header = { parentElement: grid, matches: (selector) => selector === '[role="row"]',
+    contains: () => false, querySelectorAll: (selector) => selector === 'h2' ? [{ textContent: 'Conversas' }] : [] };
+  const outer = { parentElement: grid, matches: (selector) => selector === '[role="row"]', contains: (other) => other === target,
+    querySelector: () => target, querySelectorAll: (selector) => selector === 'h2' ? [] : [titleNode('Example')] };
   const { adapter } = setup({
-    '#side [data-testid="cell-frame-container"], #side [data-testid="conversation-list-item"], #side [role="listitem"], #side [role="row"]': [outer, target],
+    '#side [data-testid="cell-frame-container"], #side [data-testid="conversation-list-item"], #side [role="listitem"], #side [role="row"]': [header, outer, target],
   });
   const result = adapter.focusedSearchCandidates();
-  assert.equal(result.rowCount, 1); assert.equal(result.candidates.length, 1);
+  assert.equal(result.rowCount, 2); assert.equal(result.candidates.length, 1);
+  assert.equal(result.conversationSectionFound, true);
   assert.equal(result.candidates[0].title, 'Example');
   assert.equal(result.candidates[0].clickTarget, target);
   assert.equal(adapter.focusedSearchCandidates().candidates[0].clickTarget, target);

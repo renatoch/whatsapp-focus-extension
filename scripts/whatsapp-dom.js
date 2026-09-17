@@ -75,14 +75,39 @@
       }));
     }
 
+    function focusedConversationRows(rows) {
+      const eligible = [];
+      let grid = null, inConversations = false, conversationSectionFound = false;
+      for (const row of rows) {
+        const parent = row.parentElement;
+        if (!row.matches?.('[role="row"]') || !parent?.matches?.('[role="grid"]')) {
+          grid = null;
+          inConversations = false;
+          continue;
+        }
+        if (parent !== grid) { grid = parent; inConversations = false; }
+        const headings = Array.from(row.querySelectorAll('h2'));
+        if (headings.length) {
+          const label = headings.length === 1 ? String(headings[0].textContent || '').trim().replace(/\s+/g, ' ').toLocaleLowerCase() : '';
+          inConversations = label === 'conversas' || label === 'chats';
+          conversationSectionFound ||= inConversations;
+          continue;
+        }
+        if (inConversations) eligible.push(row);
+      }
+      return { rows: eligible, conversationSectionFound };
+    }
+
     function focusedSearchCandidates() {
       const rows = Array.from(document.querySelectorAll(
         '#side [data-testid="cell-frame-container"], #side [data-testid="conversation-list-item"], #side [role="listitem"], #side [role="row"]'
       ));
       const outerRows = rows.filter((row) => !rows.some((other) => other !== row && other.contains(row)));
+      const section = focusedConversationRows(outerRows);
       return {
         rowCount: outerRows.length,
-        candidates: outerRows.map((row) => ({
+        conversationSectionFound: section.conversationSectionFound,
+        candidates: section.rows.map((row) => ({
           row, clickTarget: focusedResultClickTarget(row), ...readConversationRowTitleDetails(row),
         })).filter((candidate) => candidate.title && candidate.clickTarget),
       };
@@ -235,7 +260,7 @@
     }
 
     return Object.freeze({ readTitle, readActiveConversationTitle, conversationRow, readConversationRowTitle, readConversationRowTitleDetails,
-      focusedResultClickTarget, activateFocusedResult, focusedSearchCandidates, setNativeSearchText,
+      focusedResultClickTarget, activateFocusedResult, focusedConversationRows, focusedSearchCandidates, setNativeSearchText,
       clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement,
       isolateEmptySearchControls, findBackControl, findMainChatsButton, findNestedViewTitle, isNestedListView,
       exitNestedListView, hasOpenConversation, isWhatsAppReady, findNativeLoadingProgress });

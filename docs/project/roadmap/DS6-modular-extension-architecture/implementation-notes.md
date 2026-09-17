@@ -87,6 +87,12 @@ Main `41ef3d8` was incorporated as `cb11f06`: conversation titles distinguish ca
 
 Main `93efc70` adds bounded `matchStructure` diagnostic counts, ported here into the DOM adapter and hidden-navigation controller (rather than copying monolithic content.js). Shared rules/tests/product log are synchronized. Source priority and click policy are unchanged. Last suites: main 85/85, DS6 106/106. Await a newly copied diagnostic to identify the title-reading/target structure; no ambiguity workaround has been implemented. This authorized follow-up does not resume DS6.
 
+## Search-section correction, still outside DS6 execution
+
+Navigator's subsequent DOM inspection established `H2` headings inside direct grid rows for Conversations, Groups in common and Messages. Main `57c9b2e` restricts candidate enumeration to Conversations/Chats, stopping at every next heading or grid/structural boundary. Missing recognized headings fail closed; no first-result fallback. Equivalent change ported into `scripts/whatsapp-dom.js`; the controller propagates only the optional boolean `conversationSectionFound`. Existing exact matching, target stability and header confirmation remain intact.
+
+Tests: main 89/89, DS6 110/110; adapter enumeration fixture now includes the evidenced heading/grid structure while retaining target-identity assertions. Live acceptance is pending. Preserve this patch during later extraction. Refactoring itself remains explicitly paused.
+
 ## Remaining
 
 Next safe implementation boundary:
