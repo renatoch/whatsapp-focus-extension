@@ -62,6 +62,7 @@
   let pendingIntent = null;
   let focusedRecents = [];
   let recentCaptureToken = 0;
+  const captureRecorder = globalThis.MirrorFocusedRecents.createCaptureRecorder();
   let recentNavigationToken = 0;
   let recentNavigationStartedAt = 0;
   let recentNavigationDiagnostic = null;
@@ -305,26 +306,44 @@
     return empty;
   }
 
+  function traceRecentCapture(stage, details = {}) {
+    captureRecorder.record(stage, { ...details, recentCount: focusedRecents.length,
+      mode: isSearching() ? 'search' : root().classList.contains(ROOT_NORMAL) ? 'normal' : root().classList.contains(ROOT_SIDEBAR_OPEN) ? 'sidebar' : 'focus' });
+  }
+
+  function traceRecentCaptureInput(event) {
+    if (!isSearching() && !root().classList.contains(ROOT_NORMAL) && !root().classList.contains(ROOT_SIDEBAR_OPEN)) return;
+    traceRecentCapture('input', { event: event.key === 'Enter' ? 'enter' : event.type,
+      zone: event.target?.closest?.('#side') ? 'side' : event.target?.closest?.('#main') ? 'main' : 'other',
+      recognized: isConversationListClick(event.target) });
+  }
+
   function captureFocusedConversation(expectedTitle, attempt, route = "search", token = ++recentCaptureToken) {
-    if (token !== recentCaptureToken) return;
+    if (token !== recentCaptureToken) { traceRecentCapture('cancelled', { token, attempt }); return; }
     const activeTitle = readActiveConversationTitle();
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const expectedMatches = !expectedTitle || (
       normalize && normalize(activeTitle) === normalize(expectedTitle)
     );
+    traceRecentCapture('checking', { token, attempt, route: route === 'search' ? 'search' : 'other',
+      expectedTitleAvailable: Boolean(expectedTitle), headerAvailable: Boolean(activeTitle), headerMatched: Boolean(activeTitle && expectedMatches) });
     if (activeTitle && expectedMatches) {
       addFocusedRecent(activeTitle);
+      traceRecentCapture('success', { token, attempt });
       if (route === "search") recordAwareness("focused_conversation_opened", { route: "search" });
       return;
     }
     if (attempt < FOCUSED_CAPTURE_RETRIES) {
       window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1, route, token), 300);
+    } else {
+      traceRecentCapture('timeout', { token, attempt });
     }
   }
 
   function addFocusedRecent(title) {
     focusedRecents = globalThis.MirrorFocusedRecents?.addRecent(focusedRecents, title) || focusedRecents;
     renderFocusedRecents();
+    traceRecentCapture('added');
   }
 
   function removeFocusedRecent(title) {
@@ -1650,6 +1669,7 @@
           <button class="mwf-button mwf-button-secondary" data-mwf-action="normal">Ver WhatsApp normal por 5 min</button>
         </div>
         <button class="mwf-awareness-link" data-mwf-action="awareness">Ver padrão de uso</button>
+        <button class="mwf-awareness-link" data-mwf-action="capture-diagnostic">Copiar diagnóstico dos recentes</button>
         <section id="mirror-whatsapp-focus-awareness" class="mwf-awareness-panel" aria-label="Padrão de uso" hidden>
           <div class="mwf-awareness-header">
             <div>
@@ -1791,6 +1811,9 @@
       }
       if (action === "normal-now") {
         setNormalTemporarily(normalAttemptRecent ? "recent-explicit" : "immediate");
+      }
+      if (action === "capture-diagnostic") {
+        copyDiagnostic(captureRecorder.snapshot(), button);
       }
       if (action === "awareness") {
         openAwarenessSummary();
@@ -2080,12 +2103,15 @@
   }
 
   function installSearchSelectionHandler() {
+    document.addEventListener('mousedown', traceRecentCaptureInput, true);
     document.addEventListener(
       "click",
       (event) => {
         if (root().classList.contains(ROOT_OPENING_RECENT)) return;
+        traceRecentCaptureInput(event);
         if (!isConversationListClick(event.target)) return;
         const title = readConversationRowTitle(conversationRow(event.target));
+        traceRecentCapture('selection', { expectedTitleAvailable: Boolean(title) });
         if (isSearching()) enterFocusedConversationSoon(title);
         else if (title && (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN))) {
           captureFocusedConversation(title, 0, null);
@@ -2098,9 +2124,11 @@
       if (isMirrorControl(event.target)) return;
       if (root().classList.contains(ROOT_OPENING_RECENT)) return;
       if (event.key !== "Enter") return;
+      traceRecentCaptureInput(event);
       if (isSearching()) enterFocusedConversationSoon();
       else if (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN)) {
         const title = readConversationRowTitle(conversationRow(event.target));
+        traceRecentCapture('selection', { expectedTitleAvailable: Boolean(title) });
         if (title) captureFocusedConversation(title, 0, null);
       }
     });
