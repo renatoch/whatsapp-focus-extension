@@ -196,10 +196,10 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Implementado] Ampliar capacidade de membros por coleção para 10**
   - Navigator aprovou dez membros porque o caso original excede oito. Limite, mensagem e teste de sanitização/reload atualizados; cinco coleções continuam permitidas. Sem mudança de schema ou de privacidade. A ampliação é independente da consulta de não lidas; não encerra por si só a validação agregada da DS5.
 
-- **[Em validação] Restringir abertura exata à seção Conversas da busca**
+- **[Validado] Restringir abertura exata à seção Conversas da busca**
   - Inspeção estrutural fornecida pelo Navigator confirmou cabeçalhos `H2` dentro de linhas `role=row`, filhas diretas de `role=grid`, nas seções Conversas, Grupos em comum e Mensagens. O diagnóstico anterior contou três alvos distintos, todos com título completo coincidente; isso não demonstrava três conversas diferentes.
   - A reabertura agora considera somente linhas após um cabeçalho Conversas/Chats no mesmo grid, até o próximo `H2`. Qualquer outro cabeçalho, troca de grid ou estrutura não reconhecida encerra a seção elegível. Sem cabeçalho reconhecido, não há seleção. Não se usa o primeiro resultado como fallback.
-  - Maiúsculas/minúsculas, bloqueio de duplicatas dentro de Conversas, estabilidade em duas observações e confirmação do cabeçalho permanecem. Diagnóstico acrescenta apenas o booleano `conversationSectionFound`; correspondências/títulos candidatos agora contam somente a seção elegível. Validar abertura na instalação estável após recarregar extensão e aba; DS6 permanece pausada.
+  - Maiúsculas/minúsculas, bloqueio de duplicatas dentro de Conversas, estabilidade em duas observações e confirmação do cabeçalho permanecem. Diagnóstico acrescenta apenas o booleano `conversationSectionFound`; correspondências/títulos candidatos agora contam somente a seção elegível. Navigator confirmou a abertura na instalação estável: “Agora funcionou”. Correção validada; DS6 permanece pausada.
 
 - **[Diagnóstico histórico] Ambiguidade persistente após distinguir capitalização**
   - Navigator confirmou que uma variante abre, enquanto a outra mantém três correspondências exatas durante as 11 observações, sem clique. Não atribuir isso a duplicação transitória nem selecionar o primeiro resultado. Possíveis leituras de fragmentos ou múltiplos resultados da mesma conversa ainda não foram comprovadas.
