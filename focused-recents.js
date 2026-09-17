@@ -83,6 +83,9 @@
         }
         return clean;
       });
+    if (typeof patch.conversationSectionFound === "boolean") {
+      diagnostic.conversationSectionFound = patch.conversationSectionFound;
+    }
     if (patch.matchStructure) {
       diagnostic.matchStructure = {};
       for (const field of ["uniqueTargets", "frameChildTitle", "frameTitle", "autoSpanTitle", "spanTitle", "unknownSource", "selectedTextDifferent", "containerTextDifferent", "containerMissing"]) {
