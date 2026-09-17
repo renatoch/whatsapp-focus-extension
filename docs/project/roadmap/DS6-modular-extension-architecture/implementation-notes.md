@@ -81,6 +81,12 @@ After the pause checkpoint, Navigator authorized one isolated stable-worktree fi
 - During later CSS extraction, preserve the two decision-state selectors hiding `.mwf-focused-recents-overlay`; normal overlay navigation must reappear with its contents intact.
 - The explicit DS6 pause remains in effect. Resume only on a new instruction; preserve this hotfix rather than restoring the older CSS baseline.
 
+## Case-sensitive titles and subsequent diagnostic-only follow-up
+
+Main `41ef3d8` was incorporated as `cb11f06`: conversation titles distinguish case in recency, collection membership and exact opening/header confirmation, without new identifiers or schema changes. Navigator reported one case variant working; the other still has three exact matches throughout all 11 inspections. Do not assume partial matching, transient duplicates or distinct conversations from those counters alone.
+
+Main `93efc70` adds bounded `matchStructure` diagnostic counts, ported here into the DOM adapter and hidden-navigation controller (rather than copying monolithic content.js). Shared rules/tests/product log are synchronized. Source priority and click policy are unchanged. Last suites: main 85/85, DS6 106/106. Await a newly copied diagnostic to identify the title-reading/target structure; no ambiguity workaround has been implemented. This authorized follow-up does not resume DS6.
+
 ## Remaining
 
 Next safe implementation boundary:

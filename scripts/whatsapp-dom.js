@@ -33,18 +33,29 @@
     }
 
     function readConversationRowTitle(row) {
-      if (!row) return "";
+      return readConversationRowTitleDetails(row).title;
+    }
+
+    function readConversationRowTitleDetails(row) {
+      const empty = { title: "", titleSource: "unknownSource", selectedTextDifferent: false, containerTextRelation: "missing" };
+      if (!row) return empty;
       const selectors = [
-        '[data-testid="cell-frame-title"] [title]',
-        '[data-testid="cell-frame-title"]',
-        'span[dir="auto"][title]',
-        'span[title]',
+        ['[data-testid="cell-frame-title"] [title]', "frameChildTitle"],
+        ['[data-testid="cell-frame-title"]', "frameTitle"],
+        ['span[dir="auto"][title]', "autoSpanTitle"],
+        ['span[title]', "spanTitle"],
       ];
-      for (const selector of selectors) {
-        const title = Array.from(row.querySelectorAll(selector)).map(readTitle).find(Boolean);
-        if (title) return title;
+      const normalize = (value) => String(value || "").trim().replace(/\s+/g, " ").normalize("NFKC");
+      for (const [selector, titleSource] of selectors) {
+        const selected = Array.from(row.querySelectorAll(selector)).find((element) => readTitle(element));
+        if (!selected) continue;
+        const title = readTitle(selected);
+        const container = row.querySelector?.('[data-testid="cell-frame-title"]');
+        return { title, titleSource,
+          selectedTextDifferent: normalize(selected.textContent) !== normalize(title),
+          containerTextRelation: !container ? "missing" : normalize(container.textContent) === normalize(title) ? "same" : "different" };
       }
-      return "";
+      return empty;
     }
 
     function focusedResultClickTarget(row) {
@@ -72,7 +83,7 @@
       return {
         rowCount: outerRows.length,
         candidates: outerRows.map((row) => ({
-          row, clickTarget: focusedResultClickTarget(row), title: readConversationRowTitle(row),
+          row, clickTarget: focusedResultClickTarget(row), ...readConversationRowTitleDetails(row),
         })).filter((candidate) => candidate.title && candidate.clickTarget),
       };
     }
@@ -223,7 +234,7 @@
       });
     }
 
-    return Object.freeze({ readTitle, readActiveConversationTitle, conversationRow, readConversationRowTitle,
+    return Object.freeze({ readTitle, readActiveConversationTitle, conversationRow, readConversationRowTitle, readConversationRowTitleDetails,
       focusedResultClickTarget, activateFocusedResult, focusedSearchCandidates, setNativeSearchText,
       clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement,
       isolateEmptySearchControls, findBackControl, findMainChatsButton, findNestedViewTitle, isNestedListView,

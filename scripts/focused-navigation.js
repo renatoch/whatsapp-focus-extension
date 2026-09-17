@@ -57,7 +57,8 @@
         attempt, searchTextAccepted, candidateRows: resultSet.rowCount, candidateTitles: candidates.length,
         exactMatches: candidates.filter((candidate) => rules.normalizeTitle(candidate.title) === rules.normalizeTitle(title)).length,
       };
-      update({ stage: "results-inspected", ...sample, resultSample: sample });
+      update({ stage: "results-inspected", ...sample, resultSample: sample,
+        matchStructure: rules.describeExactMatches(title, candidates) });
       const uniqueTarget = classification.status === "match" && searchTextAccepted ? candidates[classification.index].clickTarget : null;
       if (!uniqueTarget || uniqueTarget !== previousUniqueTarget) {
         if (attempt < MAX_RETRIES) later(() => inspect(title, token, attempt + 1, uniqueTarget), RETRY_MS, token);

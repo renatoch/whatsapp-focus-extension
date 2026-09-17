@@ -83,10 +83,33 @@
         }
         return clean;
       });
+    if (patch.matchStructure) {
+      diagnostic.matchStructure = {};
+      for (const field of ["uniqueTargets", "frameChildTitle", "frameTitle", "autoSpanTitle", "spanTitle", "unknownSource", "selectedTextDifferent", "containerTextDifferent", "containerMissing"]) {
+        const value = Number(patch.matchStructure[field]);
+        diagnostic.matchStructure[field] = Number.isFinite(value) && value >= 0 ? Math.min(1000, Math.round(value)) : 0;
+      }
+    }
     if (patch.failureReason === null || FAILURE_REASONS.includes(patch.failureReason)) {
       diagnostic.failureReason = patch.failureReason;
     }
     return diagnostic;
+  }
+
+  // Aggregate only exact matches. DOM references and title evidence remain ephemeral.
+  function describeExactMatches(targetTitle, candidates) {
+    const matches = candidates.filter((candidate) => normalizeTitle(candidate.title) === normalizeTitle(targetTitle));
+    const structure = { uniqueTargets: new Set(matches.map((candidate) => candidate.clickTarget).filter(Boolean)).size,
+      frameChildTitle: 0, frameTitle: 0, autoSpanTitle: 0, spanTitle: 0, unknownSource: 0,
+      selectedTextDifferent: 0, containerTextDifferent: 0, containerMissing: 0 };
+    for (const candidate of matches) {
+      const source = ["frameChildTitle", "frameTitle", "autoSpanTitle", "spanTitle"].includes(candidate.titleSource) ? candidate.titleSource : "unknownSource";
+      structure[source] += 1;
+      if (candidate.selectedTextDifferent === true) structure.selectedTextDifferent += 1;
+      if (candidate.containerTextRelation === "different") structure.containerTextDifferent += 1;
+      if (candidate.containerTextRelation === "missing") structure.containerMissing += 1;
+    }
+    return structure;
   }
 
   function classifyExactTitleMatches(targetTitle, candidateTitles) {
@@ -109,6 +132,7 @@
     createNavigationDiagnostic,
     updateNavigationDiagnostic,
     classifyExactTitleMatches,
+    describeExactMatches,
   });
 
   globalScope.MirrorFocusedRecents = api;
