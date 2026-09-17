@@ -126,8 +126,44 @@
     return { status: "not-found", index: null };
   }
 
+  // Tab-only diagnostic recorder. Never retains titles, DOM references or absolute times.
+  function createCaptureRecorder(now = () => Date.now()) {
+    const events = [], starts = new Map();
+    let lastOutcome = null;
+    const enums = { event: ['mousedown', 'click', 'enter'], zone: ['side', 'main', 'other'],
+      mode: ['search', 'normal', 'sidebar', 'focus'], route: ['search', 'other'] };
+    function record(stage, details = {}) {
+      if (!['input', 'selection', 'checking', 'success', 'timeout', 'cancelled', 'added'].includes(stage)) return;
+      const entry = { stage };
+      for (const [key, allowed] of Object.entries(enums)) if (allowed.includes(details[key])) entry[key] = details[key];
+      for (const key of ['recognized', 'expectedTitleAvailable', 'headerAvailable', 'headerMatched']) {
+        if (typeof details[key] === 'boolean') entry[key] = details[key];
+      }
+      for (const key of ['token', 'attempt', 'recentCount']) {
+        if (Number.isFinite(details[key]) && details[key] >= 0) entry[key] = Math.min(1000000, Math.round(details[key]));
+      }
+      if (stage === 'checking' && entry.attempt === 0) {
+        starts.set(entry.token, now());
+        if (starts.size > 8) starts.delete(starts.keys().next().value);
+      }
+      if (starts.has(entry.token)) entry.elapsedMs = Math.min(1000000, Math.max(0, Math.round(now() - starts.get(entry.token))));
+      if (['success', 'timeout', 'cancelled'].includes(stage)) {
+        lastOutcome = entry;
+        starts.delete(entry.token);
+      }
+      events.push(entry);
+      if (events.length > 32) events.shift();
+    }
+    function snapshot() {
+      return { version: 1, kind: 'recent-capture', lastOutcome: lastOutcome ? { ...lastOutcome } : null,
+        events: events.map((entry) => ({ ...entry })) };
+    }
+    return Object.freeze({ record, snapshot });
+  }
+
   const api = Object.freeze({
     MAX_RECENTS,
+    createCaptureRecorder,
     normalizeTitle,
     addRecent,
     removeRecent,

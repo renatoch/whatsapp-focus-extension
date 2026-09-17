@@ -93,6 +93,12 @@ Navigator's subsequent DOM inspection established `H2` headings inside direct gr
 
 Tests: main 89/89, DS6 110/110; adapter enumeration fixture now includes the evidenced heading/grid structure while retaining target-identity assertions. Live acceptance is pending. Preserve this patch during later extraction. Refactoring itself remains explicitly paused.
 
+## Intermittent recent capture — diagnostic-only follow-up
+
+Main `b5021dc` instruments the still-inline recent capture and native input handlers, ported identically here without resuming DS6. Pure `createCaptureRecorder` in focused-recents.js retains 32 sanitized structural events plus last terminal outcome in tab memory. A focus-overlay button copies the current snapshot; mousedown is observed but does not initiate capture. Keep existing retry timing/cancellation and event semantics until actual evidence establishes the failure.
+
+Navigator reports occasional missing recents after full-mode opening, and one later appearance while typing without another click. No code had changed during the earlier read-only investigation. Do not label this fixed or assert a cause. Next evidence: copy **Copiar diagnóstico dos recentes** on the focus overlay before reloading after the episode. Tests: main 93/93, DS6 114/114. Preserve instrumentation or deliberately migrate it when recent capture is eventually extracted.
+
 ## Remaining
 
 Next safe implementation boundary:
