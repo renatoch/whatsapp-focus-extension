@@ -197,15 +197,16 @@
     }
   }
 
+  function conversationListRow(target) {
+    if (!target?.closest) return null;
+    const row = target.closest('[data-testid="conversation-list-item"], [role="listitem"], [role="row"]');
+    if (!row?.querySelector?.('[data-testid="cell-frame-title"]')) return null;
+    if (!row.closest("#side") && !row.closest('[data-testid="archived-chatlist"]')) return null;
+    return row;
+  }
+
   function isConversationListClick(target) {
-    if (!target?.closest) return false;
-    const side = target.closest("#side");
-    if (!side) return false;
-    return Boolean(
-      target.closest('[data-testid="cell-frame-container"]') ||
-        target.closest('[role="listitem"]') ||
-        target.closest('[role="row"]')
-    );
+    return Boolean(conversationListRow(target));
   }
 
   function setSidebarOpen() {
