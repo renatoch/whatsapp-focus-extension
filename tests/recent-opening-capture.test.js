@@ -33,6 +33,8 @@ function harness() {
     isConversationListClick: (target) => Boolean(target?.rowTitle),
     conversationRow: (target) => target?.rowTitle ? target : null,
     readConversationRowTitle: (row) => row?.rowTitle || '',
+    readConversationRowTitleDetails: (row) => ({ title: row?.rowTitle || '', titleSource: 'frameTitle', selectedTextDifferent: false, containerTextRelation: 'same' }),
+    readActiveConversationTitleDetails: () => ({ title: activeTitle, headerSource: 'infoTitle', headerTextDifferent: false }),
     readActiveConversationTitle: () => activeTitle,
     addFocusedRecent: (title) => added.push(title),
     recordAwareness: (...args) => events.push(args),
@@ -58,6 +60,11 @@ test('instrumentation distinguishes missing confirmation from cancellation', () 
   timeout.flush();
   assert.equal(timeout.traces.at(-1).stage, 'timeout');
   assert.equal(timeout.traces.filter((entry) => entry.stage === 'checking').length, 6);
+  const checks = timeout.traces.filter((entry) => entry.stage === 'checking');
+  assert.equal(checks[1].headerChanged, false);
+  assert.equal(checks[1].caseFoldedMatch, false);
+  assert.equal(checks[1].headerSource, 'infoTitle');
+  assert.equal(checks[1].rowSource, 'frameTitle');
   assert.deepEqual(timeout.added, []);
   const cancelled = harness();
   cancelled.listeners.click({ type: 'click', target: { rowTitle: 'Selected' } });

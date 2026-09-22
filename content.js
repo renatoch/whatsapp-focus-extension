@@ -258,20 +258,23 @@
   }
 
   function readActiveConversationTitle() {
+    return readActiveConversationTitleDetails().title;
+  }
+
+  function readActiveConversationTitleDetails() {
     const selectors = [
-      '#main header [data-testid="conversation-info-header-chat-title"]',
-      '#main header [data-testid="conversation-info-header"] [title]',
-      '#main header span[dir="auto"][title]',
-      '#main header span[title]',
-      '#main header [dir="auto"]',
+      ['#main header [data-testid="conversation-info-header-chat-title"]', 'infoTitle'],
+      ['#main header [data-testid="conversation-info-header"] [title]', 'infoContainerTitle'],
+      ['#main header span[dir="auto"][title]', 'autoSpanTitle'],
+      ['#main header span[title]', 'spanTitle'],
+      ['#main header [dir="auto"]', 'autoText'],
     ];
-    for (const selector of selectors) {
-      const title = Array.from(document.querySelectorAll(selector))
-        .map(readTitle)
-        .find(Boolean);
-      if (title) return title;
+    for (const [selector, headerSource] of selectors) {
+      const selected = Array.from(document.querySelectorAll(selector)).find((element) => readTitle(element));
+      if (selected) return { title: readTitle(selected), headerSource,
+        headerTextDifferent: String(selected.textContent || '').trim().replace(/\s+/g, ' ').normalize('NFKC') !== readTitle(selected).normalize('NFKC') };
     }
-    return "";
+    return { title: '', headerSource: 'unavailable', headerTextDifferent: false };
   }
 
   function conversationRow(target) {
@@ -318,14 +321,17 @@
       recognized: isConversationListClick(event.target) });
   }
 
-  function captureFocusedConversation(expectedTitle, attempt, route = "search", token = ++recentCaptureToken) {
+  function captureFocusedConversation(expectedTitle, attempt, route = "search", token = ++recentCaptureToken, previousHeader, rowEvidence = {}) {
     if (token !== recentCaptureToken) { traceRecentCapture('cancelled', { token, attempt }); return; }
-    const activeTitle = readActiveConversationTitle();
+    const header = readActiveConversationTitleDetails();
+    const activeTitle = header.title;
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const expectedMatches = !expectedTitle || (
       normalize && normalize(activeTitle) === normalize(expectedTitle)
     );
-    traceRecentCapture('checking', { token, attempt, route: route === 'search' ? 'search' : 'other',
+    traceRecentCapture('checking', { ...rowEvidence, ...globalThis.MirrorFocusedRecents.compareCaptureTitles(expectedTitle, activeTitle, previousHeader),
+      headerSource: header.headerSource, headerTextDifferent: header.headerTextDifferent,
+      token, attempt, route: route === 'search' ? 'search' : 'other',
       expectedTitleAvailable: Boolean(expectedTitle), headerAvailable: Boolean(activeTitle), headerMatched: Boolean(activeTitle && expectedMatches) });
     if (activeTitle && expectedMatches) {
       addFocusedRecent(activeTitle);
@@ -334,7 +340,7 @@
       return;
     }
     if (attempt < FOCUSED_CAPTURE_RETRIES) {
-      window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1, route, token), 300);
+      window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1, route, token, activeTitle, rowEvidence), 300);
     } else {
       traceRecentCapture('timeout', { token, attempt });
     }
@@ -2110,11 +2116,13 @@
         if (root().classList.contains(ROOT_OPENING_RECENT)) return;
         traceRecentCaptureInput(event);
         if (!isConversationListClick(event.target)) return;
-        const title = readConversationRowTitle(conversationRow(event.target));
-        traceRecentCapture('selection', { expectedTitleAvailable: Boolean(title) });
+        const details = readConversationRowTitleDetails(conversationRow(event.target));
+        const { title, titleSource: rowSource, selectedTextDifferent, containerTextRelation } = details;
+        const evidence = { rowSource, selectedTextDifferent, containerTextRelation };
+        traceRecentCapture('selection', { ...evidence, expectedTitleAvailable: Boolean(title) });
         if (isSearching()) enterFocusedConversationSoon(title);
         else if (title && (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN))) {
-          captureFocusedConversation(title, 0, null);
+          captureFocusedConversation(title, 0, null, undefined, undefined, evidence);
         }
       },
       true
@@ -2127,9 +2135,10 @@
       traceRecentCaptureInput(event);
       if (isSearching()) enterFocusedConversationSoon();
       else if (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN)) {
-        const title = readConversationRowTitle(conversationRow(event.target));
-        traceRecentCapture('selection', { expectedTitleAvailable: Boolean(title) });
-        if (title) captureFocusedConversation(title, 0, null);
+        const { title, titleSource: rowSource, selectedTextDifferent, containerTextRelation } = readConversationRowTitleDetails(conversationRow(event.target));
+        const evidence = { rowSource, selectedTextDifferent, containerTextRelation };
+        traceRecentCapture('selection', { ...evidence, expectedTitleAvailable: Boolean(title) });
+        if (title) captureFocusedConversation(title, 0, null, undefined, undefined, evidence);
       }
     });
   }

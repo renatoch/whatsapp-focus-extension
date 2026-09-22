@@ -1,21 +1,42 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { createCaptureRecorder } = require('../focused-recents.js');
+const { createCaptureRecorder, compareCaptureTitles } = require('../focused-recents.js');
 test('capture recorder keeps bounded structural evidence and last terminal result', () => {
   let now = 100;
   const recorder = createCaptureRecorder(() => now);
   recorder.record('checking', { attempt: 0, token: 1, title: 'Private', expectedTitleAvailable: true });
   now += 300;
+  recorder.record('checking', { token: 1, attempt: 1, headerSource: 'autoSpanTitle', caseFoldedMatch: true, headerChanged: false });
   recorder.record('success', { token: 1, headerMatched: true, recentCount: 1, dom: 'Private' });
   for (let i = 0; i < 60; i++) recorder.record('input', { event: 'enter', zone: 'main', recognized: false });
   const snapshot = recorder.snapshot();
   assert.equal(snapshot.events.length, 32);
   assert.equal(snapshot.lastOutcome.stage, 'success');
   assert.equal(snapshot.lastOutcome.elapsedMs, 300);
+  assert.equal(snapshot.lastCapture.length, 3);
+  assert.equal(snapshot.lastCapture[1].headerSource, 'autoSpanTitle');
+  assert.equal(snapshot.lastCapture[1].caseFoldedMatch, true);
+  snapshot.lastCapture[0].stage = 'changed';
+  assert.equal(recorder.snapshot().lastCapture[0].stage, 'checking');
   assert.equal(JSON.stringify(snapshot).includes('Private'), false);
   snapshot.events[0].zone = 'changed';
   assert.equal(recorder.snapshot().events[0].zone, 'main');
 });
+test('title comparisons report distinctions without leaking text or relaxing equality', () => {
+  const casing = compareCaptureTitles('Example', 'EXAMPLE', 'EXAMPLE');
+  assert.equal(casing.caseFoldedMatch, true);
+  assert.equal(casing.formatFoldedMatch, false);
+  assert.equal(casing.headerChanged, false);
+  const formatting = compareCaptureTitles('Example', '\u200eExample', 'Previous');
+  assert.equal(formatting.caseFoldedMatch, false);
+  assert.equal(formatting.formatFoldedMatch, true);
+  assert.equal(formatting.headerChanged, true);
+  assert.equal(compareCaptureTitles('Example', 'Other').caseAndFormatFoldedMatch, false);
+  assert.equal(compareCaptureTitles('', '').caseFoldedMatch, false);
+  assert.equal('headerChanged' in compareCaptureTitles('Example', 'Example'), false);
+  assert.equal(JSON.stringify(formatting).includes('Example'), false);
+});
+
 test('unknown fields and enums are rejected, counts bounded, timeout and cancellation retained', () => {
   const recorder = createCaptureRecorder(() => 0);
   recorder.record('private-stage', {});
