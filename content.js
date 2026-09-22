@@ -1018,6 +1018,8 @@
     if (field) {
       clearNativeSearchText(field);
       field.click();
+      // Synthetic click does not guarantee focus, especially for an empty field.
+      field.focus();
       updateSearchGateState(field);
       debugLog("focusNativeSearch:field-focused", describeElement(field));
       return;
