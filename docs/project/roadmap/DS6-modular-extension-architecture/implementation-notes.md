@@ -99,6 +99,10 @@ Main `b5021dc` instruments the still-inline recent capture and native input hand
 
 Navigator reports occasional missing recents after full-mode opening, and one later appearance while typing without another click. No code had changed during the earlier read-only investigation. Do not label this fixed or assert a cause. Next evidence: copy **Copiar diagnóstico dos recentes** on the focus overlay before reloading after the episode. Tests: main 93/93, DS6 114/114. Preserve instrumentation or deliberately migrate it when recent capture is eventually extracted.
 
+## Capture mismatch diagnostics — second pass
+
+Main `cef943f` is ported here: title-source metadata, header change between retries, diagnostic-only case/format comparisons, and a separately retained lastCapture (up to eight structural records). Header title selection retains the original selector priority; in DS6 its metadata reader lives in the native adapter. The first real report showed recognized side click, available titles on both sides, six mismatches and timeout after 2,460 ms, not cancellation. Cause remains unresolved; do not widen title matching or timeout based on this alone. Await the next report through the existing overlay copy button after reload. Main 95/95 tests; DS6 116/116. No DS6 execution resumed.
+
 ## Remaining
 
 Next safe implementation boundary:

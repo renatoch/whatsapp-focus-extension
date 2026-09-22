@@ -126,23 +126,39 @@
     return { status: "not-found", index: null };
   }
 
+  // Diagnostic comparisons only: never used to accept an opening or capture.
+  function compareCaptureTitles(expected, current, previous) {
+    const left = normalizeTitle(expected), right = normalizeTitle(current);
+    const stripFormat = (value) => value.replace(/[\u200B-\u200F\u202A-\u202E\u2066-\u2069\uFEFF]/g, '').trim();
+    const available = Boolean(left && right);
+    return { caseFoldedMatch: available && left.toLocaleLowerCase() === right.toLocaleLowerCase(),
+      formatFoldedMatch: available && stripFormat(left) === stripFormat(right),
+      caseAndFormatFoldedMatch: available && stripFormat(left).toLocaleLowerCase() === stripFormat(right).toLocaleLowerCase(),
+      ...(previous === undefined ? {} : { headerChanged: right !== normalizeTitle(previous) }) };
+  }
+
   // Tab-only diagnostic recorder. Never retains titles, DOM references or absolute times.
   function createCaptureRecorder(now = () => Date.now()) {
     const events = [], starts = new Map();
-    let lastOutcome = null;
+    let lastOutcome = null, lastCapture = [], captureToken = null;
     const enums = { event: ['mousedown', 'click', 'enter'], zone: ['side', 'main', 'other'],
-      mode: ['search', 'normal', 'sidebar', 'focus'], route: ['search', 'other'] };
+      mode: ['search', 'normal', 'sidebar', 'focus'], route: ['search', 'other'],
+      rowSource: ['frameChildTitle', 'frameTitle', 'autoSpanTitle', 'spanTitle', 'unknownSource'],
+      headerSource: ['infoTitle', 'infoContainerTitle', 'autoSpanTitle', 'spanTitle', 'autoText', 'unavailable'],
+      containerTextRelation: ['same', 'different', 'missing'] };
     function record(stage, details = {}) {
       if (!['input', 'selection', 'checking', 'success', 'timeout', 'cancelled', 'added'].includes(stage)) return;
       const entry = { stage };
       for (const [key, allowed] of Object.entries(enums)) if (allowed.includes(details[key])) entry[key] = details[key];
-      for (const key of ['recognized', 'expectedTitleAvailable', 'headerAvailable', 'headerMatched']) {
+      for (const key of ['recognized', 'expectedTitleAvailable', 'headerAvailable', 'headerMatched', 'headerChanged', 'caseFoldedMatch', 'formatFoldedMatch', 'caseAndFormatFoldedMatch', 'selectedTextDifferent', 'headerTextDifferent']) {
         if (typeof details[key] === 'boolean') entry[key] = details[key];
       }
       for (const key of ['token', 'attempt', 'recentCount']) {
         if (Number.isFinite(details[key]) && details[key] >= 0) entry[key] = Math.min(1000000, Math.round(details[key]));
       }
       if (stage === 'checking' && entry.attempt === 0) {
+        captureToken = entry.token;
+        lastCapture = [];
         starts.set(entry.token, now());
         if (starts.size > 8) starts.delete(starts.keys().next().value);
       }
@@ -151,11 +167,16 @@
         lastOutcome = entry;
         starts.delete(entry.token);
       }
+      if (entry.token === captureToken && ['checking', 'success', 'timeout', 'cancelled'].includes(stage)) {
+        lastCapture.push(entry);
+        if (lastCapture.length > 8) lastCapture.shift();
+      }
       events.push(entry);
       if (events.length > 32) events.shift();
     }
     function snapshot() {
       return { version: 1, kind: 'recent-capture', lastOutcome: lastOutcome ? { ...lastOutcome } : null,
+        lastCapture: lastCapture.map((entry) => ({ ...entry })),
         events: events.map((entry) => ({ ...entry })) };
     }
     return Object.freeze({ record, snapshot });
@@ -164,6 +185,7 @@
   const api = Object.freeze({
     MAX_RECENTS,
     createCaptureRecorder,
+    compareCaptureTitles,
     normalizeTitle,
     addRecent,
     removeRecent,
