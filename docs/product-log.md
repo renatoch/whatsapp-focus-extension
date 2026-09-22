@@ -196,6 +196,11 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Implementado] Ampliar capacidade de membros por coleção para 10**
   - Navigator aprovou dez membros porque o caso original excede oito. Limite, mensagem e teste de sanitização/reload atualizados; cinco coleções continuam permitidas. Sem mudança de schema ou de privacidade. A ampliação é independente da consulta de não lidas; não encerra por si só a validação agregada da DS5.
 
+- **[Backlog] Não cobrir a tela de login/vinculação do WhatsApp Web**
+  - No perfil separado de investigação, o overlay de foco bloqueou o QR code antes da vinculação. Futuro ajuste deve detectar de forma estrutural e conservadora que a interface autenticada ainda não está pronta e não exibir o Focus Mode sobre login/QR/fluxos de vinculação. O foco deve voltar automaticamente somente quando a interface normal autenticada estiver disponível.
+  - Não inferir login por conteúdo privado, texto traduzido ou timeout; caracterizar o DOM do estado desconectado e as transições login → carregamento → WhatsApp pronto. Falhar aberto apenas para a superfície de autenticação comprovada, sem enfraquecer o blind start em sessões autenticadas. Testar início desconectado, vinculação, reload, logout e carregamento lento.
+  - Contorno atual para o perfil de investigação: desativar a extensão, vincular pelo QR code e reativá-la. Nenhuma implementação autorizada neste registro.
+
 - **[Em validação] Restaurar foco explícito na entrada da busca**
   - Navigator relatou que Buscar deixou de colocar o cursor no campo, tanto no overlay quanto na conversa focada. Não foi uma mudança intencional. O caminho compartilhado limpava o campo e chamava click, mas não focus; campo já vazio não passava pelo setter que incidentalmente aplicava foco.
   - Agora `focusNativeSearch` chama explicitamente focus após click e antes de atualizar o gate, independentemente de texto anterior. Não altera normalização de listas, timers, gate de três caracteres/um segundo nem captura dos recentes. Testes exercitam campos vazio/preenchido sem supor foco automático de click. Validação nas duas entradas ainda pendente; portado ao worktree sem retomar DS6.
