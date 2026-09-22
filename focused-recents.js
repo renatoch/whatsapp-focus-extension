@@ -137,12 +137,38 @@
       ...(previous === undefined ? {} : { headerChanged: right !== normalizeTitle(previous) }) };
   }
 
+  // Short-lived evidence only; does not open/capture conversations or retain raw
+  // observations in exported diagnostics. Release even if a click never follows.
+  function createCapturePointerProbe({ scheduler, now = () => Date.now() }) {
+    let pending = null, timer = null;
+    function clear() { scheduler.clearTimeout(timer); timer = null; pending = null; }
+    function down(row, title, source) {
+      clear();
+      if (!row) return;
+      const observation = { row, title: normalizeTitle(title), source, at: now() };
+      pending = observation;
+      timer = scheduler.setTimeout(() => { if (pending === observation) clear(); }, 5000);
+    }
+    function up(row, title) {
+      const observation = pending;
+      clear();
+      if (!observation || now() - observation.at > 5000) return { pointerObserved: false };
+      return { pointerObserved: true, pointerSameRow: observation.row === row,
+        pointerTitleAvailable: Boolean(observation.title),
+        pointerTitleMatchesClick: Boolean(observation.title && observation.title === normalizeTitle(title)),
+        pointerSource: ['frameChildTitle', 'frameTitle', 'autoSpanTitle', 'spanTitle', 'unknownSource'].includes(observation.source) ? observation.source : 'unknownSource',
+        pointerElapsedMs: Math.max(0, Math.round(now() - observation.at)) };
+    }
+    return Object.freeze({ down, up, clear });
+  }
+
   // Tab-only diagnostic recorder. Never retains titles, DOM references or absolute times.
   function createCaptureRecorder(now = () => Date.now()) {
     const events = [], starts = new Map();
     let lastOutcome = null, lastCapture = [], captureToken = null;
     const enums = { event: ['mousedown', 'click', 'enter'], zone: ['side', 'main', 'other'],
       mode: ['search', 'normal', 'sidebar', 'focus'], route: ['search', 'other'],
+      pointerSource: ['frameChildTitle', 'frameTitle', 'autoSpanTitle', 'spanTitle', 'unknownSource'],
       rowSource: ['frameChildTitle', 'frameTitle', 'autoSpanTitle', 'spanTitle', 'unknownSource'],
       headerSource: ['infoTitle', 'infoContainerTitle', 'autoSpanTitle', 'spanTitle', 'autoText', 'unavailable'],
       containerTextRelation: ['same', 'different', 'missing'] };
@@ -150,10 +176,10 @@
       if (!['input', 'selection', 'checking', 'success', 'timeout', 'cancelled', 'added'].includes(stage)) return;
       const entry = { stage };
       for (const [key, allowed] of Object.entries(enums)) if (allowed.includes(details[key])) entry[key] = details[key];
-      for (const key of ['recognized', 'expectedTitleAvailable', 'headerAvailable', 'headerMatched', 'headerChanged', 'caseFoldedMatch', 'formatFoldedMatch', 'caseAndFormatFoldedMatch', 'selectedTextDifferent', 'headerTextDifferent']) {
+      for (const key of ['recognized', 'expectedTitleAvailable', 'headerAvailable', 'headerMatched', 'headerChanged', 'caseFoldedMatch', 'formatFoldedMatch', 'caseAndFormatFoldedMatch', 'selectedTextDifferent', 'headerTextDifferent', 'pointerObserved', 'pointerSameRow', 'pointerTitleAvailable', 'pointerTitleMatchesClick']) {
         if (typeof details[key] === 'boolean') entry[key] = details[key];
       }
-      for (const key of ['token', 'attempt', 'recentCount']) {
+      for (const key of ['token', 'attempt', 'recentCount', 'pointerElapsedMs']) {
         if (Number.isFinite(details[key]) && details[key] >= 0) entry[key] = Math.min(1000000, Math.round(details[key]));
       }
       if (stage === 'checking' && entry.attempt === 0) {
@@ -185,6 +211,7 @@
   const api = Object.freeze({
     MAX_RECENTS,
     createCaptureRecorder,
+    createCapturePointerProbe,
     compareCaptureTitles,
     normalizeTitle,
     addRecent,

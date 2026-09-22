@@ -63,6 +63,7 @@
   let focusedRecents = [];
   let recentCaptureToken = 0;
   const captureRecorder = globalThis.MirrorFocusedRecents.createCaptureRecorder();
+  const capturePointerProbe = globalThis.MirrorFocusedRecents.createCapturePointerProbe({ scheduler: window });
   let recentNavigationToken = 0;
   let recentNavigationStartedAt = 0;
   let recentNavigationDiagnostic = null;
@@ -315,10 +316,20 @@
   }
 
   function traceRecentCaptureInput(event) {
-    if (!isSearching() && !root().classList.contains(ROOT_NORMAL) && !root().classList.contains(ROOT_SIDEBAR_OPEN)) return;
-    traceRecentCapture('input', { event: event.key === 'Enter' ? 'enter' : event.type,
+    if (!isSearching() && !root().classList.contains(ROOT_NORMAL) && !root().classList.contains(ROOT_SIDEBAR_OPEN)) {
+      capturePointerProbe.clear();
+      return {};
+    }
+    const recognized = isConversationListClick(event.target);
+    const row = recognized ? conversationRow(event.target) : null;
+    const details = readConversationRowTitleDetails(row);
+    let pointerEvidence = {};
+    if (event.type === 'mousedown') capturePointerProbe.down(row, details.title, details.titleSource);
+    if (event.type === 'click') pointerEvidence = capturePointerProbe.up(row, details.title);
+    traceRecentCapture('input', { ...pointerEvidence, event: event.key === 'Enter' ? 'enter' : event.type,
       zone: event.target?.closest?.('#side') ? 'side' : event.target?.closest?.('#main') ? 'main' : 'other',
-      recognized: isConversationListClick(event.target) });
+      recognized });
+    return pointerEvidence;
   }
 
   function captureFocusedConversation(expectedTitle, attempt, route = "search", token = ++recentCaptureToken, previousHeader, rowEvidence = {}) {
@@ -2114,11 +2125,11 @@
       "click",
       (event) => {
         if (root().classList.contains(ROOT_OPENING_RECENT)) return;
-        traceRecentCaptureInput(event);
+        const pointerEvidence = traceRecentCaptureInput(event);
         if (!isConversationListClick(event.target)) return;
         const details = readConversationRowTitleDetails(conversationRow(event.target));
         const { title, titleSource: rowSource, selectedTextDifferent, containerTextRelation } = details;
-        const evidence = { rowSource, selectedTextDifferent, containerTextRelation };
+        const evidence = { ...pointerEvidence, rowSource, selectedTextDifferent, containerTextRelation };
         traceRecentCapture('selection', { ...evidence, expectedTitleAvailable: Boolean(title) });
         if (isSearching()) enterFocusedConversationSoon(title);
         else if (title && (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN))) {
