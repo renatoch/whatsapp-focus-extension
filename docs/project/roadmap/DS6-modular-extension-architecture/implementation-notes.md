@@ -109,6 +109,10 @@ Main `756d3e5` is ported here without resuming DS6. An isolated probe compares r
 
 Navigator confirmed visually equal names and intermittent outcomes for the same conversation. This narrows investigation to DOM timing/title extraction but does not establish a cause. Navigator offered browser access to reduce repeated diagnostic exchanges; no CDP connection or separate profile has been configured. Any direct session should remain local and structural-only, without copying real profiles or exporting conversation content. Browser setup and DS6 execution are separate boundaries.
 
+## Explicit search-entry focus hotfix
+
+Main `d7427cc` is ported here: shared `focusNativeSearch` explicitly calls focus after click even when the query is empty. Navigator reported lost cursor focus from both entry surfaces. Deterministic tests cover empty and filled fields without assuming synthetic click focuses. Main 102/102; DS6 123/123. Live validation pending. This separate authorized fix does not resume DS6 or resolve intermittent recent capture.
+
 ## Remaining
 
 Next safe implementation boundary:
