@@ -20,6 +20,7 @@ function harness() {
   const classes = new Set(['mwf-normal']);
   let activeTitle = 'Previous';
   const context = vm.createContext({
+    capturePointerProbe: require('../focused-recents.js').createCapturePointerProbe({ scheduler: { setTimeout: () => 0, clearTimeout() {} }, now: () => 0 }),
     traceRecentCapture: (stage, details) => traces.push({ stage, ...details }),
     document: { addEventListener: (event, callback) => { listeners[event] = callback; } },
     window: { setTimeout: (callback) => timers.push(callback) },
@@ -81,6 +82,20 @@ test('mousedown observation and composer Enter do not themselves add recents', (
   assert.equal(h.traces[0].zone, 'side');
   assert.equal(h.traces[1].zone, 'main');
   assert.equal(h.traces[1].recognized, false);
+});
+
+test('pointer title changes are reported but do not relax capture confirmation', () => {
+  const h = harness();
+  const target = { rowTitle: 'Selected' };
+  h.listeners.mousedown({ type: 'mousedown', target });
+  target.rowTitle = 'Changed';
+  h.listeners.click({ type: 'click', target });
+  h.setTitle('Selected'); h.flush();
+  const check = h.traces.find((entry) => entry.stage === 'checking');
+  assert.equal(check.pointerSameRow, true);
+  assert.equal(check.pointerTitleMatchesClick, false);
+  assert.deepEqual(h.added, []);
+  assert.equal(h.traces.at(-1).stage, 'timeout');
 });
 
 test('full-mode keyboard activation also records a confirmed conversation', () => {

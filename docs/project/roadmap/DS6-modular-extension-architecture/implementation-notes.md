@@ -103,6 +103,12 @@ Navigator reports occasional missing recents after full-mode opening, and one la
 
 Main `cef943f` is ported here: title-source metadata, header change between retries, diagnostic-only case/format comparisons, and a separately retained lastCapture (up to eight structural records). Header title selection retains the original selector priority; in DS6 its metadata reader lives in the native adapter. The first real report showed recognized side click, available titles on both sides, six mismatches and timeout after 2,460 ms, not cancellation. Cause remains unresolved; do not widen title matching or timeout based on this alone. Await the next report through the existing overlay copy button after reload. Main 95/95 tests; DS6 116/116. No DS6 execution resumed.
 
+## Pointer down/click diagnostic comparison
+
+Main `756d3e5` is ported here without resuming DS6. An isolated probe compares row identity and title at mousedown vs click, carries only structural flags into lastCapture, and clears raw observation on click/new mousedown or after five seconds. It does not capture on mousedown or alter confirmation. Tests cover replacement/mutation, expiry, stale callbacks, allowlisting and unchanged rejection of mismatched titles: main 100/100, DS6 121/121.
+
+Navigator confirmed visually equal names and intermittent outcomes for the same conversation. This narrows investigation to DOM timing/title extraction but does not establish a cause. Navigator offered browser access to reduce repeated diagnostic exchanges; no CDP connection or separate profile has been configured. Any direct session should remain local and structural-only, without copying real profiles or exporting conversation content. Browser setup and DS6 execution are separate boundaries.
+
 ## Remaining
 
 Next safe implementation boundary:
