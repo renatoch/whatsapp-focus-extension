@@ -4,18 +4,17 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 const rules = require('../focused-recents.js');
-function inspect(row, header = false) {
+function inspect(row) {
   const adapterPath = path.join(__dirname, '../scripts/whatsapp-dom.js');
-  const method = header ? 'readActiveConversationTitleDetails' : 'readConversationRowTitleDetails';
-  if (fs.existsSync(adapterPath)) return require(adapterPath).createWhatsAppDom({ document: header ? row : {}, window: {} })[method](row);
+  if (fs.existsSync(adapterPath)) return require(adapterPath).createWhatsAppDom({ document: {}, window: {} }).readConversationRowTitleDetails(row);
   const source = fs.readFileSync(path.join(__dirname, '../content.js'), 'utf8');
-  const context = vm.createContext({ document: header ? row : {} });
-  for (const name of ['readTitle', method]) {
+  const context = vm.createContext({});
+  for (const name of ['readTitle', 'readConversationRowTitleDetails']) {
     const start = source.indexOf(`  function ${name}(`);
     assert.notEqual(start, -1);
     vm.runInContext(source.slice(start, source.indexOf('\n  function ', start + 1)), context);
   }
-  return context[method](row);
+  return context.readConversationRowTitleDetails(row);
 }
 function element(title, text = title) { return { getAttribute: () => title, textContent: text }; }
 test('evidence notices a fragment without changing the selected title', () => {
@@ -36,15 +35,6 @@ test('fallback source and title attribute/text differences are structural eviden
   assert.equal(evidence.containerTextRelation, 'missing');
   assert.equal(evidence.selectedTextDifferent, true);
 });
-test('header evidence retains native selector priority and attribute/text differences', () => {
-  const doc = { querySelectorAll: (selector) => selector.includes('chat-title') ? [element('Example', 'Different')] : [element('Other')] };
-  const evidence = inspect(doc, true);
-  assert.equal(evidence.title, 'Example');
-  assert.equal(evidence.headerSource, 'infoTitle');
-  assert.equal(evidence.headerTextDifferent, true);
-  assert.equal(inspect({ querySelectorAll: () => [] }, true).headerSource, 'unavailable');
-});
-
 test('only exact matches contribute to bounded title-free diagnostics', () => {
   const target = {};
   const candidates = [

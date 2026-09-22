@@ -16,12 +16,9 @@ function harness() {
   const timers = [];
   const added = [];
   const events = [];
-  const traces = [];
   const classes = new Set(['mwf-normal']);
   let activeTitle = 'Previous';
   const context = vm.createContext({
-    capturePointerProbe: require('../focused-recents.js').createCapturePointerProbe({ scheduler: { setTimeout: () => 0, clearTimeout() {} }, now: () => 0 }),
-    traceRecentCapture: (stage, details) => traces.push({ stage, ...details }),
     document: { addEventListener: (event, callback) => { listeners[event] = callback; } },
     window: { setTimeout: (callback) => timers.push(callback) },
     MirrorFocusedRecents: require('../focused-recents.js'),
@@ -34,15 +31,13 @@ function harness() {
     isConversationListClick: (target) => Boolean(target?.rowTitle),
     conversationRow: (target) => target?.rowTitle ? target : null,
     readConversationRowTitle: (row) => row?.rowTitle || '',
-    readConversationRowTitleDetails: (row) => ({ title: row?.rowTitle || '', titleSource: 'frameTitle', selectedTextDifferent: false, containerTextRelation: 'same' }),
-    readActiveConversationTitleDetails: () => ({ title: activeTitle, headerSource: 'infoTitle', headerTextDifferent: false }),
     readActiveConversationTitle: () => activeTitle,
     addFocusedRecent: (title) => added.push(title),
     recordAwareness: (...args) => events.push(args),
     enterFocusedConversationSoon: () => { throw Error('Full mode must remain full'); },
   });
-  vm.runInContext(functionSource('traceRecentCaptureInput') + '\n' + functionSource('captureFocusedConversation') + '\n' + functionSource('installSearchSelectionHandler') + '\ninstallSearchSelectionHandler();', context);
-  return { context, listeners, timers, added, events, traces, classes, setTitle: (title) => { activeTitle = title; },
+  vm.runInContext(functionSource('captureFocusedConversation') + '\n' + functionSource('installSearchSelectionHandler') + '\ninstallSearchSelectionHandler();', context);
+  return { context, listeners, timers, added, events, classes, setTitle: (title) => { activeTitle = title; },
     flush: () => { let budget = 30; while (timers.length && budget--) timers.shift()(); assert.ok(budget > 0); } };
 }
 
@@ -53,49 +48,6 @@ test('full-mode click records only a confirmed open title and does not emit sear
   h.setTitle('Selected'); h.flush();
   assert.deepEqual(h.added, ['Selected']);
   assert.deepEqual(h.events, []);
-});
-
-test('instrumentation distinguishes missing confirmation from cancellation', () => {
-  const timeout = harness();
-  timeout.listeners.click({ type: 'click', target: { rowTitle: 'Selected' } });
-  timeout.flush();
-  assert.equal(timeout.traces.at(-1).stage, 'timeout');
-  assert.equal(timeout.traces.filter((entry) => entry.stage === 'checking').length, 6);
-  const checks = timeout.traces.filter((entry) => entry.stage === 'checking');
-  assert.equal(checks[1].headerChanged, false);
-  assert.equal(checks[1].caseFoldedMatch, false);
-  assert.equal(checks[1].headerSource, 'infoTitle');
-  assert.equal(checks[1].rowSource, 'frameTitle');
-  assert.deepEqual(timeout.added, []);
-  const cancelled = harness();
-  cancelled.listeners.click({ type: 'click', target: { rowTitle: 'Selected' } });
-  cancelled.context.recentCaptureToken++;
-  cancelled.flush();
-  assert.equal(cancelled.traces.at(-1).stage, 'cancelled');
-});
-
-test('mousedown observation and composer Enter do not themselves add recents', () => {
-  const h = harness();
-  h.listeners.mousedown({ type: 'mousedown', target: { rowTitle: 'Selected', closest: (selector) => selector === '#side' } });
-  h.listeners.keydown({ key: 'Enter', target: { closest: (selector) => selector === '#main' } });
-  assert.deepEqual(h.added, []);
-  assert.equal(h.traces[0].zone, 'side');
-  assert.equal(h.traces[1].zone, 'main');
-  assert.equal(h.traces[1].recognized, false);
-});
-
-test('pointer title changes are reported but do not relax capture confirmation', () => {
-  const h = harness();
-  const target = { rowTitle: 'Selected' };
-  h.listeners.mousedown({ type: 'mousedown', target });
-  target.rowTitle = 'Changed';
-  h.listeners.click({ type: 'click', target });
-  h.setTitle('Selected'); h.flush();
-  const check = h.traces.find((entry) => entry.stage === 'checking');
-  assert.equal(check.pointerSameRow, true);
-  assert.equal(check.pointerTitleMatchesClick, false);
-  assert.deepEqual(h.added, []);
-  assert.equal(h.traces.at(-1).stage, 'timeout');
 });
 
 test('full-mode keyboard activation also records a confirmed conversation', () => {

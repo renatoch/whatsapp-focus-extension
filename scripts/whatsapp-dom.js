@@ -12,23 +12,18 @@
     }
 
     function readActiveConversationTitle() {
-      return readActiveConversationTitleDetails().title;
-    }
-
-    function readActiveConversationTitleDetails() {
       const selectors = [
-        ['#main header [data-testid="conversation-info-header-chat-title"]', 'infoTitle'],
-        ['#main header [data-testid="conversation-info-header"] [title]', 'infoContainerTitle'],
-        ['#main header span[dir="auto"][title]', 'autoSpanTitle'],
-        ['#main header span[title]', 'spanTitle'],
-        ['#main header [dir="auto"]', 'autoText'],
+        '#main header [data-testid="conversation-info-header-chat-title"]',
+        '#main header [data-testid="conversation-info-header"] [title]',
+        '#main header span[dir="auto"][title]',
+        '#main header span[title]',
+        '#main header [dir="auto"]',
       ];
-      for (const [selector, headerSource] of selectors) {
-        const selected = Array.from(document.querySelectorAll(selector)).find((element) => readTitle(element));
-        if (selected) return { title: readTitle(selected), headerSource,
-          headerTextDifferent: String(selected.textContent || '').trim().replace(/\s+/g, ' ').normalize('NFKC') !== readTitle(selected).normalize('NFKC') };
+      for (const selector of selectors) {
+        const title = Array.from(document.querySelectorAll(selector)).map(readTitle).find(Boolean);
+        if (title) return title;
       }
-      return { title: '', headerSource: 'unavailable', headerTextDifferent: false };
+      return "";
     }
 
     function conversationRow(target) {
@@ -272,7 +267,7 @@
       });
     }
 
-    return Object.freeze({ readTitle, readActiveConversationTitle, readActiveConversationTitleDetails, conversationRow, conversationListRow, readConversationRowTitle, readConversationRowTitleDetails,
+    return Object.freeze({ readTitle, readActiveConversationTitle, conversationRow, conversationListRow, readConversationRowTitle, readConversationRowTitleDetails,
       focusedResultClickTarget, activateFocusedResult, focusedConversationRows, focusedSearchCandidates, setNativeSearchText,
       clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement,
       isolateEmptySearchControls, findBackControl, findMainChatsButton, findNestedViewTitle, isNestedListView,

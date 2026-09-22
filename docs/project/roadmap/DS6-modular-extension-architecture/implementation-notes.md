@@ -93,21 +93,9 @@ Navigator's subsequent DOM inspection established `H2` headings inside direct gr
 
 Tests: main 89/89, DS6 110/110; adapter enumeration fixture now includes the evidenced heading/grid structure while retaining target-identity assertions. Live acceptance is pending. Preserve this patch during later extraction. Refactoring itself remains explicitly paused.
 
-## Intermittent recent capture — diagnostic-only follow-up
+## Intermittent capture diagnosis — concluded and removed
 
-Main `b5021dc` instruments the still-inline recent capture and native input handlers, ported identically here without resuming DS6. Pure `createCaptureRecorder` in focused-recents.js retains 32 sanitized structural events plus last terminal outcome in tab memory. A focus-overlay button copies the current snapshot; mousedown is observed but does not initiate capture. Keep existing retry timing/cancellation and event semantics until actual evidence establishes the failure.
-
-Navigator reports occasional missing recents after full-mode opening, and one later appearance while typing without another click. No code had changed during the earlier read-only investigation. Do not label this fixed or assert a cause. Next evidence: copy **Copiar diagnóstico dos recentes** on the focus overlay before reloading after the episode. Tests: main 93/93, DS6 114/114. Preserve instrumentation or deliberately migrate it when recent capture is eventually extracted.
-
-## Capture mismatch diagnostics — second pass
-
-Main `cef943f` is ported here: title-source metadata, header change between retries, diagnostic-only case/format comparisons, and a separately retained lastCapture (up to eight structural records). Header title selection retains the original selector priority; in DS6 its metadata reader lives in the native adapter. The first real report showed recognized side click, available titles on both sides, six mismatches and timeout after 2,460 ms, not cancellation. Cause remains unresolved; do not widen title matching or timeout based on this alone. Await the next report through the existing overlay copy button after reload. Main 95/95 tests; DS6 116/116. No DS6 execution resumed.
-
-## Pointer down/click diagnostic comparison
-
-Main `756d3e5` is ported here without resuming DS6. An isolated probe compares row identity and title at mousedown vs click, carries only structural flags into lastCapture, and clears raw observation on click/new mousedown or after five seconds. It does not capture on mousedown or alter confirmation. Tests cover replacement/mutation, expiry, stale callbacks, allowlisting and unchanged rejection of mismatched titles: main 100/100, DS6 121/121.
-
-Navigator confirmed visually equal names and intermittent outcomes for the same conversation. This narrows investigation to DOM timing/title extraction but does not establish a cause. Navigator offered browser access to reduce repeated diagnostic exchanges; no CDP connection or separate profile has been configured. Any direct session should remain local and structural-only, without copying real profiles or exporting conversation content. Browser setup and DS6 execution are separate boundaries.
+Temporary recorder, title-comparison metadata and mousedown/click probe established the archived-layer boundary described below. After validation in both profiles, main `a3204d7` removes the focus-overlay diagnostic link, tab-memory recorder, pointer observer, header metadata and investigation-only tests. The DS6 worktree mirrors that removal while retaining the archived row fix and the separate exact-reopening failure diagnostic. Do not resurrect temporary instrumentation during extraction unless new evidence justifies it.
 
 ## Explicit search-entry focus hotfix
 
@@ -117,7 +105,7 @@ Main `d7427cc` is ported here: shared `focusNativeSearch` explicitly calls focus
 
 Direct loopback CDP inspection (no conversation content exported; one already-read conversation opened by Navigator) established that archived rows live in `[data-testid="archived-chatlist"]` outside `#side`. The same row/title survived mousedown→click, so unmount/timing was not the cause. Existing `#side` guard discarded the opening. It also misclassified the standalone archived navigation button as a conversation, producing misleading frameTitle timeouts.
 
-Main `e94d5e5` narrows valid rows to titled conversation/listitem/row elements inside `#side` or archived-chatlist. In DS6, this belongs to `whatsapp-dom.js` as `conversationListRow`; composition uses it. Tests cover both lists, navigation exclusion and fail-closed outsiders: main 105/105, DS6 126/126. Manual validation after extension/tab reload is pending. Preserve this adapter boundary; DS6 itself remains paused.
+Main `e94d5e5` narrows valid rows to titled conversation/listitem/row elements inside `#side` or archived-chatlist. In DS6, this belongs to `whatsapp-dom.js` as `conversationListRow`; composition uses it. Tests cover both lists, navigation exclusion and fail-closed outsiders. Navigator validated the fix first in the isolated profile and then in the principal profile. Preserve this adapter boundary; DS6 itself remains paused.
 
 ## Remaining
 
