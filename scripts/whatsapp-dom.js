@@ -37,6 +37,14 @@
       ) || null;
     }
 
+    function conversationListRow(target) {
+      if (!target?.closest) return null;
+      const row = target.closest('[data-testid="conversation-list-item"], [role="listitem"], [role="row"]');
+      if (!row?.querySelector?.('[data-testid="cell-frame-title"]')) return null;
+      if (!row.closest("#side") && !row.closest('[data-testid="archived-chatlist"]')) return null;
+      return row;
+    }
+
     function readConversationRowTitle(row) {
       return readConversationRowTitleDetails(row).title;
     }
@@ -264,7 +272,7 @@
       });
     }
 
-    return Object.freeze({ readTitle, readActiveConversationTitle, readActiveConversationTitleDetails, conversationRow, readConversationRowTitle, readConversationRowTitleDetails,
+    return Object.freeze({ readTitle, readActiveConversationTitle, readActiveConversationTitleDetails, conversationRow, conversationListRow, readConversationRowTitle, readConversationRowTitleDetails,
       focusedResultClickTarget, activateFocusedResult, focusedConversationRows, focusedSearchCandidates, setNativeSearchText,
       clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement,
       isolateEmptySearchControls, findBackControl, findMainChatsButton, findNestedViewTitle, isNestedListView,

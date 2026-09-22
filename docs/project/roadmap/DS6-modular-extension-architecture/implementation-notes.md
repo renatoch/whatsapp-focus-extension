@@ -113,6 +113,12 @@ Navigator confirmed visually equal names and intermittent outcomes for the same 
 
 Main `d7427cc` is ported here: shared `focusNativeSearch` explicitly calls focus after click even when the query is empty. Navigator reported lost cursor focus from both entry surfaces. Deterministic tests cover empty and filled fields without assuming synthetic click focuses. Main 102/102; DS6 123/123. Live validation pending. This separate authorized fix does not resume DS6 or resolve intermittent recent capture.
 
+## Archived-layer capture correction from direct browser evidence
+
+Direct loopback CDP inspection (no conversation content exported; one already-read conversation opened by Navigator) established that archived rows live in `[data-testid="archived-chatlist"]` outside `#side`. The same row/title survived mousedown→click, so unmount/timing was not the cause. Existing `#side` guard discarded the opening. It also misclassified the standalone archived navigation button as a conversation, producing misleading frameTitle timeouts.
+
+Main `e94d5e5` narrows valid rows to titled conversation/listitem/row elements inside `#side` or archived-chatlist. In DS6, this belongs to `whatsapp-dom.js` as `conversationListRow`; composition uses it. Tests cover both lists, navigation exclusion and fail-closed outsiders: main 105/105, DS6 126/126. Manual validation after extension/tab reload is pending. Preserve this adapter boundary; DS6 itself remains paused.
+
 ## Remaining
 
 Next safe implementation boundary:

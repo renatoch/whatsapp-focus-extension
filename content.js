@@ -62,7 +62,7 @@
   const fixedCollectionRenderCache = new WeakMap();
   let pendingCollectionTitle = "";
   const nativeAdapter = globalThis.MirrorWhatsAppDom.createWhatsAppDom({ document, window, debugLog, describeElement, isMirrorControl, overlayId: OVERLAY_ID });
-  const { readActiveConversationTitle, readActiveConversationTitleDetails, conversationRow, readConversationRowTitle, readConversationRowTitleDetails,
+  const { readActiveConversationTitle, readActiveConversationTitleDetails, conversationRow, conversationListRow, readConversationRowTitle, readConversationRowTitleDetails,
     clearNativeSearchText, getSearchText, findNativeSearchField,
     isolateEmptySearchControls, isNestedListView, exitNestedListView, findMainChatsButton,
     hasOpenConversation, isWhatsAppReady, findNativeLoadingProgress,
@@ -205,14 +205,7 @@
   }
 
   function isConversationListClick(target) {
-    if (!target?.closest) return false;
-    const side = target.closest("#side");
-    if (!side) return false;
-    return Boolean(
-      target.closest('[data-testid="cell-frame-container"]') ||
-        target.closest('[role="listitem"]') ||
-        target.closest('[role="row"]')
-    );
+    return Boolean(conversationListRow(target));
   }
 
   function setSidebarOpen() {
