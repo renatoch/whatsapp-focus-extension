@@ -177,6 +177,12 @@
       return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
     }
 
+    function hasNativeTransientSurface() {
+      const selectors = '[role="dialog"][aria-modal="true"], [data-testid="media-viewer-modal"]';
+      return Array.from(document.querySelectorAll(selectors))
+        .some((element) => !isMirrorControl(element) && isVisibleElement(element));
+    }
+
     function isolateEmptySearchControls() {
       const side = document.querySelector("#side");
       const field = findNativeSearchField();
@@ -269,7 +275,7 @@
 
     return Object.freeze({ readTitle, readActiveConversationTitle, conversationRow, conversationListRow, readConversationRowTitle, readConversationRowTitleDetails,
       focusedResultClickTarget, activateFocusedResult, focusedConversationRows, focusedSearchCandidates, setNativeSearchText,
-      clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement,
+      clearNativeSearchText, getSearchText, findNativeSearchField, isVisibleElement, hasNativeTransientSurface,
       isolateEmptySearchControls, findBackControl, findMainChatsButton, findNestedViewTitle, isNestedListView,
       exitNestedListView, hasOpenConversation, isWhatsAppReady, findNativeLoadingProgress });
   }

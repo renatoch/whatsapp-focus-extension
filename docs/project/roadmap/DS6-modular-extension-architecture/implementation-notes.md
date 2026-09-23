@@ -107,6 +107,10 @@ Direct loopback CDP inspection (no conversation content exported; one already-re
 
 Main `e94d5e5` narrows valid rows to titled conversation/listitem/row elements inside `#side` or archived-chatlist. In DS6, this belongs to `whatsapp-dom.js` as `conversationListRow`; composition uses it. Tests cover both lists, navigation exclusion and fail-closed outsiders. Navigator validated the fix first in the isolated profile and then in the principal profile. Preserve this adapter boundary; DS6 itself remains paused.
 
+## Native transient surface priority
+
+Direct structural inspection established editor dialogs via `[role="dialog"][aria-modal="true"]` and image/video via `[data-testid="media-viewer-modal"]`. Main `fe2dff1` temporarily hides only the focused-navigation shelf while either visible native surface exists and restores it from unchanged child state through the existing mutation observer. In DS6, detection belongs to the native adapter; composition owns shelf visibility. Tests: main 98/98, DS6 119/119. Live editor/image/video validation pending. This separate authorized fix does not resume DS6.
+
 ## Remaining
 
 Next safe implementation boundary:

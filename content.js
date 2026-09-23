@@ -63,7 +63,7 @@
   const { readActiveConversationTitle, conversationRow, conversationListRow, readConversationRowTitle, readConversationRowTitleDetails,
     clearNativeSearchText, getSearchText, findNativeSearchField,
     isolateEmptySearchControls, isNestedListView, exitNestedListView, findMainChatsButton,
-    hasOpenConversation, isWhatsAppReady, findNativeLoadingProgress,
+    hasOpenConversation, isWhatsAppReady, findNativeLoadingProgress, hasNativeTransientSurface,
   } = nativeAdapter;
   const focusedNavigation = globalThis.MirrorFocusedNavigation.createFocusedNavigation({
     native: nativeAdapter, rules: globalThis.MirrorFocusedRecents, scheduler: window,
@@ -350,7 +350,7 @@
     if (!shelf) return;
     const recents = shelf.querySelector("[data-mwf-focused-recents-focused]");
     const collections = shelf.querySelector("[data-mwf-fixed-collections-focused]");
-    shelf.hidden = Boolean(recents?.hidden && collections?.hidden);
+    shelf.hidden = hasNativeTransientSurface() || Boolean(recents?.hidden && collections?.hidden);
     if (isSearching()) updateSearchNavigation(getSearchText());
   }
 
@@ -797,6 +797,7 @@
   }
 
   function updateOverlayState() {
+    updateFocusedNavigationShelfVisibility();
     if (isSearching() && root().classList.contains(ROOT_SEARCH_NAVIGATION) &&
         !root().classList.contains(ROOT_OPENING_RECENT)) isolateEmptySearchControls();
     const overlay = getOverlay();
