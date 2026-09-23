@@ -401,12 +401,18 @@
     document.body.appendChild(shelf);
   }
 
+  function hasNativeTransientSurface() {
+    const selectors = '[role="dialog"][aria-modal="true"], [data-testid="media-viewer-modal"]';
+    return Array.from(document.querySelectorAll(selectors))
+      .some((element) => !isMirrorControl(element) && isVisibleElement(element));
+  }
+
   function updateFocusedNavigationShelfVisibility() {
     const shelf = document.getElementById(FOCUSED_RECENTS_ID);
     if (!shelf) return;
     const recents = shelf.querySelector("[data-mwf-focused-recents-focused]");
     const collections = shelf.querySelector("[data-mwf-fixed-collections-focused]");
-    shelf.hidden = Boolean(recents?.hidden && collections?.hidden);
+    shelf.hidden = hasNativeTransientSurface() || Boolean(recents?.hidden && collections?.hidden);
     if (isSearching()) updateSearchNavigation(getSearchText());
   }
 
@@ -1269,6 +1275,7 @@
   }
 
   function updateOverlayState() {
+    updateFocusedNavigationShelfVisibility();
     if (isSearching() && root().classList.contains(ROOT_SEARCH_NAVIGATION) &&
         !root().classList.contains(ROOT_OPENING_RECENT)) isolateEmptySearchControls();
     const overlay = getOverlay();
