@@ -10,6 +10,7 @@
   const ROOT_SIDEBAR_HIDDEN = "mwf-sidebar-hidden";
   const ROOT_OVERLAY_OPEN = "mwf-overlay-open";
   const ROOT_OPENING_RECENT = "mwf-opening-recent";
+  const ROOT_NATIVE_TRANSIENT = "mwf-native-transient-open";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
@@ -408,11 +409,13 @@
   }
 
   function updateFocusedNavigationShelfVisibility() {
+    const suspended = hasNativeTransientSurface();
+    root().classList.toggle(ROOT_NATIVE_TRANSIENT, suspended);
     const shelf = document.getElementById(FOCUSED_RECENTS_ID);
     if (!shelf) return;
     const recents = shelf.querySelector("[data-mwf-focused-recents-focused]");
     const collections = shelf.querySelector("[data-mwf-fixed-collections-focused]");
-    shelf.hidden = hasNativeTransientSurface() || Boolean(recents?.hidden && collections?.hidden);
+    shelf.hidden = suspended || Boolean(recents?.hidden && collections?.hidden);
     if (isSearching()) updateSearchNavigation(getSearchText());
   }
 
