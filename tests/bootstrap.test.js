@@ -13,6 +13,7 @@ test('manifest factories load without DOM access and bootstrap enters blind stat
     add: (...values) => values.forEach((value) => classes.add(value)),
     remove: (...values) => values.forEach((value) => classes.delete(value)),
     contains: (value) => classes.has(value),
+    toggle: (value, force) => force ? classes.add(value) : classes.delete(value),
   } };
   const document = {
     get body() { domReads++; return null; },

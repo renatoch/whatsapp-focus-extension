@@ -109,7 +109,7 @@ Main `e94d5e5` narrows valid rows to titled conversation/listitem/row elements i
 
 ## Native transient surface priority
 
-Direct structural inspection established editor dialogs via `[role="dialog"][aria-modal="true"]` and image/video via `[data-testid="media-viewer-modal"]`. Main `fe2dff1` temporarily hides only the focused-navigation shelf while either visible native surface exists and restores it from unchanged child state through the existing mutation observer. In DS6, detection belongs to the native adapter; composition owns shelf visibility. Tests: main 98/98, DS6 119/119. Live editor/image/video validation pending. This separate authorized fix does not resume DS6.
+Direct structural inspection established editor dialogs via `[role="dialog"][aria-modal="true"]` and image/video via `[data-testid="media-viewer-modal"]`. Main `fe2dff1` temporarily hides the focused-navigation shelf while either visible native surface exists and restores it from unchanged child state through the existing mutation observer; Navigator validated editor, image and video. Follow-up `ed401a2` applies the same root state to Buscar, Adicionar à coleção and an open collection chooser. In DS6, detection belongs to the native adapter; composition owns root/shelf visibility. Tests: main 99/99, DS6 120/120. Live button validation pending. This separate authorized fix does not resume DS6.
 
 ## Remaining
 
