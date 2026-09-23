@@ -1080,6 +1080,11 @@ html.mwf-native-transient-open .mwf-focused-navigation-floating {
   pointer-events: none !important;
 }
 
+/* Override the more-specific active-mode rule that normally shows this button. */
+html.mwf-native-transient-open.mwf-active:not(.mwf-overlay-open) #mirror-whatsapp-focus-add-collection {
+  display: none !important;
+}
+
 #mirror-whatsapp-focus-collection-chooser {
   position: fixed;
   left: 190px;

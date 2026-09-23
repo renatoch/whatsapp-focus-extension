@@ -65,6 +65,7 @@ test('the transient root state hides focused actions and an open collection choo
     assert.match(css, new RegExp(`html\\.mwf-native-transient-open[^{}]*#${id}`));
   }
   assert.match(css, /html\.mwf-native-transient-open[^{}]*\.mwf-focused-navigation-floating/);
+  assert.match(css, /html\.mwf-native-transient-open\.mwf-active:not\(\.mwf-overlay-open\) #mirror-whatsapp-focus-add-collection\s*\{[^}]*display:\s*none !important;/s);
 });
 
 test('the existing DOM observer refreshes transient visibility on native mutations', () => {
