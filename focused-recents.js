@@ -1,7 +1,8 @@
 (function exposeFocusedRecents(globalScope) {
   "use strict";
 
-  const MAX_RECENTS = 5;
+  const INITIAL_VISIBLE_RECENTS = 5;
+  const MAX_RECENTS = 10;
   const DIAGNOSTIC_STAGES = Object.freeze([
     "starting",
     "chats-normalized",
@@ -31,6 +32,16 @@
     const remaining = (Array.isArray(recents) ? recents : [])
       .filter((item) => normalizeTitle(item) !== key);
     return [displayTitle, ...remaining].slice(0, Math.max(1, limit));
+  }
+
+  function visibleRecents(recents, expanded) {
+    const safeRecents = Array.isArray(recents) ? recents : [];
+    return safeRecents.slice(0, expanded ? MAX_RECENTS : INITIAL_VISIBLE_RECENTS);
+  }
+
+  function hiddenRecentCount(recents, expanded) {
+    if (expanded) return 0;
+    return Math.max(0, (Array.isArray(recents) ? recents.length : 0) - INITIAL_VISIBLE_RECENTS);
   }
 
   function removeRecent(recents, title) {
@@ -127,9 +138,12 @@
   }
 
   const api = Object.freeze({
+    INITIAL_VISIBLE_RECENTS,
     MAX_RECENTS,
     normalizeTitle,
     addRecent,
+    visibleRecents,
+    hiddenRecentCount,
     removeRecent,
     clearRecents,
     createNavigationDiagnostic,

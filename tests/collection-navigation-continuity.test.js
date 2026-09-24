@@ -7,14 +7,16 @@ const source = fs.readFileSync(path.join(__dirname, '../content.js'), 'utf8');
 const css = fs.readFileSync(path.join(__dirname, '../focus.css'), 'utf8');
 
 // CSS contracts: browser layout still requires the short live pointer check.
-test('focused recents reserve five fixed rows without expanding the overlay', () => {
+test('focused recents reserve five fixed rows and expand to ten without moving collections by default', () => {
   assert.match(css, /\[data-mwf-focused-recents-focused\]\s*\{[^}]*height: 232px;/s);
   assert.match(css, /\[data-mwf-focused-recents-focused\] \.mwf-focused-recents-heading\s*\{[^}]*height: 20px;/s);
   assert.match(css, /\[data-mwf-focused-recents-focused\] \.mwf-focused-recent-item\s*\{[^}]*height: 36px;[^}]*flex: 0 0 36px;/s);
   assert.match(css, /\[data-mwf-focused-recents-focused\]\[hidden\]\s*\{[^}]*display: block !important;[^}]*visibility: hidden;/s);
   assert.doesNotMatch(css, /\.mwf-focused-recents\[hidden\] \+ \.mwf-fixed-collections/);
-  assert.equal(require('../focused-recents.js').MAX_RECENTS, 5);
+  assert.match(css, /\[data-mwf-focused-recents-focused\]\.mwf-focused-recents-expanded\s*\{[^}]*height: 442px;/s);
+  assert.equal(require('../focused-recents.js').MAX_RECENTS, 10);
   assert.equal(20 + 8 + 5 * 36 + 4 * 6, 232);
+  assert.equal(20 + 8 + 10 * 36 + 9 * 6, 442);
 });
 
 function extract(name) {

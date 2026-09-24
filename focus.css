@@ -249,6 +249,10 @@ html.mwf-normal #mirror-whatsapp-focus-overlay {
   line-height: 20px;
 }
 
+[data-mwf-focused-recents-focused].mwf-focused-recents-expanded {
+  height: 442px;
+}
+
 [data-mwf-focused-recents-focused][hidden] {
   display: block !important;
   visibility: hidden;
@@ -316,7 +320,14 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
   font-size: 12px;
 }
 
+.mwf-focused-recents-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .mwf-focused-recents-clear,
+.mwf-focused-recents-toggle,
 .mwf-focused-recent-open,
 .mwf-focused-recent-remove {
   border: 0;
@@ -325,7 +336,8 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
   font: inherit;
 }
 
-.mwf-focused-recents-clear {
+.mwf-focused-recents-clear,
+.mwf-focused-recents-toggle {
   padding: 2px 4px;
   background: transparent;
   color: #8696a0;
@@ -370,7 +382,8 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 
 .mwf-focused-recent-open:hover,
 .mwf-focused-recent-remove:hover,
-.mwf-focused-recents-clear:hover {
+.mwf-focused-recents-clear:hover,
+.mwf-focused-recents-toggle:hover {
   color: #00a884;
 }
 

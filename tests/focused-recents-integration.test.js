@@ -8,6 +8,15 @@ const content = fs.readFileSync(path.join(projectRoot, 'content.js'), 'utf8');
 const css = fs.readFileSync(path.join(projectRoot, 'focus.css'), 'utf8');
 const manifest = JSON.parse(fs.readFileSync(path.join(projectRoot, 'manifest.json'), 'utf8'));
 
+test('keeps recent expansion session-only and renders the bounded visible slice', () => {
+  assert.match(content, /let focusedRecentsExpanded = false;/);
+  assert.match(content, /MirrorFocusedRecents\?\.visibleRecents\(focusedRecents, focusedRecentsExpanded\)/);
+  assert.match(content, /focusedRecentsExpanded = !focusedRecentsExpanded;/);
+  assert.match(content, /toggle\.setAttribute\("aria-expanded", String\(focusedRecentsExpanded\)\)/);
+  assert.equal((content.match(/focusedRecentsExpanded\s*=/g) || []).length, 2);
+  assert.doesNotMatch(content, /focusedRecentsExpanded[^\n]*(localStorage|storage)/);
+});
+
 test('loads the pure focused-recents boundary before the content script', () => {
   assert.deepEqual(manifest.content_scripts[0].js, [
     'awareness.js',

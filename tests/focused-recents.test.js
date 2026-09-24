@@ -9,6 +9,8 @@ const {
   createNavigationDiagnostic,
   updateNavigationDiagnostic,
   normalizeTitle,
+  visibleRecents,
+  hiddenRecentCount,
 } = require('../focused-recents.js');
 
 test('normalizes titles only for equality', () => {
@@ -17,7 +19,7 @@ test('normalizes titles only for equality', () => {
   assert.equal(normalizeTitle(null), '');
 });
 
-test('keeps five unique titles in most-recent-first order', () => {
+test('keeps ten unique titles in most-recent-first order', () => {
   let recents = [];
   for (const title of ['Alpha', 'Beta', 'Gamma', 'Delta']) recents = addRecent(recents, title);
   assert.deepEqual(recents, ['Delta', 'Gamma', 'Beta', 'Alpha']);
@@ -27,8 +29,17 @@ test('keeps five unique titles in most-recent-first order', () => {
 
   recents = addRecent(recents, 'Epsilon');
   assert.deepEqual(recents, ['Epsilon', 'Beta', 'Delta', 'Gamma', 'Alpha']);
-  recents = addRecent(recents, 'Zeta');
-  assert.deepEqual(recents, ['Zeta', 'Epsilon', 'Beta', 'Delta', 'Gamma']);
+  for (const title of ['Zeta', 'Eta', 'Theta', 'Iota', 'Kappa', 'Lambda']) recents = addRecent(recents, title);
+  assert.deepEqual(recents, ['Lambda', 'Kappa', 'Iota', 'Theta', 'Eta', 'Zeta', 'Epsilon', 'Beta', 'Delta', 'Gamma']);
+});
+
+test('shows five recents by default and up to ten after explicit expansion', () => {
+  const recents = Array.from({ length: 10 }, (_, index) => `Chat ${index + 1}`);
+  assert.deepEqual(visibleRecents(recents, false), recents.slice(0, 5));
+  assert.deepEqual(visibleRecents(recents, true), recents);
+  assert.equal(hiddenRecentCount(recents, false), 5);
+  assert.equal(hiddenRecentCount(recents.slice(0, 8), false), 3);
+  assert.equal(hiddenRecentCount(recents, true), 0);
 });
 
 test('deduplicates normalized titles while preserving the latest display text', () => {

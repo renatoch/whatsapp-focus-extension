@@ -35,7 +35,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - durante a busca, oculta resultados até que pelo menos 3 letras sejam digitadas e espera 1 segundo antes da primeira exibição, evitando revelar recentes durante a digitação inicial;
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
-- mantém na memória da aba até 5 **Conversas em andamento**, ordenadas pela última abertura: seleção no modo completo, busca focada, coleção, recentes ou **Continuar conversa**; receber mensagens ou aparecer na lista não adiciona conversas; os títulos não são persistidos nem entram no awareness;
+- mantém na memória da aba até 10 **Conversas em andamento**, ordenadas pela última abertura: mostra 5 por padrão e permite revelar as outras 5 explicitamente, mantendo a escolha de expansão durante a sessão; seleção no modo completo, busca focada, coleção, recentes ou **Continuar conversa** atualiza a lista; receber mensagens ou aparecer na lateral não adiciona conversas; os títulos não são persistidos nem entram no awareness;
 - permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 10 conversas, recolhidas por padrão na própria tela de conversa focada para alternância direta; somente nomes de coleção e títulos escolhidos ficam no armazenamento isolado da extensão;
 - ao entrar em **Buscar** com campo vazio, oferece recentes e coleções recolhidas para escolha direta, mesmo sem conversa aberta; oculta os ramos nativos concorrentes abaixo da busca sem mover a seção, que tem fundo opaco; ao digitar, esconde essas opções, e ao limpar o campo volta a mostrá-las;
 - na reabertura por recentes/coleções, aguarda um alvo exato único em duas sondagens consecutivas; duplicidade persistente falha fechada, com diagnóstico estrutural copiável sem nomes;
@@ -102,8 +102,9 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 15. Abra **Ver padrão de uso** e confirme que os contadores refletem somente ações da extensão.
 16. Teste pausar/retomar a coleta; depois teste apagar os dados locais.
 17. Em uma conversa focada, clique em **Adicionar à coleção**, crie uma coleção e adicione outra conversa.
-18. Sem voltar ao overlay, expanda a coleção na tela de conversa focada e abra conversas em sequência; a seção permanece visível e expandida durante a troca, preservando a rolagem. A área de recentes reserva espaço para cinco itens, mesmo vazia, para não empurrar a coleção ao incluir uma conversa.
-19. Recarregue a página, abra uma conversa focada e confirme que a coleção persiste recolhida nessa tela.
+18. Abra mais de cinco conversas intencionalmente; confirme que cinco aparecem por padrão, use **Mais 5** para revelar as demais e alterne entre conversas. A expansão deve permanecer até ser recolhida manualmente ou a aba ser recarregada.
+19. Sem voltar ao overlay, expanda uma coleção na tela de conversa focada e abra conversas em sequência; a seção permanece visível e expandida durante a troca, preservando a rolagem. Recolhidos, os recentes ainda reservam espaço para cinco itens, mesmo vazios, para não empurrar a coleção ao incluir uma conversa.
+20. Recarregue a página, abra uma conversa focada e confirme que a coleção persiste recolhida e os títulos recentes não persistem.
 
 ## Limitações conhecidas
 
