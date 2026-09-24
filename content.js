@@ -55,6 +55,7 @@
   let intentPromptStartedAt = null;
   let pendingIntent = null;
   let focusedRecents = [];
+  let focusedRecentsExpanded = false;
   let recentCaptureToken = 0;
   let fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || { version: 1, collections: [] };
   let expandedFixedCollectionName = "";
@@ -284,25 +285,47 @@
     renderFocusedRecents();
   }
 
+  function toggleFocusedRecentsExpanded() {
+    focusedRecentsExpanded = !focusedRecentsExpanded;
+    renderFocusedRecents();
+  }
+
   function createFocusedRecentsContents(container) {
+    const initialVisibleRecents = globalThis.MirrorFocusedRecents?.INITIAL_VISIBLE_RECENTS || 5;
     container.replaceChildren();
     container.hidden = focusedRecents.length === 0;
+    container.classList.toggle("mwf-focused-recents-expanded", focusedRecentsExpanded && focusedRecents.length > initialVisibleRecents);
     if (focusedRecents.length === 0) return;
 
     const heading = document.createElement("div");
     heading.className = "mwf-focused-recents-heading";
     const label = document.createElement("strong");
     label.textContent = "Conversas em andamento";
+    const actions = document.createElement("span");
+    actions.className = "mwf-focused-recents-actions";
+    if (focusedRecents.length > initialVisibleRecents) {
+      const hiddenCount = globalThis.MirrorFocusedRecents?.hiddenRecentCount(focusedRecents, focusedRecentsExpanded) || 0;
+      const toggle = document.createElement("button");
+      toggle.type = "button";
+      toggle.className = "mwf-focused-recents-toggle";
+      toggle.textContent = focusedRecentsExpanded ? "Menos" : `Mais ${hiddenCount}`;
+      toggle.setAttribute("aria-expanded", String(focusedRecentsExpanded));
+      toggle.setAttribute("aria-label", focusedRecentsExpanded ? "Mostrar menos conversas recentes" : `Mostrar mais ${hiddenCount} conversas recentes`);
+      toggle.addEventListener("click", toggleFocusedRecentsExpanded);
+      actions.appendChild(toggle);
+    }
     const clear = document.createElement("button");
     clear.type = "button";
     clear.className = "mwf-focused-recents-clear";
     clear.textContent = "Limpar";
     clear.addEventListener("click", clearFocusedRecents);
-    heading.append(label, clear);
+    actions.appendChild(clear);
+    heading.append(label, actions);
 
     const list = document.createElement("div");
     list.className = "mwf-focused-recents-list";
-    for (const title of focusedRecents) {
+    const visibleRecents = globalThis.MirrorFocusedRecents?.visibleRecents(focusedRecents, focusedRecentsExpanded) || focusedRecents.slice(0, initialVisibleRecents);
+    for (const title of visibleRecents) {
       const item = document.createElement("div");
       item.className = "mwf-focused-recent-item";
       const open = document.createElement("button");
