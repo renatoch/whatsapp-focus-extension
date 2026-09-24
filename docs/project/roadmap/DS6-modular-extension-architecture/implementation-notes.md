@@ -111,6 +111,10 @@ Main `e94d5e5` narrows valid rows to titled conversation/listitem/row elements i
 
 Direct structural inspection established editor dialogs via `[role="dialog"][aria-modal="true"]` and image/video via `[data-testid="media-viewer-modal"]`. Main `fe2dff1` temporarily hides the focused-navigation shelf while either visible native surface exists and restores it from unchanged child state through the existing mutation observer; Navigator validated editor, image and video. Follow-up `ed401a2` applies the same root state to Buscar, Adicionar à coleção and an open collection chooser. The active-mode add-button selector was more specific than the generic suspension; main `5ba179f` adds an explicit override. Direct computed-style inspection with the media viewer open confirmed both buttons and chooser at `display: none`; Navigator then confirmed shelf, Buscar and Adicionar à coleção visually. Dedicated debug Chrome was closed and port 9222 verified closed. In DS6, detection belongs to the native adapter; composition owns root/shelf visibility. Tests: main 99/99, DS6 120/120. This separate authorized fix does not resume DS6.
 
+## Expandable session recents synchronization
+
+Main `136be41` raises the ephemeral recent-set bound from five to ten while preserving five visible rows by default. An explicit `Mais N` / `Menos` control reveals the second layer, and its expanded state remains tab-session-only across navigation/rerenders. No storage or awareness title path was added. The approved stable change was cherry-picked as `5a807b5`; main passes 101/101 and DS6 122/122. Live validation is pending. This synchronization does not resume DS6.
+
 ## Remaining
 
 Next safe implementation boundary:
