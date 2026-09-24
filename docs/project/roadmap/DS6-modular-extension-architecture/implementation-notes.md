@@ -113,7 +113,7 @@ Direct structural inspection established editor dialogs via `[role="dialog"][ari
 
 ## Expandable session recents synchronization
 
-Main `136be41` raises the ephemeral recent-set bound from five to ten while preserving five visible rows by default. An explicit `Mais N` / `Menos` control reveals the second layer, and its expanded state remains tab-session-only across navigation/rerenders. No storage or awareness title path was added. The approved stable change was cherry-picked as `5a807b5`; main passes 101/101 and DS6 122/122. Live validation is pending. This synchronization does not resume DS6.
+Main `136be41` raises the ephemeral recent-set bound from five to ten while preserving five visible rows by default. An explicit `Mais N` / `Menos` control reveals the second layer, and its expanded state remains tab-session-only across navigation/rerenders. No storage or awareness title path was added. The approved stable change was cherry-picked as `5a807b5`; main passes 101/101 and DS6 122/122. Navigator accepted the live behavior: “Ok, está bom”. This synchronization does not resume DS6.
 
 ## Remaining
 
