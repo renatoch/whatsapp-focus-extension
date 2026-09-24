@@ -196,10 +196,10 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Implementado] Ampliar capacidade de membros por coleção para 10**
   - Navigator aprovou dez membros porque o caso original excede oito. Limite, mensagem e teste de sanitização/reload atualizados; cinco coleções continuam permitidas. Sem mudança de schema ou de privacidade. A ampliação é independente da consulta de não lidas; não encerra por si só a validação agregada da DS5.
 
-- **[Em validação] Expandir Conversas em andamento de cinco para dez**
+- **[Validado] Expandir Conversas em andamento de cinco para dez**
   - Uso natural mostrou que a lista funciona como memória de trabalho: depois de chavear para consultar outra conversa, ela ajuda a lembrar e retomar o fio anterior. Cinco itens se mostraram insuficientes em sessões com mais alternância.
   - A extensão agora mantém até dez títulos únicos somente na memória da aba, mas continua mostrando cinco por padrão. Quando há excedentes, **Mais N** revela até cinco adicionais; **Menos** recolhe. A escolha de expansão permanece ao navegar e renderizar novamente, mudando apenas por ação manual ou reload da aba.
-  - Nenhuma persistência, awareness, preview, sinal de não lida ou captura por atividade recebida foi adicionada. Recolhida, a seção preserva a geometria existente de cinco linhas; expandida, cresce dentro do shelf rolável. Validação manual pendente para capacidade, alternância, manutenção da expansão, recolhimento e reload.
+  - Nenhuma persistência, awareness, preview, sinal de não lida ou captura por atividade recebida foi adicionada. Recolhida, a seção preserva a geometria existente de cinco linhas; expandida, cresce dentro do shelf rolável. Navigator validou o comportamento no uso real: “Ok, está bom”.
 
 - **[Validado] Suspender navegação focada sob modais e visualizadores nativos**
   - O shelf flutuante usa `z-index: 2147483645` e ficava acima de superfícies nativas, cobrindo parte de Editar mensagem e visualizadores. A hierarquia desejada é priorizar a tarefa transitória: ocultar o shelf, sem desmontar recentes/coleções, e restaurar o mesmo conteúdo, expansão e scroll ao fechar.
