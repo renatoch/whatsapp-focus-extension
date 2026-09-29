@@ -4,14 +4,14 @@
 
 ## Aggregate Validation
 
-Prove behavior and privacy equivalence across the module extraction, not merely reduced line counts. Planning baseline: 77 tests last passed before Navigator acceptance of stabilized reopening. No DS6 implementation tests have been executed yet.
+Prove behavior and privacy equivalence across the module extraction, not merely reduced line counts. Planning baseline: 77 tests last passed before Navigator acceptance of stabilized reopening. Implementation has resumed; latest recent-capture checkpoint passes 132 automated tests. Live Chrome equivalence is still pending.
 
 ## Automated Matrix
 
 - Adapter: synthetic DOM for current selectors, exact title normalization, main/archived normalization, native input/clear, mousedown activation and empty-search sibling isolation. No real contacts, message content or DOM snapshots.
 - Search: zero/one/two/three characters, initial one-second gate, clear-to-known-navigation, no Enter leakage from extension controls.
 - Navigation: transient ambiguity → two stable unique samples → one click; persistent ambiguity and missing results → bounded failure; target replacement/query mismatch → no click; cancellation → stale callbacks inert; header confirmation remains mandatory.
-- Recency: five unique session-only titles for supported entry routes, no incoming-message capture, no false search telemetry for other routes.
+- Recency: ten unique session-only titles, five initially visible with session-retained expansion, for supported entry routes, no incoming-message capture, no false search telemetry for other routes.
 - Collections: five collections × ten members, unchanged sanitized schema, create/add/remove/delete, reload persistence, missing storage/failure handling, no expansion persistence.
 - UI continuity: same member node retained during unrelated updates, expansion preserved across member openings, scroll offset preserved, fixed recent-slot geometry including zero entries, opaque panel and native empty-search isolation.
 - Normal/intent: deterministic clocks for eight-second barrier, recent-use explicit confirmation, declaration versus pre-declaration return, five-minute expiry destinations and nested-view normalization. Exact event association/allowlists and authored-note handling remain compatible.
@@ -60,4 +60,4 @@ Missing/ambiguous-title failures are primarily synthetic automated tests; if a l
 
 ## Validation Evidence
 
-Pending plan approval, implementation, automated verification, targeted Chrome acceptance and Debt Review. Existing Navigator acceptance belongs to the pre-refactor baseline, not to DS6 results.
+Plan approved; implementation resumed and partial, with 132 automated tests passing at the capture extraction checkpoint. Targeted Chrome acceptance and Debt Review remain pending. Existing Navigator acceptance belongs to the pre-refactor baseline, not to DS6 results.

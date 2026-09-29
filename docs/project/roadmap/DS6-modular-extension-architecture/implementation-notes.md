@@ -1,5 +1,22 @@
 # DS6 — Implementation Notes
 
+## Current resume status
+
+Navigator explicitly resumed DS6 after the toast adjustment. Recent capture is
+now extracted into `scripts/recent-capture.js`, preserving six inspections at
+300 ms retry intervals, exact case-sensitive confirmation and route callbacks.
+Cancel/dispose clear owned timers and invalidate stale callbacks; restart is tested.
+The opening-route suite uses the real factory while event/Continue composition
+bridges remain until their owners are extracted. Full suite: 132/132 passing.
+
+Next: mode and normal/intent controller extraction, including the still-composed
+250 ms focused-entry / 350 ms initial capture delays and application start/dispose.
+Do not treat this first resumed checkpoint as full DS6 completion or Chrome acceptance.
+Main remains untouched. Earlier pause and five-recent references below are historical:
+current behavior is ten tab-only recents with five initially visible and retained
+expansion. Limited backup push authorization is governed by `docs/github-backup-policy.md`;
+merge, release and packaging still require separate authorization.
+
 ## Isolation and authorization
 
 Navigator approved the DS Plan and requested branch isolation. Ariad implementation approval covers DS6.TS1–TS6. No merge, push, release or deployment is authorized.
@@ -123,7 +140,7 @@ Main `feb1ddd` adds an explicit `Fechar` button to toasts/diagnostics and reduce
 
 Next safe implementation boundary:
 
-1. Extract recent capture (including bounded confirmation retries and cancellation) into a controller using the native adapter; migrate `recent-opening-capture.test.js` from its remaining VM bridge without weakening source-route and passive-change tests.
+1. Completed at resumed checkpoint: extract bounded recent capture and cancellation into a controller using the native adapter; preserve source-route and passive-change tests. Event wiring remains a composition bridge until mode/lifecycle extraction.
 2. Finish timer/listener lifecycle ownership as mode/normal-intent controllers are extracted. Some delayed search entry/capture and normalization callbacks are still scheduled by `content.js`; module-local disposal is implemented, but application-level start/dispose is not complete.
 3. Extract conversation store and UI surfaces via data/action callbacks, not a global mutable context. Preserve exact collection render cache and fixed five-slot layout.
 4. Split CSS and the development asset loader only after auditing cascade order; retain the current CSS untouched until that boundary.

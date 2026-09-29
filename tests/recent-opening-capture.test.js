@@ -36,7 +36,16 @@ function harness() {
     recordAwareness: (...args) => events.push(args),
     enterFocusedConversationSoon: () => { throw Error('Full mode must remain full'); },
   });
-  vm.runInContext(functionSource('captureFocusedConversation') + '\n' + functionSource('installSearchSelectionHandler') + '\ninstallSearchSelectionHandler();', context);
+  const { createRecentCapture } = require('../scripts/recent-capture.js');
+  const capture = createRecentCapture({
+    readTitle: () => activeTitle,
+    normalizeTitle: require('../focused-recents.js').normalizeTitle,
+    scheduler: { setTimeout: callback => { timers.push(callback); return callback; },
+      clearTimeout: callback => { const index = timers.indexOf(callback); if (index >= 0) timers.splice(index, 1); } },
+    onCaptured: (title, route) => { added.push(title); if (route === 'search') events.push(['focused_conversation_opened', { route: 'search' }]); },
+  });
+  context.captureFocusedConversation = (title, _attempt, route = 'search') => capture.capture(title, route);
+  vm.runInContext(functionSource('installSearchSelectionHandler') + '\ninstallSearchSelectionHandler();', context);
   return { context, listeners, timers, added, events, classes, setTitle: (title) => { activeTitle = title; },
     flush: () => { let budget = 30; while (timers.length && budget--) timers.shift()(); assert.ok(budget > 0); } };
 }

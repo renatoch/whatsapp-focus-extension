@@ -21,6 +21,15 @@ Decompose extension DOM integration, mode/navigation ownership, UI surfaces and 
 - DS6.TS5
 - DS6.TS6
 
+## Current baseline amendments
+
+Navigator resumed implementation after the isolated pause. Preserve later accepted
+stable changes: ten ephemeral recents, five initially visible, session-retained
+expansion, native-modal priority, archived capture and exact search-section scoping.
+The older five-item references below describe the original planning baseline, not
+a request to roll back these changes. Ordinary backup pushes follow
+`docs/github-backup-policy.md`; merge/release remain separate authorization gates.
+
 ## Scope
 
 Refactor the current working extension, not an earlier DS1/DS5 snapshot. Planning baseline is code at `2f9f6e3` with its stabilization accepted in `469a85c`: 2,214 lines in `content.js`, 1,187 in `focus.css`, and 77 previously passing tests. Planning itself does not run implementation or claim new test evidence.

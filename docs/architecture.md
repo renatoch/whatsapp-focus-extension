@@ -13,7 +13,8 @@ Manifest content scripts load synchronously at `document_start`:
 2. `scripts/whatsapp-dom.js`: exports an injected factory; no import-time DOM access.
 3. `scripts/focused-navigation.js`: injected hidden-search controller; owns its bounded polling and confirmation timers.
 4. `scripts/search-gate.js`: isolated manual-search settlement policy and timer.
-5. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
+5. `scripts/recent-capture.js`: bounded header confirmation and cancellation for deliberate recent capture.
+6. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -65,6 +66,20 @@ empty-search integration suite connects this real factory to the UI bridge.
 `tests/bootstrap.test.js` loads scripts in actual manifest order, verifies no
 factory module reads the DOM at import time, then checks blind root classes
 before `document.body` exists. This is a composition check, not live Chrome E2E.
+
+## Recent capture
+
+`createRecentCapture({ readTitle, normalizeTitle, onCaptured, scheduler, retries })`
+owns header confirmation: one immediate inspection and up to five retries at
+300 ms. Only deliberate capture requests can add a title; incoming activity does
+not start capture. Superseding a request, cancel or dispose clears the owned timer
+and invalidates queued callbacks. Start permits reuse after disposal. Composition
+keeps recency updates and route-specific awareness outside the controller.
+
+`tests/recent-capture.test.js` exercises the public factory. The existing opening
+route tests now use that factory too, retaining VM bridges only for not-yet-extracted
+click/keyboard wiring and Continue ordering. Delayed focused entry (250 ms plus
+350 ms) still belongs to composition until the mode/lifecycle extraction.
 
 ## Invariants during extraction
 

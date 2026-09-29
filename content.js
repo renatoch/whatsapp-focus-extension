@@ -56,7 +56,6 @@
   let pendingIntent = null;
   let focusedRecents = [];
   let focusedRecentsExpanded = false;
-  let recentCaptureToken = 0;
   let fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || { version: 1, collections: [] };
   let expandedFixedCollectionName = "";
   const fixedCollectionRenderCache = new WeakMap();
@@ -73,6 +72,15 @@
     onBegin: beginHiddenNavigationSurface,
     onOpened: focusedConversationOpened,
     onFailure: failFocusedRecentNavigation,
+  });
+  const recentCapture = globalThis.MirrorRecentCapture.createRecentCapture({
+    readTitle: readActiveConversationTitle,
+    normalizeTitle: globalThis.MirrorFocusedRecents.normalizeTitle,
+    scheduler: window, retries: FOCUSED_CAPTURE_RETRIES,
+    onCaptured: (title, route) => {
+      addFocusedRecent(title);
+      if (route === "search") recordAwareness("focused_conversation_opened", { route: "search" });
+    },
   });
   const searchGate = globalThis.MirrorSearchGate.createSearchGate({
     readText: getSearchText, isSearching, scheduler: window,
@@ -108,7 +116,7 @@
 
   function setActive({ showOverlay }) {
     focusedNavigation.cancel();
-    recentCaptureToken += 1;
+    recentCapture.cancel();
     closeFixedCollectionChooser();
     if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
     intentPromptStartedAt = null;
@@ -143,7 +151,7 @@
 
   function setSearchMode() {
     focusedNavigation.cancel();
-    recentCaptureToken += 1;
+    recentCapture.cancel();
     closeFixedCollectionChooser();
     debugLog("setSearchMode:start", {
       ready: isWhatsAppReady(),
@@ -250,21 +258,8 @@
     if (overlay) overlay.hidden = true;
   }
 
-  function captureFocusedConversation(expectedTitle, attempt, route = "search", token = ++recentCaptureToken) {
-    if (token !== recentCaptureToken) return;
-    const activeTitle = readActiveConversationTitle();
-    const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
-    const expectedMatches = !expectedTitle || (
-      normalize && normalize(activeTitle) === normalize(expectedTitle)
-    );
-    if (activeTitle && expectedMatches) {
-      addFocusedRecent(activeTitle);
-      if (route === "search") recordAwareness("focused_conversation_opened", { route: "search" });
-      return;
-    }
-    if (attempt < FOCUSED_CAPTURE_RETRIES) {
-      window.setTimeout(() => captureFocusedConversation(expectedTitle, attempt + 1, route, token), 300);
-    }
+  function captureFocusedConversation(expectedTitle, _attempt, route = "search") {
+    recentCapture.capture(expectedTitle, route);
   }
 
   function addFocusedRecent(title) {
@@ -661,7 +656,7 @@
   }
 
   function beginHiddenNavigationSurface() {
-    recentCaptureToken += 1;
+    recentCapture.cancel();
     resetSearchGate();
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SEARCHING, ROOT_OPENING_RECENT);

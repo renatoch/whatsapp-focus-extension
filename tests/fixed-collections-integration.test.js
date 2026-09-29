@@ -17,6 +17,7 @@ test('loads fixed collections before the content integration', () => {
     'scripts/whatsapp-dom.js',
     'scripts/focused-navigation.js',
     'scripts/search-gate.js',
+    'scripts/recent-capture.js',
     'content.js',
   ]);
 });
