@@ -1454,6 +1454,13 @@
     button.textContent = "Diagnóstico copiado";
   }
 
+  function hideToast() {
+    const toast = document.getElementById(TOAST_ID);
+    if (!toast) return;
+    toast.hidden = true;
+    window.clearTimeout(showToast.timeoutId);
+  }
+
   function showToast(message, diagnostic = null) {
     if (!document.body) return;
     let toast = document.getElementById(TOAST_ID);
@@ -1468,18 +1475,31 @@
     const text = document.createElement("span");
     text.textContent = message;
     toast.appendChild(text);
+
+    const actions = document.createElement("div");
+    actions.className = "mwf-toast-actions";
+
     if (diagnostic) {
       const button = document.createElement("button");
       button.type = "button";
       button.textContent = "Copiar diagnóstico";
       button.addEventListener("click", () => copyDiagnostic(diagnostic, button));
-      toast.appendChild(button);
+      actions.appendChild(button);
     }
+
+    const closeButton = document.createElement("button");
+    closeButton.type = "button";
+    closeButton.className = "mwf-toast-close";
+    closeButton.textContent = "Fechar";
+    closeButton.addEventListener("click", hideToast);
+    actions.appendChild(closeButton);
+
+    toast.appendChild(actions);
     toast.hidden = false;
     window.clearTimeout(showToast.timeoutId);
     showToast.timeoutId = window.setTimeout(() => {
       toast.hidden = true;
-    }, diagnostic ? 30000 : 6500);
+    }, diagnostic ? 10000 : 5000);
   }
 
   function getControlsContainer() {

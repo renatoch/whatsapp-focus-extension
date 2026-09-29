@@ -1198,16 +1198,38 @@ html.mwf-native-transient-open.mwf-active:not(.mwf-overlay-open) #mirror-whatsap
   display: block;
 }
 
-#mirror-whatsapp-focus-toast button {
+#mirror-whatsapp-focus-toast .mwf-toast-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 10px;
+}
+
+#mirror-whatsapp-focus-toast button {
   border: 1px solid rgba(247, 215, 148, 0.36);
   border-radius: 999px;
-  padding: 7px 11px;
+  padding: 6px 12px;
   background: transparent;
   color: #f7d794;
   cursor: pointer;
   font: inherit;
   font-size: 12px;
+}
+
+#mirror-whatsapp-focus-toast button:hover {
+  background: rgba(247, 215, 148, 0.12);
+  border-color: rgba(247, 215, 148, 0.6);
+}
+
+#mirror-whatsapp-focus-toast button.mwf-toast-close {
+  color: #aebac1;
+  border-color: rgba(174, 186, 193, 0.3);
+}
+
+#mirror-whatsapp-focus-toast button.mwf-toast-close:hover {
+  color: #e9edef;
+  border-color: rgba(233, 237, 239, 0.5);
+  background: rgba(233, 237, 239, 0.08);
 }
 
 #mirror-whatsapp-focus-overlay:not(.mwf-has-conversation) [data-mwf-action="continue"] {

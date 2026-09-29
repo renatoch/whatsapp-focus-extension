@@ -196,6 +196,12 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Implementado] Ampliar capacidade de membros por coleção para 10**
   - Navigator aprovou dez membros porque o caso original excede oito. Limite, mensagem e teste de sanitização/reload atualizados; cinco coleções continuam permitidas. Sem mudança de schema ou de privacidade. A ampliação é independente da consulta de não lidas; não encerra por si só a validação agregada da DS5.
 
+- **[Em validação] Botão Fechar e redução de timeout no aviso de diagnóstico**
+  - Navigator apontou que ao falhar a reabertura de recente (ex.: nome repetido/ambíguo), o toast exibia "Copiar diagnóstico" mas não oferecia botão "Fechar", além de ter um timeout excessivamente longo (30 segundos).
+  - Adicionado botão explícito "Fechar" (`mwf-toast-close`) que cancela o timer e oculta o aviso imediatamente.
+  - O timeout máximo com diagnóstico foi reduzido de 30s para 10s (e mensagens normais de 6.5s para 5s).
+  - Testes cobrem a presença de ambos os botões, fechamento imediato e timeout reduzido. Validação manual pendente.
+
 - **[Validado] Expandir Conversas em andamento de cinco para dez**
   - Uso natural mostrou que a lista funciona como memória de trabalho: depois de chavear para consultar outra conversa, ela ajuda a lembrar e retomar o fio anterior. Cinco itens se mostraram insuficientes em sessões com mais alternância.
   - A extensão agora mantém até dez títulos únicos somente na memória da aba, mas continua mostrando cinco por padrão. Quando há excedentes, **Mais N** revela até cinco adicionais; **Menos** recolhe. A escolha de expansão permanece ao navegar e renderizar novamente, mudando apenas por ação manual ou reload da aba.
