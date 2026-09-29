@@ -115,6 +115,10 @@ Direct structural inspection established editor dialogs via `[role="dialog"][ari
 
 Main `136be41` raises the ephemeral recent-set bound from five to ten while preserving five visible rows by default. An explicit `Mais N` / `Menos` control reveals the second layer, and its expanded state remains tab-session-only across navigation/rerenders. No storage or awareness title path was added. The approved stable change was cherry-picked as `5a807b5`; main passes 101/101 and DS6 122/122. Navigator accepted the live behavior: “Ok, está bom”. This synchronization does not resume DS6.
 
+## Toast dismiss and timeout reduction
+
+Main `feb1ddd` adds an explicit `Fechar` button to toasts/diagnostics and reduces the diagnostic timeout from 30s to 10s (normal toasts to 5s). Synchronized as `dd9a861`. Tests: main 106/106, DS6 127/127. Live validation pending. DS6 remains paused.
+
 ## Remaining
 
 Next safe implementation boundary:
