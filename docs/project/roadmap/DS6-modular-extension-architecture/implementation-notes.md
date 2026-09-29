@@ -3,15 +3,29 @@
 ## Current resume status
 
 Navigator explicitly resumed DS6 after the toast adjustment. Recent capture is
-now extracted into `scripts/recent-capture.js`, preserving six inspections at
-300 ms retry intervals, exact case-sensitive confirmation and route callbacks.
-Cancel/dispose clear owned timers and invalidate stale callbacks; restart is tested.
-The opening-route suite uses the real factory while event/Continue composition
-bridges remain until their owners are extracted. Full suite: 132/132 passing.
+extracted into `scripts/recent-capture.js`, preserving six inspections at 300 ms
+retry intervals, exact case-sensitive confirmation and route callbacks.
 
-Next: mode and normal/intent controller extraction, including the still-composed
-250 ms focused-entry / 350 ms initial capture delays and application start/dispose.
-Do not treat this first resumed checkpoint as full DS6 completion or Chrome acceptance.
+The Astra-reviewed Sol implementation extracts root-class transitions and delayed entry
+to `scripts/mode-controller.js`. It owns the 100 ms search handoff and the 250 ms +
+350 ms focused/capture chain with cancellation, supersession, late-normalization,
+reentrancy and dispose/restart guards. `content.js` retains delegating wrappers and
+the existing event/Continue/expiry wiring. Full suite after Astra review: 147/147
+passing. Review added full class-set matrices, all-transition capture cancellation,
+render reentrancy and post-restart normalization coverage. An isolated comparison
+against `1f57f2b:content.js` passed 32 baseline/factory scenarios for normal-flow
+class sets, effect ordering, overlay visibility and timing. No blocking production
+code defect was found. Pre-extraction characterization was not executed by Sol as
+planned; this retrospective baseline comparison supplements the durable factory tests.
+Two disabled search debug messages were removed; no public behavior depends on them. `content.js` is 1,763 lines (down from 1,816); the new module is 213 lines.
+Production volume increases by 160 lines because lifecycle and injected boundaries
+are explicit; this checkpoint optimizes ownership, not total line count.
+
+Astra approved this bounded checkpoint for commit/backup, not final DS6 acceptance.
+Syntax checks, manifest parsing and diff checks passed. Next: plan the normal/intent
+slice before another model handoff; check live quotas first.
+Normal/intent countdown and bypass ownership, outer listener/observer disposal and
+native helper delays remain later work. Do not treat this as DS6 completion or Chrome acceptance.
 Main remains untouched. Earlier pause and five-recent references below are historical:
 current behavior is ten tab-only recents with five initially visible and retained
 expansion. Limited backup push authorization is governed by `docs/github-backup-policy.md`;

@@ -69,6 +69,6 @@ test('empty-search CSS reveals the shelf instead of the overlapping gate message
 });
 
 test('search entry collapses collections and Enter on extension controls cannot select native results', () => {
-  assert.match(extract('setSearchMode'), /expandedFixedCollectionName = ""/);
+  assert.match(source, /collapseFixedCollection: \(\) => \{ expandedFixedCollectionName = ""; \}/);
   assert.match(extract('installSearchSelectionHandler'), /isMirrorControl\(event.target\)/);
 });

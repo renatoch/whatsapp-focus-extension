@@ -14,7 +14,8 @@ Manifest content scripts load synchronously at `document_start`:
 3. `scripts/focused-navigation.js`: injected hidden-search controller; owns its bounded polling and confirmation timers.
 4. `scripts/search-gate.js`: isolated manual-search settlement policy and timer.
 5. `scripts/recent-capture.js`: bounded header confirmation and cancellation for deliberate recent capture.
-6. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
+6. `scripts/mode-controller.js`: root-class transitions plus cancellable delayed search/focused entry.
+7. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -78,8 +79,29 @@ keeps recency updates and route-specific awareness outside the controller.
 
 `tests/recent-capture.test.js` exercises the public factory. The existing opening
 route tests now use that factory too, retaining VM bridges only for not-yet-extracted
-click/keyboard wiring and Continue ordering. Delayed focused entry (250 ms plus
-350 ms) still belongs to composition until the mode/lifecycle extraction.
+click/keyboard wiring and Continue ordering. Deliberate capture confirmation remains
+owned here while the mode controller owns when the delayed request begins.
+
+## Mode transitions and delayed entry
+
+`createModeController(...)` owns the established root-class mutations for active,
+normal, search, sidebar-open, sidebar-hidden, focused and hidden-navigation states.
+It receives narrow operational callbacks and a focused `surfaces` callback group;
+it does not read storage or native selectors. Composition retains small delegating
+wrappers so not-yet-extracted listeners and normal/intent flows keep stable call sites.
+
+The controller owns the 100 ms search handoff and the 250 ms focused transition plus
+350 ms capture chain. Every public transition invalidates owned work. Generation
+guards also reject callbacks that a scheduler invokes after cancellation, late Chats
+normalization, superseded selections and reentrant callbacks that switch mode.
+`dispose` rejects transitions until `start`; this is controller-local lifecycle only,
+not yet application-wide listener/observer disposal.
+
+`tests/mode-controller.test.js` uses a deterministic scheduler at exact boundaries,
+checks existing class/effect ordering, latest-selection behavior, mode changes between
+delays, forced stale callbacks, reentrancy and restart. Continue, full-mode capture,
+recent/collection success and expiry remain integration contracts in their existing
+tests. Native normalization's own 260/360 ms callbacks remain in composition.
 
 ## Invariants during extraction
 

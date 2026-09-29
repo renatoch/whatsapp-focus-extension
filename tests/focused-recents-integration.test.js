@@ -29,6 +29,7 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'scripts/focused-navigation.js',
     'scripts/search-gate.js',
     'scripts/recent-capture.js',
+    'scripts/mode-controller.js',
     'content.js',
   ]);
 });

@@ -87,6 +87,37 @@
     minimum: MIN_SEARCH_CHARS, delayMs: SEARCH_SETTLE_MS,
     onState: applySearchGateState,
   });
+  const modeController = globalThis.MirrorModeController.createModeController({
+    classes: {
+      active: ROOT_ACTIVE, normal: ROOT_NORMAL, searching: ROOT_SEARCHING,
+      searchFocused: ROOT_SEARCH_FOCUSED, searchTooShort: ROOT_SEARCH_TOO_SHORT,
+      searchWaiting: ROOT_SEARCH_WAITING, sidebarOpen: ROOT_SIDEBAR_OPEN,
+      sidebarHidden: ROOT_SIDEBAR_HIDDEN, overlayOpen: ROOT_OVERLAY_OPEN,
+      openingRecent: ROOT_OPENING_RECENT,
+    },
+    getRoot: root, scheduler: window, isReady: isWhatsAppReady,
+    cancelFocusedNavigation: () => focusedNavigation.cancel(),
+    cancelRecentCapture: () => recentCapture.cancel(), closeChooser: closeFixedCollectionChooser,
+    cancelPendingNormalAttempt: () => {
+      if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
+    },
+    clearIntentPrompt: () => {
+      intentPromptStartedAt = null;
+      getOverlay()?.classList.remove("mwf-intent-pending");
+    },
+    clearNormalDelay, updateFocusStreak, resetSearchGate,
+    collapseFixedCollection: () => { expandedFixedCollectionName = ""; },
+    updateSearchNavigation,
+    normalizeChats: (callback) => goToMainChatsThen("search", callback),
+    focusNativeSearch,
+    captureFocusedConversation: (title, route) => recentCapture.capture(title, route),
+    surfaces: {
+      getOverlay, ensureOverlay, ensureReturnButton, ensureSidebarButton,
+      ensureSearchAgainButton, ensureSearchGateMessage, ensureFocusedRecentsShelf,
+      ensureAddCollectionButton, ensureFixedCollectionChooser,
+      renderFocusedRecents, renderFixedCollections,
+    },
+  });
 
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
@@ -115,71 +146,15 @@
   }
 
   function setActive({ showOverlay }) {
-    focusedNavigation.cancel();
-    recentCapture.cancel();
-    closeFixedCollectionChooser();
-    if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
-    intentPromptStartedAt = null;
-    getOverlay()?.classList.remove("mwf-intent-pending");
-    clearNormalDelay();
-    updateFocusStreak();
-    root().classList.add(ROOT_ACTIVE);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OPENING_RECENT);
-    root().classList.toggle(ROOT_OVERLAY_OPEN, Boolean(showOverlay));
-    ensureOverlay();
-    ensureReturnButton();
-    ensureSidebarButton();
-    ensureSearchAgainButton();
-    ensureSearchGateMessage();
-    ensureFocusedRecentsShelf();
-    ensureAddCollectionButton();
-    ensureFixedCollectionChooser();
-    renderFocusedRecents();
-    renderFixedCollections();
-    getOverlay().hidden = !showOverlay;
+    modeController.setActive({ showOverlay });
   }
 
   function setNormal() {
-    focusedNavigation.cancel();
-    closeFixedCollectionChooser();
-    clearNormalDelay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
-    root().classList.add(ROOT_NORMAL);
-    const overlay = getOverlay();
-    if (overlay) overlay.hidden = true;
+    modeController.setNormal();
   }
 
   function setSearchMode() {
-    focusedNavigation.cancel();
-    recentCapture.cancel();
-    closeFixedCollectionChooser();
-    debugLog("setSearchMode:start", {
-      ready: isWhatsAppReady(),
-      searching: isSearching(),
-      rootClass: root().className,
-    });
-
-    if (!isWhatsAppReady()) {
-      debugLog("setSearchMode:not-ready -> overlay");
-      setActive({ showOverlay: true });
-      return;
-    }
-
-    resetSearchGate();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_SEARCH_FOCUSED, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
-    root().classList.add(ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT);
-    expandedFixedCollectionName = "";
-    ensureFocusedRecentsShelf();
-    renderFocusedRecents();
-    renderFixedCollections();
-    updateSearchNavigation("");
-    const overlay = getOverlay();
-    if (overlay) overlay.hidden = true;
-    window.setTimeout(() => {
-      goToMainChatsThen("search", () =>
-        focusNativeSearch({ retriedFromNestedView: true, source: "after-shared-main-chats" })
-      );
-    }, 100);
+    modeController.setSearchMode();
   }
 
   function isSearching() {
@@ -217,10 +192,7 @@
   }
 
   function setSidebarOpen() {
-    const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
-    root().classList.add(ROOT_SIDEBAR_OPEN);
-    if (overlay) overlay.hidden = true;
+    modeController.setSidebarOpen();
   }
 
   function hideSidebarFromCurrentView() {
@@ -228,34 +200,15 @@
   }
 
   function setSidebarHiddenManually() {
-    const overlay = getOverlay();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
-    root().classList.add(ROOT_SIDEBAR_HIDDEN);
-    if (overlay) overlay.hidden = true;
+    modeController.setSidebarHidden();
   }
 
   function enterFocusedConversationSoon(expectedTitle = "") {
-    window.setTimeout(() => {
-      setSearchFocusedConversation();
-      window.setTimeout(() => captureFocusedConversation(expectedTitle, 0), 350);
-    }, 250);
+    modeController.enterFocusedSoon(expectedTitle);
   }
 
   function setSearchFocusedConversation() {
-    const overlay = getOverlay();
-    resetSearchGate();
-    root().classList.add(ROOT_ACTIVE, ROOT_SEARCH_FOCUSED, ROOT_SIDEBAR_HIDDEN);
-    root().classList.remove(ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
-    ensureOverlay();
-    ensureReturnButton();
-    ensureSidebarButton();
-    ensureSearchAgainButton();
-    ensureFocusedRecentsShelf();
-    ensureAddCollectionButton();
-    ensureFixedCollectionChooser();
-    renderFocusedRecents();
-    renderFixedCollections();
-    if (overlay) overlay.hidden = true;
+    modeController.setFocused();
   }
 
   function captureFocusedConversation(expectedTitle, _attempt, route = "search") {
@@ -656,13 +609,7 @@
   }
 
   function beginHiddenNavigationSurface() {
-    recentCapture.cancel();
-    resetSearchGate();
-    root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
-    root().classList.add(ROOT_SEARCHING, ROOT_OPENING_RECENT);
-    const overlay = getOverlay();
-    if (overlay) overlay.hidden = true;
-    renderFocusedRecents();
+    modeController.beginHiddenNavigation();
   }
 
   function openFocusedRecent(title) {

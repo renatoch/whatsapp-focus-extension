@@ -18,6 +18,7 @@ test('loads fixed collections before the content integration', () => {
     'scripts/focused-navigation.js',
     'scripts/search-gate.js',
     'scripts/recent-capture.js',
+    'scripts/mode-controller.js',
     'content.js',
   ]);
 });
