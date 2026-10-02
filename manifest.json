@@ -7,7 +7,7 @@
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "js": ["awareness.js", "focus-state.js", "focused-recents.js", "fixed-collections.js", "scripts/whatsapp-dom.js", "scripts/focused-navigation.js", "scripts/search-gate.js", "scripts/recent-capture.js", "scripts/mode-controller.js", "scripts/normal-mode.js", "scripts/intent-controller.js", "scripts/dev-assets.js", "content.js"],
+      "js": ["awareness.js", "focus-state.js", "focused-recents.js", "fixed-collections.js", "scripts/whatsapp-dom.js", "scripts/focused-navigation.js", "scripts/search-gate.js", "scripts/recent-capture.js", "scripts/mode-controller.js", "scripts/normal-mode.js", "scripts/intent-controller.js", "scripts/dev-assets.js", "scripts/ui/toast.js", "content.js"],
       "css": ["focus.css"],
       "run_at": "document_start"
     }

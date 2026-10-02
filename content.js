@@ -164,6 +164,10 @@
     onError: (error) => console.debug("WhatsApp Focus Mode dev refresh failed", error),
   });
 
+  const toastSurface = globalThis.MirrorToast.createToast({
+    document, scheduler: window, id: TOAST_ID, copyDiagnostic,
+  });
+
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
     if (details === undefined) {
@@ -1397,52 +1401,8 @@
     button.textContent = "Diagnóstico copiado";
   }
 
-  function hideToast() {
-    const toast = document.getElementById(TOAST_ID);
-    if (!toast) return;
-    toast.hidden = true;
-    window.clearTimeout(showToast.timeoutId);
-  }
-
   function showToast(message, diagnostic = null) {
-    if (!document.body) return;
-    let toast = document.getElementById(TOAST_ID);
-    if (!toast) {
-      toast = document.createElement("div");
-      toast.id = TOAST_ID;
-      toast.setAttribute("role", "status");
-      document.body.appendChild(toast);
-    }
-
-    toast.replaceChildren();
-    const text = document.createElement("span");
-    text.textContent = message;
-    toast.appendChild(text);
-
-    const actions = document.createElement("div");
-    actions.className = "mwf-toast-actions";
-
-    if (diagnostic) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.textContent = "Copiar diagnóstico";
-      button.addEventListener("click", () => copyDiagnostic(diagnostic, button));
-      actions.appendChild(button);
-    }
-
-    const closeButton = document.createElement("button");
-    closeButton.type = "button";
-    closeButton.className = "mwf-toast-close";
-    closeButton.textContent = "Fechar";
-    closeButton.addEventListener("click", hideToast);
-    actions.appendChild(closeButton);
-
-    toast.appendChild(actions);
-    toast.hidden = false;
-    window.clearTimeout(showToast.timeoutId);
-    showToast.timeoutId = window.setTimeout(() => {
-      toast.hidden = true;
-    }, diagnostic ? 10000 : 5000);
+    toastSurface.show(message, diagnostic);
   }
 
   function getControlsContainer() {

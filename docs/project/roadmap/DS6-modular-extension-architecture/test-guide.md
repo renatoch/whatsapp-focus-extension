@@ -4,7 +4,7 @@
 
 ## Aggregate Validation
 
-Prove behavior and privacy equivalence across the module extraction, not merely reduced line counts. Planning baseline: 77 tests last passed before Navigator acceptance of stabilized reopening. Implementation has resumed; the development-assets checkpoint passes 194 automated tests after Astra implementation/review. Live Chrome equivalence is still pending.
+Prove behavior and privacy equivalence across the module extraction, not merely reduced line counts. Planning baseline: 77 tests last passed before Navigator acceptance of stabilized reopening. Implementation has resumed; the toast-surface checkpoint passes 198 automated tests after Astra implementation/review. Live Chrome equivalence is still pending.
 
 ## Automated Matrix
 
@@ -60,4 +60,4 @@ Missing/ambiguous-title failures are primarily synthetic automated tests; if a l
 
 ## Validation Evidence
 
-Plan approved; implementation resumed and partial, with 194 automated tests passing at the reviewed development-assets checkpoint (intent: 182; normal: 171). Development-assets characterization passed at 187 before extraction. Intent characterization passed at 177 before extraction. Normal-mode characterization ran before extraction at 153/153; equivalent assertions now use the public factory plus real mode-controller integration. Targeted Chrome acceptance and Debt Review remain pending. Existing Navigator acceptance belongs to the pre-refactor baseline, not to DS6 results.
+Plan approved; implementation resumed and partial, with 198 automated tests passing at the reviewed toast-surface checkpoint (development assets: 194; intent: 182; normal: 171). Toast characterization passed at 196 before extraction. Development-assets characterization passed at 187 before extraction. Intent characterization passed at 177 before extraction. Normal-mode characterization ran before extraction at 153/153; equivalent assertions now use the public factory plus real mode-controller integration. Targeted Chrome acceptance and Debt Review remain pending. Existing Navigator acceptance belongs to the pre-refactor baseline, not to DS6 results.

@@ -40,3 +40,14 @@ reject stale async completions after disposal. Characterize before extraction;
 add fake-fetch lifecycle tests and bootstrap contracts. Do not change manifest
 resource permissions, introduce automatic JS reload, or redesign configuration.
 Record actual outcomes; if quota or complexity prevents this slice, leave it planned.
+
+## Slice 3: bounded toast surface
+
+After the first two checkpoints, readings were 68% five-hour / 59% weekly.
+Extract only toast DOM rendering and owned dismissal timer into scripts/ui/toast.js.
+Keep asynchronous clipboard fallback in composition, injected as a callback; preserve
+5-second ordinary / 10-second diagnostic timeout, textContent rendering, Fechar and
+Copiar diagnóstico. Characterize before moving, then test stale timeout/button
+callbacks, disposal/restart, absent body and replacement. Do not redesign other
+controls or claim manual acceptance of the stable toast change. Check quotas before
+review/commit and stop at a clean backed-up boundary if another slice is too risky.

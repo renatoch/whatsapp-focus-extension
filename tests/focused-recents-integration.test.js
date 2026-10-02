@@ -33,6 +33,7 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'scripts/normal-mode.js',
     'scripts/intent-controller.js',
     'scripts/dev-assets.js',
+    'scripts/ui/toast.js',
     'content.js',
   ]);
 });
@@ -68,7 +69,7 @@ test('an empty search hides WhatsApp recent-search suggestions', () => {
 test('failed navigation exposes a copyable privacy-safe diagnostic', () => {
   assert.match(navigation, /update\(\{[^}]*stage: "results-inspected"/s);
   assert.match(content, /,\s*diagnostic\s*\);/);
-  assert.match(content, /button\.textContent = "Copiar diagnóstico";/);
+  assert.match(content, /document, scheduler: window, id: TOAST_ID, copyDiagnostic/); // UI behavior: toast-dismiss.test.js.
 });
 
 test('focused navigation awareness never receives a title field', () => {

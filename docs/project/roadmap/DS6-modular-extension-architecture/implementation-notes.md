@@ -2,6 +2,21 @@
 
 ## Current resume status
 
+Astra-only continuation, slice 3: extracted `scripts/ui/toast.js` after `85aade3`.
+Characterization ran before production edits: 196/196. Reviewed factory/lifecycle
+suite: 198/198; content/module syntax, manifest parse and diff checks passed.
+Preserved textContent, DOM/classes, buttons and 5/10-second durations; obsolete
+timeouts and detached buttons are inert. Clipboard fallback remains composition-owned.
+content.js 1,655 → 1,615 (-40); new module 72 lines; net production +32.
+Stopping at this checkpoint: last fresh quota was 85% five-hour / 62% weekly,
+near the temporary 90% five-hour ceiling. No fourth slice started. Refresh quotas
+on return; the temporary exception does not silently become a permanent policy.
+No Chrome equivalence, main changes, merge or release. Next candidate is cohesive
+focused/overlay UI ownership; application disposal, CSS split and final acceptance
+still remain. Earlier three handoffs are completed work, not outstanding execution.
+
+Earlier checkpoints follow as history.
+
 Astra-only continuation, slice 2: extracted `scripts/dev-assets.js` after `9a0780b`.
 Characterization before production edits: 187/187 (five new conversion/refresh cases).
 Reviewed final suite: 194/194, syntax/manifest/diff checks passed. Fixed a regression

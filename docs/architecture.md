@@ -18,7 +18,8 @@ Manifest content scripts load synchronously at `document_start`:
 7. `scripts/normal-mode.js`: confirmation/countdown and temporary-normal-access timers.
 8. `scripts/intent-controller.js`: prompt/attempt state and outcome association.
 9. `scripts/dev-assets.js`: CSS/config conversion, refresh cache and owned interval.
-10. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
+10. `scripts/ui/toast.js`: toast rendering and cancellable dismissal timer.
+11. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -184,6 +185,17 @@ results/errors are ignored; it does not abort browser fetches already in progres
 The five baseline cases passed against the original implementation before migration
 to the factory; lifecycle tests include handle 0, slow fetches, restart, stale tick,
 reentrant disposal and unchanged fetch URL/no-store behavior.
+
+## Toast surface
+
+`createToast({ document, scheduler, id, copyDiagnostic })` owns toast rendering and
+one dismissal timer. It preserves textContent, button copy/classes, DOM reuse,
+5-second ordinary and 10-second diagnostic duration. `show/hide/dispose/start` guard
+stale timeout and detached-button callbacks across replacement and restart. No DOM
+access occurs during construction. Clipboard serialization/fallback remains in
+composition; disposal cannot cancel an already-started clipboard operation.
+Baseline UI cases ran before extraction (196 tests); final surface/lifecycle suite
+passes 198 tests. Stable toast manual acceptance remains pending.
 
 ## Invariants during extraction
 
