@@ -19,6 +19,7 @@ test('loads fixed collections before the content integration', () => {
     'scripts/search-gate.js',
     'scripts/recent-capture.js',
     'scripts/mode-controller.js',
+    'scripts/normal-mode.js',
     'content.js',
   ]);
 });

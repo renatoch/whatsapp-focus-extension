@@ -45,13 +45,9 @@
   const fixedCollectionsAdapter = globalThis.chrome?.storage?.local
     ? globalThis.MirrorAwareness?.createChromeStorageAdapter(globalThis.chrome.storage.local)
     : null;
-  let bypassTimer = null;
-  let normalDelayTimer = null;
-  let normalDelayInterval = null;
   let lastHotCss = "";
   let lastConfigCss = "";
   let normalAttemptStartedAt = null;
-  let normalAttemptRecent = false;
   let intentPromptStartedAt = null;
   let pendingIntent = null;
   let focusedRecents = [];
@@ -116,6 +112,45 @@
       ensureSearchAgainButton, ensureSearchGateMessage, ensureFocusedRecentsShelf,
       ensureAddCollectionButton, ensureFixedCollectionChooser,
       renderFocusedRecents, renderFixedCollections,
+    },
+  });
+
+  const normalMode = globalThis.MirrorNormalMode.createNormalMode({
+    scheduler: window, now: () => Date.now(), delayMs: NORMAL_DELAY_MS, tickMs: 200,
+    bypassMs: BYPASS_MS, recentWindowMs: RECENT_NORMAL_OPEN_MS,
+    readLastNormalOpenedAt, recordNormalOpenedAt,
+    onAttemptStarted: () => {
+      normalAttemptStartedAt = Date.now();
+      recordAwareness("attempt_started");
+    },
+    finishNormalAttempt, recordAwareness, setNormal, setActive,
+    setFocused: setSearchFocusedConversation,
+    isNormalMode: () => root().classList.contains(ROOT_NORMAL),
+    chooseExpiryDestination: chooseNormalExpiryDestination,
+    normalizeChats: (callback) => goToMainChatsThen("expiry", callback),
+    ui: {
+      prepare: () => {
+        const overlay = getOverlay();
+        if (!overlay) return false;
+        ensureNormalConfirm(overlay);
+        return true;
+      },
+      reset: resetNormalConfirmation,
+      setPending: () => getOverlay()?.classList.add("mwf-normal-pending"),
+      setRecent: () => {
+        const overlay = getOverlay();
+        if (!overlay) return;
+        overlay.classList.add("mwf-normal-recent");
+        overlay.querySelectorAll('[data-mwf-action="normal-now"]').forEach((button) => {
+          button.textContent = "Abrir mesmo assim";
+        });
+      },
+      updateWarning: (lastOpenedAt) => updateRecentNormalWarning(getOverlay(), lastOpenedAt),
+      setCountdown: (seconds) => {
+        getOverlay()?.querySelectorAll("[data-mwf-normal-countdown]").forEach((element) => {
+          element.textContent = String(seconds);
+        });
+      },
     },
   });
 
@@ -854,7 +889,7 @@
     }
     pendingIntent = null;
     normalAttemptStartedAt = null;
-    normalAttemptRecent = false;
+    normalMode.resetRecentAttempt();
   }
 
   function formatAwarenessReflection(category) {
@@ -1281,7 +1316,7 @@
         clearNormalDelay();
       }
       if (action === "normal-now") {
-        setNormalTemporarily(normalAttemptRecent ? "recent-explicit" : "immediate");
+        normalMode.openNow();
       }
       if (action === "awareness") {
         openAwarenessSummary();
@@ -1322,8 +1357,7 @@
     button.title = "Voltar ao modo foco (Alt+Shift+F)";
     button.addEventListener("click", () => {
       if (root().classList.contains(ROOT_NORMAL)) recordAwareness("focus_returned", { reason: "manual" });
-      if (bypassTimer) window.clearTimeout(bypassTimer);
-      bypassTimer = null;
+      normalMode.cancelBypass();
       setActive({ showOverlay: true });
     });
 
@@ -1555,8 +1589,7 @@
           event.preventDefault();
           event.stopImmediatePropagation();
           if (root().classList.contains(ROOT_NORMAL)) recordAwareness("focus_returned", { reason: "manual" });
-          if (bypassTimer) window.clearTimeout(bypassTimer);
-          bypassTimer = null;
+          normalMode.cancelBypass();
           setActive({ showOverlay: true });
         }
         if (event.key.toLowerCase() === "l") {
@@ -1632,41 +1665,7 @@
   }
 
   function startNormalDelay() {
-    const overlay = getOverlay();
-    if (!overlay) return;
-
-    ensureNormalConfirm(overlay);
-    clearNormalDelay();
-    overlay.classList.add("mwf-normal-pending");
-
-    const lastOpenedAt = readLastNormalOpenedAt();
-    const recentlyOpened = Boolean(lastOpenedAt && Date.now() - lastOpenedAt < RECENT_NORMAL_OPEN_MS);
-    normalAttemptStartedAt = Date.now();
-    normalAttemptRecent = recentlyOpened;
-    recordAwareness("attempt_started");
-    updateRecentNormalWarning(overlay, lastOpenedAt);
-
-    if (recentlyOpened) {
-      overlay.classList.add("mwf-normal-recent");
-      overlay.querySelectorAll('[data-mwf-action="normal-now"]').forEach((button) => {
-        button.textContent = "Abrir mesmo assim";
-      });
-      return;
-    }
-
-    const startedAt = Date.now();
-
-    const updateCountdown = () => {
-      const remainingMs = Math.max(0, NORMAL_DELAY_MS - (Date.now() - startedAt));
-      const remainingSeconds = Math.ceil(remainingMs / 1000);
-      overlay.querySelectorAll("[data-mwf-normal-countdown]").forEach((element) => {
-        element.textContent = String(remainingSeconds);
-      });
-    };
-
-    updateCountdown();
-    normalDelayInterval = window.setInterval(updateCountdown, 200);
-    normalDelayTimer = window.setTimeout(() => setNormalTemporarily("countdown"), NORMAL_DELAY_MS);
+    normalMode.beginConfirmation();
   }
 
   function ensureNormalConfirm(overlay = getOverlay()) {
@@ -1699,10 +1698,10 @@
   }
 
   function clearNormalDelay() {
-    if (normalDelayTimer) window.clearTimeout(normalDelayTimer);
-    if (normalDelayInterval) window.clearInterval(normalDelayInterval);
-    normalDelayTimer = null;
-    normalDelayInterval = null;
+    normalMode.clearConfirmation();
+  }
+
+  function resetNormalConfirmation() {
     const overlay = getOverlay();
     if (overlay) {
       overlay.classList.remove("mwf-normal-pending", "mwf-normal-recent");
@@ -1721,21 +1720,7 @@
   }
 
   function setNormalTemporarily(route = "immediate") {
-    finishNormalAttempt("normal_opened", { route });
-    clearNormalDelay();
-    if (bypassTimer) window.clearTimeout(bypassTimer);
-    recordNormalOpenedAt();
-    setNormal();
-    bypassTimer = window.setTimeout(() => {
-      bypassTimer = null;
-      const expiryDestination = chooseNormalExpiryDestination();
-      recordAwareness("focus_returned", { reason: "expiry", expiryDestination });
-      if (expiryDestination === "focused-conversation") {
-        goToMainChatsThen("expiry", () => setSearchFocusedConversation());
-      } else {
-        setActive({ showOverlay: true });
-      }
-    }, BYPASS_MS);
+    normalMode.openTemporarily(route);
   }
 
   function boot() {

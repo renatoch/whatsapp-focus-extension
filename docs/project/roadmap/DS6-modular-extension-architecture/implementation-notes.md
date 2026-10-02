@@ -2,6 +2,32 @@
 
 ## Current resume status
 
+Sol executed `normal-mode-handoff.md` from `2304811`; Astra reviewed and approved
+this bounded extraction for checkpoint/backup, not final DS6 acceptance. The new `scripts/normal-mode.js` owns confirmation and
+bypass timers, recent-attempt route selection and generation guards; mode-controller
+semantics, intent UI/state and persistence are unchanged. Manual Foco/shortcut now
+cancel through the factory. Late expiry normalization cannot override a non-normal
+mode or a cancelled/disposed/reopened bypass.
+
+Before extraction, six new VM behavioral cases plus the existing suite passed
+153/153. Those assertions migrated to factory tests; old moved-function bridges
+were replaced with real normal/mode integration plus still-composed intent/manual/
+Continue wiring. Handle 0 explicitly supported; forced obsolete callbacks and
+expiry duplicate invocation rejected. Astra reproduced and fixed two additional
+cases with tests first: a reentrant new confirmation supersedes an unfinished
+opening (including releasing the old bypass), and expiry normalization completion
+is single-use. Confirmation cleanup remains independent of an already-live bypass.
+Destination selection at expiry time is also explicitly tested.
+Reviewed suite: 171/171 passing; JS syntax, manifest parsing and diff checks passed.
+Last review-stage quota read: 15% hourly / 51% weekly, 13 seconds old. Refresh before
+further work; no subsequent extraction is started by this checkpoint.
+content.js: 1,763 → 1,748 lines (-15); new module 139 lines; net production +124
+lines, excluding tests/docs. Intent state/attempt telemetry, outer observer/listener
+lifecycle and native helper delays remain future boundaries. No Chrome equivalence
+claimed and no main-worktree changes authorized or made.
+
+The paragraphs below describe the previous reviewed checkpoint and planning history.
+
 Navigator explicitly resumed DS6 after the toast adjustment. Recent capture is
 extracted into `scripts/recent-capture.js`, preserving six inspections at 300 ms
 retry intervals, exact case-sensitive confirmation and route callbacks.
@@ -22,8 +48,13 @@ Production volume increases by 160 lines because lifecycle and injected boundari
 are explicit; this checkpoint optimizes ownership, not total line count.
 
 Astra approved this bounded checkpoint for commit/backup, not final DS6 acceptance.
-Syntax checks, manifest parsing and diff checks passed. Next: plan the normal/intent
-slice before another model handoff; check live quotas first.
+Syntax checks, manifest parsing and diff checks passed for that checkpoint.
+Navigator authorized the next slice; Astra prepared `normal-mode-handoff.md` for
+Sol execution, stopping before commit/push. It extracts confirmation/countdown and
+temporary normal-access timers first; intent form/state and event association stay
+in composition for a later boundary. The older `next-extraction-handoff.md` is the
+completed mode-controller handoff, not the current execution plan. Check fresh
+quotas before starting. No production implementation in this planning turn.
 Normal/intent countdown and bypass ownership, outer listener/observer disposal and
 native helper delays remain later work. Do not treat this as DS6 completion or Chrome acceptance.
 Main remains untouched. Earlier pause and five-recent references below are historical:

@@ -4,7 +4,7 @@
 
 ## Aggregate Validation
 
-Prove behavior and privacy equivalence across the module extraction, not merely reduced line counts. Planning baseline: 77 tests last passed before Navigator acceptance of stabilized reopening. Implementation has resumed; the mode-controller checkpoint passes 147 automated tests after Astra review. Live Chrome equivalence is still pending.
+Prove behavior and privacy equivalence across the module extraction, not merely reduced line counts. Planning baseline: 77 tests last passed before Navigator acceptance of stabilized reopening. Implementation has resumed; the normal-mode checkpoint passes 171 automated tests after Astra review. Live Chrome equivalence is still pending.
 
 ## Automated Matrix
 
@@ -60,4 +60,4 @@ Missing/ambiguous-title failures are primarily synthetic automated tests; if a l
 
 ## Validation Evidence
 
-Plan approved; implementation resumed and partial, with 147 automated tests passing at the reviewed mode-controller checkpoint. Targeted Chrome acceptance and Debt Review remain pending. Existing Navigator acceptance belongs to the pre-refactor baseline, not to DS6 results.
+Plan approved; implementation resumed and partial, with 171 automated tests passing at the reviewed normal-mode checkpoint (previous checkpoint: 147). Normal-mode characterization ran before extraction at 153/153; equivalent assertions now use the public factory plus real mode-controller integration. Targeted Chrome acceptance and Debt Review remain pending. Existing Navigator acceptance belongs to the pre-refactor baseline, not to DS6 results.

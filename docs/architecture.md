@@ -15,7 +15,8 @@ Manifest content scripts load synchronously at `document_start`:
 4. `scripts/search-gate.js`: isolated manual-search settlement policy and timer.
 5. `scripts/recent-capture.js`: bounded header confirmation and cancellation for deliberate recent capture.
 6. `scripts/mode-controller.js`: root-class transitions plus cancellable delayed search/focused entry.
-7. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
+7. `scripts/normal-mode.js`: confirmation/countdown and temporary-normal-access timers.
+8. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -102,6 +103,38 @@ checks existing class/effect ordering, latest-selection behavior, mode changes b
 delays, forced stale callbacks, reentrancy and restart. Continue, full-mode capture,
 recent/collection success and expiry remain integration contracts in their existing
 tests. Native normalization's own 260/360 ms callbacks remain in composition.
+
+## Normal confirmation and temporary access
+
+`createNormalMode` owns confirmation timeout/interval, the recent-attempt route flag,
+bypass timeout and separate generation guards. Injected constants preserve the
+8-second barrier, 200 ms countdown display tick and 5-minute bypass. UI hooks are
+`prepare(): boolean`, `reset()`, `setPending()`, `setRecent()`,
+`updateWarning(lastOpenedAt)` and `setCountdown(seconds)`; selectors, markup and
+copy remain in composition. Storage, attempt timestamps, intent declarations and
+outcome association remain outside this factory.
+
+Operations are `beginConfirmation`, `clearConfirmation`, `openNow`,
+`openTemporarily(route)`, `cancelBypass`, `resetRecentAttempt`, `dispose`, `start`.
+Confirmation cleanup deliberately does not cancel bypass. This permits the mode
+controller's nested cleanup during normal entry without invalidating the new bypass.
+A separate request generation lets a reentrant new confirmation supersede an
+unfinished opening without cancelling an already-live bypass. Composition calls
+`resetRecentAttempt` when finishing its existing intent attempt.
+Both manual focus entry handlers cancel bypass through the factory.
+
+Expiry reads destination at firing time, emits the existing event, and normalizes
+Chats before focused entry. Late normalization checks its bypass generation and
+current native root mode; completion is single-use. Cancel/dispose/reopen invalidate the old completion;
+callbacks forced after cancellation are inert. Disposal is controller-local and
+emits no extra telemetry. Intent UI/state, outer listeners/observers and native
+normalization helper delays are still not application-disposable.
+
+The six new baseline cases ran against the old VM bridge before extraction;
+`tests/normal-mode.test.js` now exercises the factory, including handle 0, exact
+boundaries, reentrancy, stale callbacks and restart. The previous characterization
+file now integrates real normal/mode factories with the still-composed attempt,
+manual-control and Continue wiring. Final live Chrome equivalence remains pending.
 
 ## Invariants during extraction
 
