@@ -47,9 +47,6 @@
     : null;
   let lastHotCss = "";
   let lastConfigCss = "";
-  let normalAttemptStartedAt = null;
-  let intentPromptStartedAt = null;
-  let pendingIntent = null;
   let focusedRecents = [];
   let focusedRecentsExpanded = false;
   let fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || { version: 1, collections: [] };
@@ -94,13 +91,8 @@
     getRoot: root, scheduler: window, isReady: isWhatsAppReady,
     cancelFocusedNavigation: () => focusedNavigation.cancel(),
     cancelRecentCapture: () => recentCapture.cancel(), closeChooser: closeFixedCollectionChooser,
-    cancelPendingNormalAttempt: () => {
-      if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
-    },
-    clearIntentPrompt: () => {
-      intentPromptStartedAt = null;
-      getOverlay()?.classList.remove("mwf-intent-pending");
-    },
+    cancelPendingNormalAttempt: () => intentController.cancelPendingAttempt(),
+    clearIntentPrompt: () => intentController.clearPrompt(),
     clearNormalDelay, updateFocusStreak, resetSearchGate,
     collapseFixedCollection: () => { expandedFixedCollectionName = ""; },
     updateSearchNavigation,
@@ -119,10 +111,7 @@
     scheduler: window, now: () => Date.now(), delayMs: NORMAL_DELAY_MS, tickMs: 200,
     bypassMs: BYPASS_MS, recentWindowMs: RECENT_NORMAL_OPEN_MS,
     readLastNormalOpenedAt, recordNormalOpenedAt,
-    onAttemptStarted: () => {
-      normalAttemptStartedAt = Date.now();
-      recordAwareness("attempt_started");
-    },
+    onAttemptStarted: () => intentController.beginAttempt(),
     finishNormalAttempt, recordAwareness, setNormal, setActive,
     setFocused: setSearchFocusedConversation,
     isNormalMode: () => root().classList.contains(ROOT_NORMAL),
@@ -151,6 +140,18 @@
           element.textContent = String(seconds);
         });
       },
+    },
+  });
+
+  const intentController = globalThis.MirrorIntentController.createIntentController({
+    now: () => Date.now(), createAttemptId, recordAwareness,
+    closeSummary: closeAwarenessSummary, clearConfirmation: clearNormalDelay,
+    beginConfirmation: startNormalDelay,
+    resetRecentAttempt: () => normalMode.resetRecentAttempt(), setActive,
+    ui: {
+      hasOverlay: () => Boolean(getOverlay()), showPrompt: showIntentPrompt,
+      hidePrompt: () => getOverlay()?.classList.remove("mwf-intent-pending"),
+      readInput: readIntentInput,
     },
   });
 
@@ -865,31 +866,8 @@
     }
   }
 
-  function normalAttemptDuration() {
-    return normalAttemptStartedAt ? Math.max(0, Date.now() - normalAttemptStartedAt) : 0;
-  }
-
   function finishNormalAttempt(type, details = {}) {
-    const durationMs = normalAttemptDuration();
-    recordAwareness(type, { durationMs, ...details });
-    if (pendingIntent) {
-      const decision = {
-        normal_opened: "opened",
-        attempt_cancelled: "cancelled",
-        continued_focused_conversation: "continued-focused",
-      }[type];
-      if (decision) {
-        recordAwareness("intent_outcome", {
-          ...pendingIntent,
-          decision,
-          durationMs,
-          route: details.route,
-        });
-      }
-    }
-    pendingIntent = null;
-    normalAttemptStartedAt = null;
-    normalMode.resetRecentAttempt();
+    intentController.finishAttempt(type, details);
   }
 
   function formatAwarenessReflection(category) {
@@ -917,7 +895,7 @@
     return `attempt-${Date.now()}-${Math.random().toString(16).slice(2)}`;
   }
 
-  function readIntentDeclaration(overlay = getOverlay()) {
+  function readIntentInput(overlay = getOverlay()) {
     const intent = overlay?.querySelector('[name="mwf-intent"]:checked')?.value;
     const note = overlay?.querySelector("[data-mwf-intent-note]")?.value || "";
     const message = overlay?.querySelector("[data-mwf-intent-message]");
@@ -926,21 +904,12 @@
       return null;
     }
     if (message) message.textContent = "";
-    return {
-      attemptId: createAttemptId(),
-      intent,
-      note,
-      promptDurationMs: intentPromptStartedAt ? Math.max(0, Date.now() - intentPromptStartedAt) : 0,
-    };
+    return { intent, note };
   }
 
-  function startIntentDeclaration() {
+  function showIntentPrompt() {
     const overlay = getOverlay();
     if (!overlay) return;
-    closeAwarenessSummary();
-    clearNormalDelay();
-    pendingIntent = null;
-    intentPromptStartedAt = Date.now();
     overlay.querySelectorAll('[name="mwf-intent"]').forEach((input) => { input.checked = false; });
     const note = overlay.querySelector("[data-mwf-intent-note]");
     const message = overlay.querySelector("[data-mwf-intent-message]");
@@ -949,31 +918,20 @@
     overlay.classList.add("mwf-intent-pending");
   }
 
+  function startIntentDeclaration() {
+    intentController.begin();
+  }
+
   function proceedFromIntent() {
-    const declaration = readIntentDeclaration();
-    if (!declaration) return;
-    pendingIntent = declaration;
-    intentPromptStartedAt = null;
-    getOverlay()?.classList.remove("mwf-intent-pending");
-    startNormalDelay();
+    intentController.proceed();
   }
 
   function declineFromIntent() {
-    const declaration = readIntentDeclaration();
-    if (!declaration) return;
-    recordAwareness("intent_outcome", { ...declaration, decision: "not-open" });
-    pendingIntent = null;
-    intentPromptStartedAt = null;
-    getOverlay()?.classList.remove("mwf-intent-pending");
+    intentController.decline();
   }
 
   function returnToFocusBeforeIntent() {
-    const durationMs = intentPromptStartedAt ? Math.max(0, Date.now() - intentPromptStartedAt) : 0;
-    recordAwareness("intent_prompt_exited", { durationMs, destination: "focus-overlay" });
-    pendingIntent = null;
-    intentPromptStartedAt = null;
-    getOverlay()?.classList.remove("mwf-intent-pending");
-    setActive({ showOverlay: true });
+    intentController.returnToFocus();
   }
 
   function renderIntentNotes(panel, notes) {

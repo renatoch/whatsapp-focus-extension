@@ -31,6 +31,7 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'scripts/recent-capture.js',
     'scripts/mode-controller.js',
     'scripts/normal-mode.js',
+    'scripts/intent-controller.js',
     'content.js',
   ]);
 });

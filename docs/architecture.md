@@ -16,7 +16,8 @@ Manifest content scripts load synchronously at `document_start`:
 5. `scripts/recent-capture.js`: bounded header confirmation and cancellation for deliberate recent capture.
 6. `scripts/mode-controller.js`: root-class transitions plus cancellable delayed search/focused entry.
 7. `scripts/normal-mode.js`: confirmation/countdown and temporary-normal-access timers.
-8. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
+8. `scripts/intent-controller.js`: prompt/attempt state and outcome association.
+9. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -135,6 +136,30 @@ The six new baseline cases ran against the old VM bridge before extraction;
 boundaries, reentrancy, stale callbacks and restart. The previous characterization
 file now integrates real normal/mode factories with the still-composed attempt,
 manual-control and Continue wiring. Final live Chrome equivalence remains pending.
+
+## Intent and attempt association
+
+`createIntentController` owns the prompt clock, attempt clock and pending authored
+declaration. Injected UI hooks only check overlay availability, read/validate the
+form and show/hide/reset prompt fields. Clock/attempt-ID creation, awareness sink,
+normal-confirmation hooks and active-mode callback are injected. Composition no
+longer duplicates these three state values; all factories are inert until boot.
+
+`begin`, `proceed`, `decline`, `returnToFocus`, `clearPrompt`, `beginAttempt`,
+`finishAttempt` and `cancelPendingAttempt` preserve declaration versus attempt
+semantics, event order and routes. Resetting the prompt alone does not discard a
+pending attempt. Authored input reaches only existing intent outcomes; aggregate
+attempt events do not acquire note/title data. Existing awareness sanitization and
+280-character authored-note policy remain unchanged.
+
+Generation checks protect synchronous reentrant callbacks. Completed association
+is detached before invoking event sinks; a newer action cannot be overwritten by
+old cleanup. `dispose/start` clears private state without telemetry/UI effects and
+does not manage the separate normal-mode timers or application listeners.
+
+Six cases were characterized against the old source before extraction, then moved
+to the factory with VM bridges only for still-composed field rendering/reading.
+Normal-mode integration uses all three real controllers (mode, normal, intent).
 
 ## Invariants during extraction
 

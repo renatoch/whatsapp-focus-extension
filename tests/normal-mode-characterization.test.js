@@ -7,6 +7,7 @@ const fs = require('node:fs');
 const source = fs.readFileSync(require('node:path').join(__dirname, '../content.js'), 'utf8');
 const { createNormalMode } = require('../scripts/normal-mode.js');
 const { createModeController } = require('../scripts/mode-controller.js');
+const { createIntentController } = require('../scripts/intent-controller.js');
 function extract(name) {
   const start = source.indexOf(`  function ${name}(`);
   assert.notEqual(start, -1);
@@ -24,33 +25,39 @@ function harness() {
   const surfaces = Object.fromEntries(['ensureOverlay','ensureReturnButton','ensureSidebarButton','ensureSearchAgainButton','ensureSearchGateMessage','ensureFocusedRecentsShelf','ensureAddCollectionButton','ensureFixedCollectionChooser','renderFocusedRecents','renderFixedCollections'].map(k => [k,noop]));
   surfaces.getOverlay = () => ({hidden:false});
   const mode = createModeController({ classes, getRoot: () => root, scheduler, isReady: () => true,
-    cancelFocusedNavigation: noop, cancelRecentCapture: noop, closeChooser: noop, cancelPendingNormalAttempt: noop,
-    clearIntentPrompt: noop, clearNormalDelay: () => normal.clearConfirmation(), updateFocusStreak: noop, resetSearchGate: noop,
+    cancelFocusedNavigation: noop, cancelRecentCapture: noop, closeChooser: noop,
+    cancelPendingNormalAttempt: () => intent.cancelPendingAttempt(),
+    clearIntentPrompt: () => intent.clearPrompt(), clearNormalDelay: () => normal.clearConfirmation(), updateFocusStreak: noop, resetSearchGate: noop,
     collapseFixedCollection: noop, updateSearchNavigation: noop, normalizeChats: cb => cb(), focusNativeSearch: noop, captureFocusedConversation: noop, surfaces });
-  const context = vm.createContext({ normalAttemptStartedAt: time, pendingIntent: { attemptId:'synthetic',intent:'check-reply',note:'authored' },
-    Date: { now: () => time }, recordAwareness: (type, details) => events.push([type, JSON.parse(JSON.stringify(details))]) });
-  vm.runInContext(extract('normalAttemptDuration')+'\n'+extract('finishNormalAttempt'), context);
+  const context = vm.createContext({
+    recordAwareness: (type, details = {}) => events.push([type, JSON.parse(JSON.stringify(details))]) });
+  vm.runInContext(extract('finishNormalAttempt'), context);
   const normal = createNormalMode({ scheduler, now: () => time, delayMs:8000, tickMs:200, bypassMs:300000, recentWindowMs:600000,
     readLastNormalOpenedAt: () => null, recordNormalOpenedAt: () => events.push('record-open'),
-    onAttemptStarted: () => { context.normalAttemptStartedAt = time; context.recordAwareness('attempt_started',{}); },
+    onAttemptStarted: () => intent.beginAttempt(),
     finishNormalAttempt: context.finishNormalAttempt, recordAwareness: context.recordAwareness,
     setNormal: () => { events.push('normal'); mode.setNormal(); }, setActive: options => mode.setActive(options), setFocused: mode.setFocused,
     isNormalMode: () => flags.has('normal'), chooseExpiryDestination: () => 'blind-overlay', normalizeChats: cb => cb(),
     ui: { prepare: () => true, reset: noop, setPending: noop, setRecent: noop, updateWarning: noop, setCountdown: noop } });
-  Object.assign(context, {normalMode:normal, root: () => root, ROOT_NORMAL:'normal', ROOT_ACTIVE:'active',
+  const intent = createIntentController({ now: () => time, createAttemptId: () => 'synthetic',
+    recordAwareness: context.recordAwareness, closeSummary: noop, clearConfirmation: () => normal.clearConfirmation(),
+    beginConfirmation: () => normal.beginConfirmation(), resetRecentAttempt: () => normal.resetRecentAttempt(),
+    setActive: mode.setActive, ui: { hasOverlay: () => true, showPrompt: noop, hidePrompt: noop,
+      readInput: () => ({ intent:'check-reply', note:'authored' }) } });
+  Object.assign(context, {intentController:intent, normalMode:normal, root: () => root, ROOT_NORMAL:'normal', ROOT_ACTIVE:'active',
     setActive: mode.setActive, document: { body:{}, getElementById: () => null, createElement: () => ({addEventListener: (name,cb) => {listeners.button = cb;}}),
       addEventListener: (name,cb) => {listeners[name] = cb;} }, getControlsContainer: () => ({appendChild:noop}), RETURN_ID:'return',
     recordAwareness: context.recordAwareness, canToggleSidebar: () => false });
-  return {normal,mode,context,pending,events,flags,listeners,setTime: value => {time=value;}};
+  return {normal,mode,intent,context,pending,events,flags,listeners,setTime: value => {time=value;}};
 }
 
 test('real mode transition cleanup does not cancel its own newly scheduled bypass', () => {
-  const h = harness(); h.normal.beginConfirmation(); h.setTime(1001000); h.normal.openNow();
+  const h = harness(); h.intent.begin(); h.intent.proceed(); h.setTime(1001000); h.normal.openNow();
   assert.equal(h.flags.has('normal'),true); assert.equal(h.pending.size,1);
   assert.equal([...h.pending.values()][0].delay,300000);
   assert.deepEqual(h.events.slice(1), [['normal_opened',{durationMs:1000,route:'immediate'}],
-    ['intent_outcome',{attemptId:'synthetic',intent:'check-reply',note:'authored',decision:'opened',durationMs:1000,route:'immediate'}], 'record-open','normal']);
-  assert.equal(h.context.pendingIntent,null);
+    ['intent_outcome',{attemptId:'synthetic',intent:'check-reply',note:'authored',promptDurationMs:0,decision:'opened',durationMs:1000,route:'immediate'}], 'record-open','normal']);
+  h.intent.cancelPendingAttempt(); assert.equal(h.events.length,5);
 });
 
 test('real active mode cleanup cancels confirmation without cancelling an unrelated bypass', () => {
@@ -69,7 +76,7 @@ for (const route of ['button','keydown']) test(`manual ${route} records once and
 
 test('Continue retains intent outcome and normalization/focused/capture order with real normal factory', () => {
   const h = harness(); const sequence = [];
-  h.normal.beginConfirmation(); h.setTime(1000500);
+  h.intent.begin(); h.intent.proceed(); h.setTime(1000500);
   h.context.finishNormalAttempt('continued_focused_conversation'); h.normal.clearConfirmation();
   Object.assign(h.context, {debugLog(){}, isWhatsAppReady:()=>true, hasOpenConversation:()=>true,
     findNativeSearchField:()=>null, describeElement:()=>null, isNestedListView:()=>false,

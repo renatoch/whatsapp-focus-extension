@@ -20,6 +20,7 @@ test('loads fixed collections before the content integration', () => {
     'scripts/recent-capture.js',
     'scripts/mode-controller.js',
     'scripts/normal-mode.js',
+    'scripts/intent-controller.js',
     'content.js',
   ]);
 });

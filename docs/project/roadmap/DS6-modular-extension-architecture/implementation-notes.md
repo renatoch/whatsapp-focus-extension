@@ -2,6 +2,20 @@
 
 ## Current resume status
 
+Astra-only continuation, slice 1: extracted `scripts/intent-controller.js` from
+`7155a7b`. The Navigator authorized multiple bounded checkpoints without Sol handoffs
+and a temporary 90% five-hour quota ceiling; the 70% weekly stop still applies.
+See `astra-continuation.md` for scope and limits.
+
+Characterization before production edits: 177/177 (six new intent cases). Final
+factory/lifecycle/integration suite: 182/182, with syntax/manifest/diff checks passed.
+Reviewed outcome ordering, note privacy, reentrant cleanup and three-controller
+wiring. content.js 1,748 → 1,706 lines (-42); new module 117; net production +75.
+No CSS/selector/storage-schema changes or Chrome acceptance. Prompt/attempt state
+is no longer composition-owned; outer listeners/observers and form rendering remain.
+
+The normal-mode checkpoint below is completed history.
+
 Sol executed `normal-mode-handoff.md` from `2304811`; Astra reviewed and approved
 this bounded extraction for checkpoint/backup, not final DS6 acceptance. The new `scripts/normal-mode.js` owns confirmation and
 bypass timers, recent-attempt route selection and generation guards; mode-controller
