@@ -21,6 +21,7 @@ test('loads fixed collections before the content integration', () => {
     'scripts/mode-controller.js',
     'scripts/normal-mode.js',
     'scripts/intent-controller.js',
+    'scripts/dev-assets.js',
     'content.js',
   ]);
 });

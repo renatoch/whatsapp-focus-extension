@@ -17,7 +17,8 @@ Manifest content scripts load synchronously at `document_start`:
 6. `scripts/mode-controller.js`: root-class transitions plus cancellable delayed search/focused entry.
 7. `scripts/normal-mode.js`: confirmation/countdown and temporary-normal-access timers.
 8. `scripts/intent-controller.js`: prompt/attempt state and outcome association.
-9. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
+9. `scripts/dev-assets.js`: CSS/config conversion, refresh cache and owned interval.
+10. `content.js`: constructs the factories and still owns remaining controllers, UI, timers and bootstrap.
 
 No bundler or new dependency. Factories expose an isolated-world browser namespace
 and CommonJS exports for Node tests. Names returned from a factory close over its
@@ -160,6 +161,29 @@ does not manage the separate normal-mode timers or application listeners.
 Six cases were characterized against the old source before extraction, then moved
 to the factory with VM bridges only for still-composed field rendering/reading.
 Normal-mode integration uses all three real controllers (mode, normal, intent).
+
+## Development assets
+
+`createDevAssets` receives fetchText, style application, config conversion, error
+reporting and scheduler dependencies. Pure `cssFromConfig` preserves the existing
+fragment order, default geometry, selector interpolation and escaping. Native styles
+are not split yet. Composition retains extension URL/cache-busting fetch and style
+node creation; no manifest resource/permission changes were needed.
+
+`start` performs an immediate pass and owns one 1-second interval; repeated start
+is inert. `refresh` keeps CSS-before-config ordering and unchanged-content caches.
+Slow passes are single-flight so an older response cannot roll newer styles back.
+This bounds asynchronous ownership rather than altering the interval cadence.
+Existing partial-failure semantics are preserved: valid CSS can apply even when
+config is malformed, which keeps the previous config override. Empty CSS does not
+clear styles; an empty converted config does clear previous overrides.
+
+`dispose` clears the interval, invalidates queued ticks and async completions, and
+retains the already-applied styles. Restart permits fresh work while obsolete fetch
+results/errors are ignored; it does not abort browser fetches already in progress.
+The five baseline cases passed against the original implementation before migration
+to the factory; lifecycle tests include handle 0, slow fetches, restart, stale tick,
+reentrant disposal and unchanged fetch URL/no-store behavior.
 
 ## Invariants during extraction
 

@@ -45,8 +45,6 @@
   const fixedCollectionsAdapter = globalThis.chrome?.storage?.local
     ? globalThis.MirrorAwareness?.createChromeStorageAdapter(globalThis.chrome.storage.local)
     : null;
-  let lastHotCss = "";
-  let lastConfigCss = "";
   let focusedRecents = [];
   let focusedRecentsExpanded = false;
   let fixedCollectionsState = globalThis.MirrorFixedCollections?.createEmptyState() || { version: 1, collections: [] };
@@ -153,6 +151,17 @@
       hidePrompt: () => getOverlay()?.classList.remove("mwf-intent-pending"),
       readInput: readIntentInput,
     },
+  });
+
+  const devAssets = globalThis.MirrorDevAssets.createDevAssets({
+    scheduler: window, intervalMs: DEV_REFRESH_MS, fetchText: fetchExtensionText,
+    applyStyle: (kind, css) => {
+      ensureStyle(kind === "css" ? HOT_CSS_ID : HOT_CONFIG_CSS_ID).textContent = css;
+    },
+    convertConfig: (config) => globalThis.MirrorDevAssets.cssFromConfig(config, {
+      returnId: RETURN_ID, sidebarId: SIDEBAR_BUTTON_ID, searchingClass: ROOT_SEARCHING,
+    }),
+    onError: (error) => console.debug("WhatsApp Focus Mode dev refresh failed", error),
   });
 
   function debugLog(message, details = undefined) {
@@ -1474,68 +1483,8 @@
     return response.text();
   }
 
-  function cssEscape(value) {
-    return String(value).replaceAll("\\", "\\\\").replaceAll('"', '\\"');
-  }
-
-  function cssFromConfig(config) {
-    const parts = [];
-
-    if (config.returnButton) {
-      const top = config.returnButton.top || "14px";
-      const left = config.returnButton.left || "72px";
-      parts.push(`#${RETURN_ID} { top: ${top} !important; left: ${left} !important; }`);
-    }
-
-    if (config.sidebarButton) {
-      const top = config.sidebarButton.top || "560px";
-      const left = config.sidebarButton.left || "6px";
-      parts.push(`#${SIDEBAR_BUTTON_ID} { top: ${top} !important; left: ${left} !important; }`);
-    }
-
-    if (Array.isArray(config.hideInSearch) && config.hideInSearch.length > 0) {
-      const selectors = config.hideInSearch.map((selector) => `html.${ROOT_SEARCHING} ${selector}`).join(",\n");
-      parts.push(`${selectors} { visibility: hidden !important; }`);
-    }
-
-    if (Array.isArray(config.dimInSearch) && config.dimInSearch.length > 0) {
-      const selectors = config.dimInSearch.map((selector) => `html.${ROOT_SEARCHING} ${selector}`).join(",\n");
-      parts.push(`${selectors} { opacity: 0.16 !important; }`);
-    }
-
-    if (Array.isArray(config.hideTextIncludes) && config.hideTextIncludes.length > 0) {
-      for (const text of config.hideTextIncludes) {
-        parts.push(`html.${ROOT_SEARCHING} #side [aria-label*="${cssEscape(text)}" i] { visibility: hidden !important; }`);
-      }
-    }
-
-    return parts.join("\n\n");
-  }
-
-  async function refreshDevAssets() {
-    try {
-      const css = await fetchExtensionText("focus.css");
-      if (css && css !== lastHotCss) {
-        ensureStyle(HOT_CSS_ID).textContent = css;
-        lastHotCss = css;
-      }
-
-      const configText = await fetchExtensionText("dev-config.json");
-      if (!configText) return;
-      const configCss = cssFromConfig(JSON.parse(configText));
-      if (configCss !== lastConfigCss) {
-        ensureStyle(HOT_CONFIG_CSS_ID).textContent = configCss;
-        lastConfigCss = configCss;
-      }
-    } catch (error) {
-      // Keep the current prototype running even if a config edit is temporarily invalid.
-      console.debug("WhatsApp Focus Mode dev refresh failed", error);
-    }
-  }
-
   function startDevRefresh() {
-    refreshDevAssets();
-    window.setInterval(refreshDevAssets, DEV_REFRESH_MS);
+    devAssets.start();
   }
 
   function installKeyboardShortcuts() {

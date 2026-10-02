@@ -2,6 +2,19 @@
 
 ## Current resume status
 
+Astra-only continuation, slice 2: extracted `scripts/dev-assets.js` after `9a0780b`.
+Characterization before production edits: 187/187 (five new conversion/refresh cases).
+Reviewed final suite: 194/194, syntax/manifest/diff checks passed. Fixed a regression
+caught by a red lifecycle test: an interval callback queued before disposal must
+remain inert after restart. Slow refreshes are single-flight; CSS/config partial
+failure semantics, one-second interval, resource URLs and style IDs are preserved.
+No CSS split, selector/config changes, new permissions or framework.
+content.js 1,706 → 1,655 lines (-51); new module 97; net production +46.
+Quota at verification: 64% five-hour / 58% weekly; refresh before another stage.
+Chrome equivalence and application-wide lifecycle remain pending.
+
+The intent checkpoint below is completed history.
+
 Astra-only continuation, slice 1: extracted `scripts/intent-controller.js` from
 `7155a7b`. The Navigator authorized multiple bounded checkpoints without Sol handoffs
 and a temporary 90% five-hour quota ceiling; the 70% weekly stop still applies.
