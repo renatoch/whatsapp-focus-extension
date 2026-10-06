@@ -1,0 +1,7 @@
+body { width: 330px; padding: 16px; margin: 0; font: 14px/1.5 system-ui, sans-serif; color: #182922; background: #f5f8f6; }
+h1 { font-size: 20px; margin-top: 0; }
+label { display: block; font-weight: 600; }
+input { max-width: 100%; margin-top: 8px; }
+a { display: inline-block; padding: 9px 14px; border-radius: 6px; background: #175d43; color: white; text-decoration: none; }
+a[hidden] { display: none; }
+.note { color: #526259; font-size: 12px; }

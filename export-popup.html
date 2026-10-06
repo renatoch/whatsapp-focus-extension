@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Extrair Markdown</title><link rel="stylesheet" href="export-popup.css"></head>
+<body>
+  <h1>Extrair Markdown</h1>
+  <p>Selecione o ZIP exportado. O chat.md será salvo com o nome do ZIP, sem alterar seu conteúdo.</p>
+  <label for="archive">ZIP da conversa</label>
+  <input id="archive" type="file" accept=".zip,application/zip">
+  <p id="status" role="status" aria-live="polite">Processamento local. O ZIP original será mantido.</p>
+  <a id="save" hidden>Salvar Markdown</a>
+  <p class="note">Nenhum conteúdo é enviado ou armazenado pela extensão. O arquivo salvo contém suas mensagens; escolha onde guardá-lo. Limites: ZIP 64 MB, Markdown 16 MB.</p>
+  <script src="zip-markdown.js"></script><script src="export-popup.js"></script>
+</body></html>

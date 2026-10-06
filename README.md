@@ -14,7 +14,7 @@ Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 - O código atual não envia mensagens, contatos ou dados de uso para servidores externos.
 - O experimento **Padrão de uso** registra horários, ações na barreira e somente a intenção/nota que o usuário decide escrever. Esses dados ficam em `chrome.storage.local`, isolados dos scripts da página do WhatsApp, e podem ser pausados ou apagados pela interface.
 - As **Coleções** persistem somente os nomes escritos pelo usuário e os títulos exibidos das conversas adicionadas explicitamente. Não guardam mensagens, previews, termos de busca, telefones, JIDs, URLs, estado de não lida ou outros dados derivados.
-- Fora dessa seleção explícita, a extensão não extrai ou persiste pessoas, conversas ou buscas do WhatsApp.
+- Fora dessa seleção explícita, a extensão não extrai ou persiste pessoas, conversas ou buscas do WhatsApp. A ferramenta **Extrair Markdown** processa somente o ZIP que você seleciona voluntariamente: lê seu `chat.md` em memória e oferece um arquivo local; não lê mensagens da página, não envia nem guarda conteúdo no armazenamento da extensão.
 - Por ser uma extensão que roda em `web.whatsapp.com`, ela tem acesso técnico ao DOM visível do WhatsApp Web. Isso inclui elementos da interface, nomes de conversas e conteúdo exibido na tela.
 - Esse acesso é necessário para ocultar a lateral, limpar previews e controlar o modo foco, mas significa que qualquer pessoa instalando a extensão precisa confiar no código.
 - O hot-refresh de desenvolvimento (`focus.css` e `dev-config.json` em `web_accessible_resources`) é uma conveniência de prototipagem. Antes de uma versão pública/distribuível, ele deve ser removido ou protegido por build/flag de desenvolvimento.
@@ -63,6 +63,25 @@ A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa 
 3. Clique em **Load unpacked** / **Carregar sem compactação**.
 4. Selecione a pasta clonada deste projeto.
 5. Abra ou recarregue `https://web.whatsapp.com`.
+
+## Extrair Markdown de um ZIP exportado
+
+1. Recarregue a extensão em `chrome://extensions` após esta atualização.
+2. Clique no botão da extensão na barra do Chrome (fixe-o pelo menu de extensões, se necessário).
+3. Selecione o ZIP exportado em Downloads.
+4. Clique em **Salvar Markdown**. `Nome da conversa.zip` gera `Nome da conversa.md`.
+
+O conteúdo de `chat.md` é preservado byte a byte, sem conversão ou leitura do chat
+aberto. O ZIP original **não é apagado**. O download usa a configuração normal do
+Chrome; confira a pasta ou escolha de destino. Fechar o popup descarta o resultado
+em memória; selecione novamente se necessário. Nenhuma permissão nova é exigida.
+
+Limites: ZIP até 64 MB; Markdown até 16 MB; um único arquivo chamado `chat.md`
+(inclusive em subpasta); ZIP simples, sem criptografia/ZIP64, com armazenamento ou
+Deflate. Integridade CRC/tamanho é verificada. Arquivos ausentes, ambíguos,
+corrompidos ou incompatíveis são recusados, sem escolher um resultado arbitrário.
+Não há monitoramento automático de downloads. A validação manual no Chrome com
+um export real ainda está pendente; os testes usam somente fixtures sintéticas.
 
 ## Desenvolvimento sem recarregar a aba toda
 
