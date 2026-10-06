@@ -87,8 +87,8 @@ Limites: ZIP até 64 MB; Markdown até 16 MB; um único arquivo chamado `chat.md
 (inclusive em subpasta); ZIP simples, sem criptografia/ZIP64, com armazenamento ou
 Deflate. Integridade CRC/tamanho é verificada. Arquivos ausentes, ambíguos,
 corrompidos ou incompatíveis são recusados, sem escolher um resultado arbitrário.
-Não há monitoramento automático de downloads. A validação manual no Chrome com
-um export real ainda está pendente; os testes usam somente fixtures sintéticas.
+Não há monitoramento automático de downloads. O fluxo foi validado manualmente pelo usuário no Chrome com um export real,
+incluindo a pseudonimização dos rótulos; os testes usam somente fixtures sintéticas.
 
 ## Desenvolvimento sem recarregar a aba toda
 

@@ -21,7 +21,10 @@ Streaming native DecompressionStream bounds inflated output before aggregation.
 No private samples are in tests. Filename cleanup prevents path/illegal-character
 output; Chrome may further normalize names or add a suffix on existing files.
 
-Live Chrome acceptance remains pending: reload extension, click its toolbar action,
+Navigator reported “Funcionou bem” after the pseudonymization update (`2179f70`):
+manual acceptance of the selected-ZIP extraction/pseudonymization flow. This does
+not claim comprehensive anonymization or acceptance of unsupported export formats.
+The validation route was: reload extension, click its toolbar action,
 choose real ZIP, Save Markdown, verify Grupo.md, group/author/quote replacements,
 consistent numbering and original ZIP preservation.
 Try a second file and an invalid ZIP; errors should expose no message content.
