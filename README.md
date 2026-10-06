@@ -69,10 +69,17 @@ A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa 
 1. Recarregue a extensão em `chrome://extensions` após esta atualização.
 2. Clique no botão da extensão na barra do Chrome (fixe-o pelo menu de extensões, se necessário).
 3. Selecione o ZIP exportado em Downloads.
-4. Clique em **Salvar Markdown**. `Nome da conversa.zip` gera `Nome da conversa.md`.
+4. Clique em **Salvar Markdown**. O resultado é **`Grupo.md`**, sem nome identificável no arquivo.
 
-O conteúdo de `chat.md` é preservado byte a byte, sem conversão ou leitura do chat
-aberto. O ZIP original **não é apagado**. O download usa a configuração normal do
+O título `Exportação de conversas do WhatsApp: …` vira `…: Grupo`. Autores no formato
+`[10:09 AM] **Nome:**` e citações `> _Nome:` recebem **Pessoa 1, Pessoa 2…**, com o
+mesmo número para o mesmo rótulo. A numeração recomeça em cada export; rótulos
+realmente distintos não são unificados como se fossem a mesma pessoa.
+
+**Não é anonimização completa:** nomes citados no corpo, telefones, links, anexos,
+datas e outras pistas permanecem. Revise antes de compartilhar. Somente esses
+rótulos são alterados; o restante do texto/formatação é preservado. Markdown deve
+estar em UTF-8 válido. Não há leitura do chat aberto. O ZIP original **não é apagado**. O download usa a configuração normal do
 Chrome; confira a pasta ou escolha de destino. Fechar o popup descarta o resultado
 em memória; selecione novamente se necessário. Nenhuma permissão nova é exigida.
 

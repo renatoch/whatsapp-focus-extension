@@ -22,10 +22,14 @@
       if (token !== generation) return;
       const result = await MirrorZipMarkdown.extractMarkdown(buffer, file.name);
       if (token !== generation) return;
-      url = URL.createObjectURL(new Blob([result.bytes], {type:'text/markdown;charset=utf-8'}));
-      save.href = url; save.download = result.name;
+      let markdown;
+      try { markdown = new TextDecoder('utf-8', {fatal:true, ignoreBOM:true}).decode(result.bytes); }
+      catch (_) { throw new Error('Não foi possível ler o Markdown em UTF-8.'); }
+      const pseudonymized = MirrorMarkdownPseudonyms.pseudonymizeMarkdown(markdown);
+      url = URL.createObjectURL(new Blob([pseudonymized], {type:'text/markdown;charset=utf-8'}));
+      save.href = url; save.download = 'Grupo.md';
       save.textContent = 'Salvar Markdown'; save.hidden = false;
-      status.textContent = 'Markdown pronto. Clique em Salvar Markdown. O ZIP original será mantido.';
+      status.textContent = 'Grupo.md pronto: título, autores e citações pseudonimizados. Revise o corpo das mensagens antes de compartilhar. O ZIP original será mantido.';
     } catch (error) {
       if (token !== generation) return;
       status.textContent = error.message || 'Não foi possível processar o ZIP.';
