@@ -36,7 +36,7 @@ test('invalid UTF-8 is refused rather than silently corrupting text',async()=>{
   const h=harness(async()=>({bytes:new Uint8Array([0xff]),name:'Synthetic.md'}));await h.select();
   assert.equal(h.nodes.save.hidden,true);assert.match(h.nodes.status.textContent,/UTF-8/);assert.equal(h.blobs.length,0);
 });
-test('manifest exposes only popup, no downloads or filesystem permission',()=>{
+test('manifest exposes popup with clipboard but no downloads or filesystem permission',()=>{
   const manifest=JSON.parse(fs.readFileSync(path.join(__dirname,'../manifest.json'),'utf8'));
-  assert.equal(manifest.action.default_popup,'export-popup.html');assert.deepEqual(manifest.permissions,['storage']);
+  assert.equal(manifest.action.default_popup,'export-popup.html');assert.deepEqual(manifest.permissions,['storage','clipboardRead','clipboardWrite']);
 });

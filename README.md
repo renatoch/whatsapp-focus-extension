@@ -64,6 +64,22 @@ A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa 
 4. Selecione a pasta clonada deste projeto.
 5. Abra ou recarregue `https://web.whatsapp.com`.
 
+## Ajustar trecho de conversa no clipboard
+
+No popup da extensão, clique em **Ajustar clipboard** depois de copiar um trecho no
+formato `[12:51, 06/10/2026] Nome: Texto`. `Renato C` vira **Eu**; outros autores e
+citações `> Nome:` / `> _Nome:` recebem **Pessoa 1, Pessoa 2…** de forma consistente.
+Marque **Remover data/hora** se quiser retirar os timestamps dos cabeçalhos de
+mensagem (desmarcado por padrão). Continuações e quebras de linha são mantidas.
+
+O clipboard é lido e substituído **somente nesse clique**, usando as permissões
+`clipboardRead`/`clipboardWrite`. Não há monitoramento, histórico, envio ou
+armazenamento de texto/mapa de nomes. Texto sem cabeçalhos reconhecidos é recusado.
+O original no clipboard será substituído: copie novamente da origem se precisar.
+Nomes no corpo, telefones, links e datas mencionadas nas mensagens permanecem;
+revise antes de compartilhar. Este modo não altera o mapeamento de nomes do ZIP.
+A validação manual desta nova ação no Chrome ainda está pendente.
+
 ## Extrair Markdown de um ZIP exportado
 
 1. Recarregue a extensão em `chrome://extensions` após esta atualização.
@@ -81,7 +97,7 @@ datas e outras pistas permanecem. Revise antes de compartilhar. Somente esses
 rótulos são alterados; o restante do texto/formatação é preservado. Markdown deve
 estar em UTF-8 válido. Não há leitura do chat aberto. O ZIP original **não é apagado**. O download usa a configuração normal do
 Chrome; confira a pasta ou escolha de destino. Fechar o popup descarta o resultado
-em memória; selecione novamente se necessário. Nenhuma permissão nova é exigida.
+em memória; selecione novamente se necessário. A extração de ZIP não usa as permissões de clipboard; elas são usadas apenas na ação explícita de ajuste de trecho copiado.
 
 Limites: ZIP até 64 MB; Markdown até 16 MB; um único arquivo chamado `chat.md`
 (inclusive em subpasta); ZIP simples, sem criptografia/ZIP64, com armazenamento ou

@@ -3,8 +3,8 @@
   "name": "WhatsApp Focus Mode",
   "version": "0.1.0",
   "description": "Abre o WhatsApp Web em modo cego para reduzir distrações e chamarizes.",
-  "permissions": ["storage"],
-  "action": { "default_title": "Extrair Markdown de ZIP", "default_popup": "export-popup.html" },
+  "permissions": ["storage", "clipboardRead", "clipboardWrite"],
+  "action": { "default_title": "Ferramentas de conversa", "default_popup": "export-popup.html" },
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
