@@ -24,7 +24,27 @@ references remain. Original clipboard text is overwritten, not backed up; user c
 copy again from origin. An OS clipboard manager may independently retain history.
 ZIP keeps its own separate Pessoa N mapping; Renato C → Eu is clipboard-only.
 
-Chrome acceptance pending: reload extension/accept new permissions if Chrome asks;
+User accepted the original quick popup action (“Funcionou”). A new review panel
+is accessible by an Ajustar texto copiado button in the focus overlay. background.js
+opens a focused extension-owned popup window only for messages from a same-extension
+WhatsApp tab; no clipboard content is transferred through runtime messages.
+The panel is NOT web-accessible or embedded in the WhatsApp DOM. Opening reads once
+when focused, with an explicit reread button if permissions/focus prevent it. Two
+readonly scrollable textareas show original and transformed text. Checkbox updates
+preview without clipboard writes. Replace is the sole write action; duplicate writes
+are blocked while pending. Closing clears preview state and invalidates old read
+completions; it cannot retract an OS clipboard write already in progress. No history,
+network, logging, persistence or automatic clipboard monitoring. No new permission
+beyond those already granted for the quick popup. Original-format assumptions and
+pseudonymization caveats remain unchanged.
+
+Review-panel Chrome acceptance pending: reload extension and WhatsApp tab; open
+Modo foco → Ajustar texto copiado; check both previews, checkbox, reread after copying
+another selection, then Replace and paste once for verification. Close and reopen:
+old previews must not persist. Ensure original clipboard remains unchanged until
+Replace. If initial auto-read fails, focus the window and click reread.
+
+Original quick-popup route: reload extension/accept new permissions if Chrome asks;
 copy provided-format synthetic or real text, open popup, click Adjust, paste into a
 local editor; verify Eu/Pessoa N and continuations. Repeat with Remove date/time on
 and a quoted author. Verify arbitrary non-chat text is refused. Do not share real

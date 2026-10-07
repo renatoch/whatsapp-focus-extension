@@ -4,6 +4,7 @@
   "version": "0.1.0",
   "description": "Abre o WhatsApp Web em modo cego para reduzir distrações e chamarizes.",
   "permissions": ["storage", "clipboardRead", "clipboardWrite"],
+  "background": { "service_worker": "background.js" },
   "action": { "default_title": "Ferramentas de conversa", "default_popup": "export-popup.html" },
   "content_scripts": [
     {

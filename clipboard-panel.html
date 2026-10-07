@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ajustar texto copiado</title><link rel="stylesheet" href="clipboard-panel.css"></head>
+<body><main>
+<h1>Ajustar texto copiado</h1>
+<p>Renato C → Eu. Demais autores e citações → Pessoa 1, Pessoa 2…</p>
+<p>Revise antes de compartilhar: nomes no corpo, telefones, links e outras pistas permanecem.</p>
+<div class="actions"><button id="read" type="button">Ler clipboard novamente</button><label><input id="remove-timestamps" type="checkbox"> Remover data/hora</label></div>
+<div class="previews"><label>Original<textarea id="original" readonly spellcheck="false" placeholder="O trecho copiado aparecerá aqui."></textarea></label><label>Resultado<textarea id="result" readonly spellcheck="false" placeholder="Confira o texto antes de substituir o clipboard."></textarea></label></div>
+<p id="status" role="status" aria-live="polite"></p>
+<div class="actions"><button id="replace" type="button" disabled>Substituir clipboard</button><button id="close" type="button">Fechar e descartar prévia</button></div>
+<p class="note">Leitura apenas ao abrir este painel ou clicar em Ler clipboard novamente. O clipboard só é alterado por Substituir clipboard. Sem envio, armazenamento ou histórico na extensão.</p>
+</main><script src="clipboard-conversation.js"></script><script src="clipboard-panel.js"></script></body></html>

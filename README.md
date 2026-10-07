@@ -66,6 +66,17 @@ A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa 
 
 ## Ajustar trecho de conversa no clipboard
 
+Na tela **Modo foco**, clique em **Ajustar texto copiado**. Abre uma janela compacta
+da própria extensão, isolada do WhatsApp, com caixas **Original** e **Resultado**
+com rolagem. Ao abrir e receber foco, lê o clipboard uma vez; se o Chrome impedir a
+leitura inicial, use **Ler clipboard novamente**. Não há monitoramento de mudanças.
+A opção **Remover data/hora** atualiza a prévia. Somente **Substituir clipboard**
+aplica o resultado; **Fechar e descartar prévia** remove os textos da janela.
+Nada é colocado no DOM do WhatsApp ou enviado ao script de fundo. A validação manual
+deste painel está pendente. Recarregue extensão e aba para ver o novo botão.
+
+O acesso rápido anterior pelo popup continua disponível:
+
 No popup da extensão, clique em **Ajustar clipboard** depois de copiar um trecho no
 formato `[12:51, 06/10/2026] Nome: Texto`. `Renato C` vira **Eu**; outros autores e
 citações `> Nome:` / `> _Nome:` recebem **Pessoa 1, Pessoa 2…** de forma consistente.
@@ -78,7 +89,7 @@ armazenamento de texto/mapa de nomes. Texto sem cabeçalhos reconhecidos é recu
 O original no clipboard será substituído: copie novamente da origem se precisar.
 Nomes no corpo, telefones, links e datas mencionadas nas mensagens permanecem;
 revise antes de compartilhar. Este modo não altera o mapeamento de nomes do ZIP.
-A validação manual desta nova ação no Chrome ainda está pendente.
+O ajuste rápido pelo popup foi validado pelo usuário; o novo painel de revisão ainda requer teste no Chrome.
 
 ## Extrair Markdown de um ZIP exportado
 
