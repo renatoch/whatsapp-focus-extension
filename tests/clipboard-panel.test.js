@@ -12,14 +12,14 @@ function harness(read=async()=> '[12:00, 1/2/2026] Renato C: Exemplo',write=asyn
 const flush=()=>new Promise(resolve=>setImmediate(resolve));
 test('opening focused panel reads once, previews without writing, checkbox updates result, explicit replace writes',async()=>{
   const h=harness();h.events.focus();await flush();h.events.focus();
-  assert.equal(h.reads(),1);assert.match(h.nodes.original.value,/Renato C/);assert.equal(h.nodes.result.value,'[12:00, 1/2/2026] Eu: Exemplo');assert.deepEqual(h.writes,[]);
-  h.nodes['remove-timestamps'].checked=true;h.nodes['remove-timestamps'].change();assert.equal(h.nodes.result.value,'Eu: Exemplo');
-  await h.nodes.replace.click();assert.deepEqual(h.writes,['Eu: Exemplo']);assert.match(h.nodes.status.textContent,/substituído/);
+  assert.equal(h.reads(),1);assert.match(h.nodes.original.value,/Renato C/);assert.equal(h.nodes.result.value,'[12:00, 1/2/2026] Exemplo');assert.deepEqual(h.writes,[]);
+  h.nodes['remove-timestamps'].checked=true;h.nodes['remove-timestamps'].change();assert.equal(h.nodes.result.value,'Exemplo');
+  await h.nodes.replace.click();assert.deepEqual(h.writes,['Exemplo']);assert.match(h.nodes.status.textContent,/substituído/);
 });
 test('read again uses current clipboard and stale completion cannot replace it',async()=>{
   let finish,calls=0;const h=harness(()=>++calls===1?new Promise(resolve=>finish=resolve):Promise.resolve('[12:01, 1/2/2026] Amiga: Atual'));
   const first=h.nodes.read.click();await h.nodes.read.click();finish('[12:00, 1/2/2026] Renato C: Antigo');await first;
-  assert.match(h.nodes.original.value,/Atual/);assert.match(h.nodes.result.value,/Pessoa 1/);assert.deepEqual(h.writes,[]);
+  assert.match(h.nodes.original.value,/Atual/);assert.equal(h.nodes.result.value,'[12:01, 1/2/2026] Atual');assert.deepEqual(h.writes,[]);
 });
 test('close clears previews and invalidates pending reads',async()=>{
   let finish;const h=harness(()=>new Promise(resolve=>finish=resolve));const task=h.nodes.read.click();h.nodes.close.click();
@@ -37,6 +37,19 @@ test('background accepts only same-extension WhatsApp tab and sends no content t
   assert.equal(opened.length,0);let response;
   listener({type:'mwf-open-clipboard-panel'},{tab:{},id:'extension',url:'https://web.whatsapp.com/'},value=>response=value);
   assert.equal(opened.length,1);assert.equal(response.ok,true);assert.equal(opened[0].url,'chrome-extension://extension/clipboard-panel.html');
+});
+test('side Texto control is idempotent, does not change mode and opens the same isolated panel',()=>{
+  const source=fs.readFileSync(path.join(__dirname,'../content.js'),'utf8');
+  function extract(name){const start=source.indexOf(`  function ${name}(`);return source.slice(start,source.indexOf('\n  function ',start+1));}
+  const elements=new Map(),requests=[];
+  const context=vm.createContext({CLIPBOARD_BUTTON_ID:'text',document:{body:{},getElementById:id=>elements.get(id),createElement:()=>({setAttribute(){},addEventListener(type,fn){this[type]=fn;}})},
+    getControlsContainer:()=>({appendChild:node=>elements.set(node.id,node)}),showToast:()=>{throw Error('Unexpected failure');},
+    chrome:{runtime:{sendMessage:(message,cb)=>{requests.push(message.type);cb({ok:true});}}}});
+  vm.runInContext(extract('openClipboardPanel')+'\n'+extract('ensureClipboardButton')+'\nensureClipboardButton();ensureClipboardButton();',context);
+  assert.equal(elements.size,1);assert.equal(elements.get('text').textContent,'Texto');elements.get('text').click();
+  assert.deepEqual(requests,['mwf-open-clipboard-panel']);
+  const css=fs.readFileSync(path.join(__dirname,'../focus.css'),'utf8');assert.match(css,/html\.mwf-native-transient-open #mirror-whatsapp-focus-clipboard/);
+  const controls=extract('ensureControls');assert.match(controls,/ensureClipboardButton\(\)/);
 });
 test('panel is not web-accessible and mode-focus button dispatches only action metadata',()=>{
   const root=path.join(__dirname,'..'),manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json')));

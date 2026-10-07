@@ -31,6 +31,12 @@ Try a second file and an invalid ZIP; errors should expose no message content.
 User reports native Web exporter; implementation does not depend on verifying or
 modifying that exporter. Normal focus UI and DS6 remain separate.
 
+Later single-participant refinement: collect recognized author/quote identities
+before rewriting; with exactly one identity, omit the repeated author label and
+its bold markup/colon, plus same-person quote labels. Timestamps remain. If a quote
+introduces a different identity, preserve numbering for clarity. This new refinement
+still requires manual acceptance; previous acceptance refers to the earlier flow.
+
 Pseudonym map is in memory only, per export; exact trimmed NFC-normalized labels
 share a number, case-distinct labels remain distinct. It cannot resolve two people
 with identical display names or different labels for the same person. Supported

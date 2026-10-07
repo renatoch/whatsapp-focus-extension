@@ -10,12 +10,12 @@ function harness({text='[12:00, 1/2/2026] Renato C: Exemplo',readError=false,wri
 }
 test('no clipboard access until clicked; success writes transformed text and confirms only after writing',async()=>{
   const h=harness();assert.equal(h.reads(),0);assert.deepEqual(h.writes,[]);await h.click();
-  assert.deepEqual(h.writes,['[12:00, 1/2/2026] Eu: Exemplo']);assert.match(h.nodes['clipboard-status'].textContent,/atualizado/);
+  assert.deepEqual(h.writes,['[12:00, 1/2/2026] Exemplo']);assert.match(h.nodes['clipboard-status'].textContent,/atualizado/);
   assert.equal(h.nodes['adjust-clipboard'].disabled,false);
 });
 test('checkbox removes timestamps and rapid duplicate clicks do not run twice',async()=>{
   const h=harness();h.nodes['remove-timestamps'].checked=true;const first=h.click();await h.click();await first;
-  assert.equal(h.reads(),1);assert.deepEqual(h.writes,['Eu: Exemplo']);
+  assert.equal(h.reads(),1);assert.deepEqual(h.writes,['Exemplo']);
 });
 test('read errors and unsupported text never write clipboard; failures never claim success or display content',async()=>{
   for(const options of [{readError:true},{text:'private secret'},{writeError:true}]){

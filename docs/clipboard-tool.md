@@ -50,4 +50,14 @@ local editor; verify Eu/Pessoa N and continuations. Repeat with Remove date/time
 and a quoted author. Verify arbitrary non-chat text is refused. Do not share real
 messages for debugging. Existing ZIP action should still work.
 
+Follow-up Navigator requested single-participant label omission and easier access.
+Recognized author and quote labels are collected before rewriting; only when that
+union has one identity are Eu/Pessoa N labels omitted (including their colon/spacing).
+Body mentions remain out of scope. Markdown ZIP transform follows the same rule.
+A new vertical Texto button in the Foco/Lateral controls opens the same private
+extension window without a mode transition, search or awareness event. It is hidden
+with the controls under focus overlay (where original action remains) and suppressed
+under native transient modal/media surfaces. Single-person behavior and side-button
+Chrome acceptance pending. No new permission or clipboard-background monitoring.
+
 DS6 synchronization remains deliberate future work; feature lives on main.

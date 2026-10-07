@@ -66,7 +66,13 @@ A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa 
 
 ## Ajustar trecho de conversa no clipboard
 
-Na tela **Modo foco**, clique em **Ajustar texto copiado**. Abre uma janela compacta
+Com **um único participante** no trecho, os rótulos (`Eu:` / `Pessoa 1:`) são omitidos,
+também no Markdown extraído. A contagem inclui autores de citações reconhecidas:
+se uma segunda pessoa é citada, os rótulos permanecem para evitar ambiguidade.
+Texto, horários (quando mantidos), continuações e quebras de linha são preservados.
+
+Clique em **Texto**, na mesma barra lateral de **Foco** e **Lateral**, sem precisar
+mudar de modo. O acesso **Ajustar texto copiado** no Modo foco também continua disponível. Abre uma janela compacta
 da própria extensão, isolada do WhatsApp, com caixas **Original** e **Resultado**
 com rolagem. Ao abrir e receber foco, lê o clipboard uma vez; se o Chrome impedir a
 leitura inicial, use **Ler clipboard novamente**. Não há monitoramento de mudanças.

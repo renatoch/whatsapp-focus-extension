@@ -14,6 +14,7 @@
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
+  const CLIPBOARD_BUTTON_ID = "mirror-whatsapp-focus-clipboard";
   const SEARCH_AGAIN_BUTTON_ID = "mirror-whatsapp-focus-search-again";
   const SEARCH_GATE_ID = "mirror-whatsapp-focus-search-gate";
   const LOADING_PROGRESS_ID = "mirror-whatsapp-focus-loading-progress";
@@ -1828,9 +1829,7 @@
         setNormalTemporarily(normalAttemptRecent ? "recent-explicit" : "immediate");
       }
       if (action === "clipboard-panel") {
-        chrome.runtime.sendMessage({type:"mwf-open-clipboard-panel"}, (response) => {
-          if (chrome.runtime.lastError || !response?.ok) showToast("Não foi possível abrir o painel de clipboard.");
-        });
+        openClipboardPanel();
       }
       if (action === "awareness") {
         openAwarenessSummary();
@@ -1889,6 +1888,24 @@
     button.title = "Mostrar/ocultar barra lateral (Alt+Shift+L)";
     button.addEventListener("click", () => toggleSidebar());
 
+    getControlsContainer().appendChild(button);
+  }
+
+  function openClipboardPanel() {
+    chrome.runtime.sendMessage({type:"mwf-open-clipboard-panel"}, (response) => {
+      if (chrome.runtime.lastError || !response?.ok) showToast("Não foi possível abrir o painel de clipboard.");
+    });
+  }
+
+  function ensureClipboardButton() {
+    if (!document.body || document.getElementById(CLIPBOARD_BUTTON_ID)) return;
+    const button = document.createElement("button");
+    button.id = CLIPBOARD_BUTTON_ID;
+    button.type = "button";
+    button.textContent = "Texto";
+    button.title = "Ajustar texto copiado (clipboard)";
+    button.setAttribute("aria-label", "Ajustar texto copiado");
+    button.addEventListener("click", openClipboardPanel);
     getControlsContainer().appendChild(button);
   }
 
@@ -2007,6 +2024,7 @@
     getControlsContainer();
     ensureReturnButton();
     ensureSidebarButton();
+    ensureClipboardButton();
     ensureSearchAgainButton();
     ensureSearchGateMessage();
     ensureFocusedRecentsShelf();

@@ -994,7 +994,8 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 }
 
 #mirror-whatsapp-focus-return,
-#mirror-whatsapp-focus-sidebar {
+#mirror-whatsapp-focus-sidebar,
+#mirror-whatsapp-focus-clipboard {
   width: 50px;
   min-height: 72px;
   border: 0;
@@ -1016,7 +1017,8 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
   color: #07130f;
 }
 
-#mirror-whatsapp-focus-sidebar {
+#mirror-whatsapp-focus-sidebar,
+#mirror-whatsapp-focus-clipboard {
   background: #28353d;
   color: #e9edef;
   border: 1px solid rgba(233, 237, 239, 0.22);
@@ -1085,6 +1087,7 @@ html.mwf-opening-recent #mirror-whatsapp-focus-add-collection {
   display: none !important;
 }
 
+html.mwf-native-transient-open #mirror-whatsapp-focus-clipboard,
 html.mwf-native-transient-open #mirror-whatsapp-focus-search-again,
 html.mwf-native-transient-open #mirror-whatsapp-focus-add-collection,
 html.mwf-native-transient-open #mirror-whatsapp-focus-collection-chooser,

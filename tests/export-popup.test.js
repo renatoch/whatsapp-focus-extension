@@ -29,7 +29,7 @@ test('errors hide stale download and are rendered as plain text',async()=>{
 test('download contains pseudonyms and no group name in its filename',async()=>{
   const h=harness(async()=>({bytes:new TextEncoder().encode('# Exportação de conversas do WhatsApp: Equipe Exemplo\n[10:09 AM] **Ana:** Olá\n> _Ana: citação'),name:'Equipe Exemplo.md'}));
   await h.select('Equipe Exemplo.zip');assert.equal(h.nodes.save.download,'Grupo.md');
-  assert.equal(await h.blobs[0].text(),'# Exportação de conversas do WhatsApp: Grupo\n[10:09 AM] **Pessoa 1:** Olá\n> _Pessoa 1: citação');
+  assert.equal(await h.blobs[0].text(),'# Exportação de conversas do WhatsApp: Grupo\n[10:09 AM] Olá\n> _citação');
   assert.match(h.nodes.status.textContent,/Revise/);
 });
 test('invalid UTF-8 is refused rather than silently corrupting text',async()=>{
