@@ -8,4 +8,9 @@ button:disabled { opacity: .5; cursor: default; }
 .previews label { min-width: 0; font-weight: 600; }
 textarea { display: block; box-sizing: border-box; width: 100%; height: 42vh; min-height: 180px; margin-top: 8px; padding: 12px; resize: vertical; overflow: auto; border: 1px solid #9cafa4; border-radius: 6px; font: 14px/1.5 ui-monospace,monospace; background: white; color: #182922; }
 .note { color: #526259; font-size: 12px; }
+.zip-tool { padding: 16px; border: 1px solid #9cafa4; border-radius: 6px; margin: 16px 0; }
+summary { font-weight: 600; cursor: pointer; }
+#save { display: inline-block; padding: 10px 16px; border-radius: 6px; background: #175d43; color: white; text-decoration: none; }
+#save[hidden] { display: none; }
+#archive { display: block; max-width: 100%; margin-top: 8px; }
 @media (max-width: 650px) { .previews { grid-template-columns: 1fr; } textarea { height: 25vh; } }

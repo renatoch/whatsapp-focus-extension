@@ -60,4 +60,12 @@ with the controls under focus overlay (where original action remains) and suppre
 under native transient modal/media surfaces. Single-person behavior and side-button
 Chrome acceptance pending. No new permission or clipboard-background monitoring.
 
+Latest UI correction: side button is Ajustar cópia (not Texto). Focus-overlay
+button/action was removed at Navigator request. The same private panel now includes
+an expandable ZIP → Markdown section, reusing ZIP extraction/pseudonymization and
+explicit Save click. ZIP status has its own DOM ID; it cannot overwrite clipboard
+preview/status. ZIP file processing and clipboard writes remain independent. The
+extension-toolbar popup also remains available. Verify side label and both tools
+in Chrome; prior side-button/panel acceptance was not reported as complete.
+
 DS6 synchronization remains deliberate future work; feature lives on main.

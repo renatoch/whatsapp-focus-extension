@@ -71,8 +71,10 @@ também no Markdown extraído. A contagem inclui autores de citações reconheci
 se uma segunda pessoa é citada, os rótulos permanecem para evitar ambiguidade.
 Texto, horários (quando mantidos), continuações e quebras de linha são preservados.
 
-Clique em **Texto**, na mesma barra lateral de **Foco** e **Lateral**, sem precisar
-mudar de modo. O acesso **Ajustar texto copiado** no Modo foco também continua disponível. Abre uma janela compacta
+Clique em **Ajustar cópia**, na mesma barra lateral de **Foco** e **Lateral**, sem
+precisar mudar de modo. O botão foi retirado do Modo foco para não poluir o card.
+O painel reúne **Texto no clipboard** e **ZIP exportado → Markdown** (clique no
+cabeçalho para expandir a seleção do ZIP). O acesso pelo ícone da extensão continua. Abre uma janela compacta
 da própria extensão, isolada do WhatsApp, com caixas **Original** e **Resultado**
 com rolagem. Ao abrir e receber foco, lê o clipboard uma vez; se o Chrome impedir a
 leitura inicial, use **Ler clipboard novamente**. Não há monitoramento de mudanças.
@@ -101,7 +103,8 @@ O ajuste rápido pelo popup foi validado pelo usuário; o novo painel de revisã
 
 1. Recarregue a extensão em `chrome://extensions` após esta atualização.
 2. Clique no botão da extensão na barra do Chrome (fixe-o pelo menu de extensões, se necessário).
-3. Selecione o ZIP exportado em Downloads.
+3. Selecione o ZIP exportado em Downloads. Alternativamente, na barra lateral do WhatsApp,
+   clique em **Ajustar cópia** e expanda **ZIP exportado → Markdown** no painel.
 4. Clique em **Salvar Markdown**. O resultado é **`Grupo.md`**, sem nome identificável no arquivo.
 
 O título `Exportação de conversas do WhatsApp: …` vira `…: Grupo`. Autores no formato

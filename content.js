@@ -1683,7 +1683,6 @@
           <button class="mwf-button mwf-button-primary" data-mwf-action="search">Buscar conversa</button>
           <button class="mwf-button mwf-button-secondary" data-mwf-action="continue">Continuar na conversa aberta</button>
           <button class="mwf-button mwf-button-secondary" data-mwf-action="normal">Ver WhatsApp normal por 5 min</button>
-          <button class="mwf-button mwf-button-secondary" data-mwf-action="clipboard-panel">Ajustar texto copiado</button>
         </div>
         <button class="mwf-awareness-link" data-mwf-action="awareness">Ver padrão de uso</button>
         <section id="mirror-whatsapp-focus-awareness" class="mwf-awareness-panel" aria-label="Padrão de uso" hidden>
@@ -1828,9 +1827,6 @@
       if (action === "normal-now") {
         setNormalTemporarily(normalAttemptRecent ? "recent-explicit" : "immediate");
       }
-      if (action === "clipboard-panel") {
-        openClipboardPanel();
-      }
       if (action === "awareness") {
         openAwarenessSummary();
       }
@@ -1902,9 +1898,9 @@
     const button = document.createElement("button");
     button.id = CLIPBOARD_BUTTON_ID;
     button.type = "button";
-    button.textContent = "Texto";
-    button.title = "Ajustar texto copiado (clipboard)";
-    button.setAttribute("aria-label", "Ajustar texto copiado");
+    button.textContent = "Ajustar cópia";
+    button.title = "Ajustar cópia: clipboard ou ZIP exportado";
+    button.setAttribute("aria-label", "Ajustar cópia: clipboard ou ZIP exportado");
     button.addEventListener("click", openClipboardPanel);
     getControlsContainer().appendChild(button);
   }

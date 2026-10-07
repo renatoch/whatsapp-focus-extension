@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   const input = document.getElementById('archive');
-  const status = document.getElementById('status');
+  const status = document.getElementById('zip-status') || document.getElementById('status');
   const save = document.getElementById('save');
   let url = null, generation = 0;
   function clearResult() {

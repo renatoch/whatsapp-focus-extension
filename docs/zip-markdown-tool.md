@@ -46,6 +46,11 @@ formats are preserved. This is NOT comprehensive anonymization: names in message
 bodies, phones, URLs, dates, attachments and contextual identifiers remain. Popup
 warns before sharing. Invalid UTF-8 is refused; newline tokens/BOM are preserved.
 
+ZIP extraction is also available in the side Ajustar cópia review window via an
+expandable ZIP section, alongside clipboard review. It reuses existing extractor,
+pseudonymizer and save controller, with a separate zip-status element. No content
+is sent to WhatsApp DOM or background worker. Live unified-panel acceptance pending.
+
 Main receives this explicitly authorized feature; DS6 has not been synchronized
 with it yet. Reconcile independent popup files/manifest deliberately before eventual
 DS6 merge; do not drop either branch's load-order changes.

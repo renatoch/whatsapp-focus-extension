@@ -1024,6 +1024,10 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
   border: 1px solid rgba(233, 237, 239, 0.22);
 }
 
+#mirror-whatsapp-focus-clipboard {
+  min-height: 112px;
+}
+
 html.mwf-overlay-open #mirror-whatsapp-focus-controls {
   display: none !important;
 }

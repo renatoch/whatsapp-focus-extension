@@ -1,7 +1,16 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ajustar texto copiado</title><link rel="stylesheet" href="clipboard-panel.css"></head>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ajustar cópia</title><link rel="stylesheet" href="clipboard-panel.css"></head>
 <body><main>
-<h1>Ajustar texto copiado</h1>
+<h1>Ajustar cópia</h1>
+<details class="zip-tool">
+<summary>ZIP exportado → Markdown</summary>
+<p>Selecione um ZIP. O título vira Grupo; autores e citações recebem Pessoa 1, Pessoa 2… Com um único participante, os rótulos são omitidos. O resultado será Grupo.md.</p>
+<label for="archive">ZIP da conversa</label><input id="archive" type="file" accept=".zip,application/zip">
+<p id="zip-status" role="status" aria-live="polite">Processamento local. O ZIP original será mantido.</p>
+<a id="save" hidden>Salvar Markdown</a>
+<p class="note">Limites: ZIP 64 MB, Markdown 16 MB. Nomes no corpo, telefones, links e outras pistas permanecem. Revise antes de compartilhar.</p>
+</details>
+<h2>Texto no clipboard</h2>
 <p>Renato C → Eu. Demais autores e citações → Pessoa 1, Pessoa 2… Com um único participante, os rótulos são omitidos.</p>
 <p>Revise antes de compartilhar: nomes no corpo, telefones, links e outras pistas permanecem.</p>
 <div class="actions"><button id="read" type="button">Ler clipboard novamente</button><label><input id="remove-timestamps" type="checkbox"> Remover data/hora</label></div>
@@ -9,4 +18,4 @@
 <p id="status" role="status" aria-live="polite"></p>
 <div class="actions"><button id="replace" type="button" disabled>Substituir clipboard</button><button id="close" type="button">Fechar e descartar prévia</button></div>
 <p class="note">Leitura apenas ao abrir este painel ou clicar em Ler clipboard novamente. O clipboard só é alterado por Substituir clipboard. Sem envio, armazenamento ou histórico na extensão.</p>
-</main><script src="clipboard-conversation.js"></script><script src="clipboard-panel.js"></script></body></html>
+</main><script src="zip-markdown.js"></script><script src="markdown-pseudonyms.js"></script><script src="export-popup.js"></script><script src="clipboard-conversation.js"></script><script src="clipboard-panel.js"></script></body></html>
