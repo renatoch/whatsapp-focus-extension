@@ -105,9 +105,9 @@ O ajuste rápido pelo popup foi validado pelo usuário; o novo painel de revisã
 2. Clique no botão da extensão na barra do Chrome (fixe-o pelo menu de extensões, se necessário).
 3. Selecione o ZIP exportado em Downloads. Alternativamente, na barra lateral do WhatsApp,
    clique em **Ajustar cópia** e expanda **ZIP exportado → Markdown** no painel.
-4. Clique em **Salvar Markdown**. O resultado é **`Grupo.md`**, sem nome identificável no arquivo.
+4. Clique em **Salvar Markdown**. O resultado é **`chat.md`**, sem nome ou telefone do ZIP no arquivo.
 
-O título `Exportação de conversas do WhatsApp: …` vira `…: Grupo`. Autores no formato
+O título `Exportação de conversas do WhatsApp: …` vira `…: Chat`. O rótulo nativo **Você** vira **Eu**, inclusive em citações, sem consumir um número de Pessoa. Autores no formato
 `[10:09 AM] **Nome:**` e citações `> _Nome:` recebem **Pessoa 1, Pessoa 2…**, com o
 mesmo número para o mesmo rótulo. A numeração recomeça em cada export; rótulos
 realmente distintos não são unificados como se fossem a mesma pessoa.

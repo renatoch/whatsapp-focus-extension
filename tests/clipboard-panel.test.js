@@ -65,7 +65,7 @@ test('unified panel keeps ZIP and clipboard previews/status independent',async()
   await nodes.read.click();const before=nodes.status.textContent;
   nodes.archive.files=[{size:1,name:'Example.zip',arrayBuffer:async()=>new ArrayBuffer(1)}];await nodes.archive.change();
   assert.equal(nodes.result.value,'[12:00, 1/2/2026] Trecho');assert.equal(nodes.status.textContent,before);
-  assert.equal(nodes.save.download,'Grupo.md');assert.match(nodes['zip-status'].textContent,/pronto/);
+  assert.equal(nodes.save.download,'chat.md');assert.match(nodes['zip-status'].textContent,/pronto/);
   const html=fs.readFileSync(path.join(root,'clipboard-panel.html'),'utf8');
   assert.match(html,/ZIP exportado/);assert.match(html,/src="zip-markdown.js"/);assert.match(html,/src="clipboard-panel.js"/);
 });

@@ -16,13 +16,14 @@
     function person(label) {
       // Unicode spelling normalization only; case-distinct labels remain distinct.
       const key = label.trim().normalize('NFC');
+      if (key === 'Você') return 'Eu';
       if (!people.has(key)) people.set(key, `Pessoa ${people.size + 1}`);
       return people.get(key);
     }
     // Preserve original newline tokens and all content outside the supported labels.
     return lines.map((line, index) => {
       if (index % 2) return line;
-      if (index === 0) line = line.replace(/^(\ufeff?# Exportação de conversas do WhatsApp:[ \t]*)[^\r\n]+$/, '$1Grupo');
+      if (index === 0) line = line.replace(/^(\ufeff?# Exportação de conversas do WhatsApp:[ \t]*)[^\r\n]+$/, '$1Chat');
       line = line.replace(header,
         (_match, prefix, name, spacing) => `${prefix}${single ? '' : '**' + person(name) + ':**' + spacing}`);
       return line.replace(quote,

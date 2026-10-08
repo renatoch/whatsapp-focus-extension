@@ -27,9 +27,9 @@
       catch (_) { throw new Error('Não foi possível ler o Markdown em UTF-8.'); }
       const pseudonymized = MirrorMarkdownPseudonyms.pseudonymizeMarkdown(markdown);
       url = URL.createObjectURL(new Blob([pseudonymized], {type:'text/markdown;charset=utf-8'}));
-      save.href = url; save.download = 'Grupo.md';
+      save.href = url; save.download = 'chat.md';
       save.textContent = 'Salvar Markdown'; save.hidden = false;
-      status.textContent = 'Grupo.md pronto: título, autores e citações pseudonimizados. Revise o corpo das mensagens antes de compartilhar. O ZIP original será mantido.';
+      status.textContent = 'chat.md pronto: título, autores e citações pseudonimizados. Revise o corpo das mensagens antes de compartilhar. O ZIP original será mantido.';
     } catch (error) {
       if (token !== generation) return;
       status.textContent = error.message || 'Não foi possível processar o ZIP.';

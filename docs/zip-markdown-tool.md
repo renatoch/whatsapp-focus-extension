@@ -1,5 +1,14 @@
 # Explicit ZIP → Markdown tool
 
+Latest native direct-chat adjustment: timestamped **Você:** and quoted Você labels
+map to Eu, leaving other participants numbered from Pessoa 1. Single-participant
+omission still applies. Use neutral chat.md and heading Chat for all exports, since
+neither ZIP phone nor presence of Você reliably classifies group versus direct.
+This supersedes historical Grupo.md/Grupo copy below; no phone/name from ZIP is
+used for the downloaded filename. Pure extractor remains byte-preserving before
+the separate label transform. Direct-chat synthetic integration is covered;
+manual Chrome confirmation of this refinement remains pending.
+
 Navigator approved a standalone extension popup, separate from DS6: select an
 exported ZIP and extract its existing chat.md. Later Navigator requested label
 pseudonymization: group title becomes Grupo; timestamped bold author labels and
