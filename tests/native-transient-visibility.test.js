@@ -42,6 +42,19 @@ test('visible native dialogs and media viewers temporarily hide the focused shel
     assert.equal(h.classes.has('mwf-native-transient-open'), true);
   }
 });
+test('observed Status player marker suspends navigation but thumbnail alone does not', () => {
+  const player = { visible:true, testid:'status-player-contact-name' };
+  const thumbnail = { visible:true, testid:'status-image-thumbnail' };
+  const h = harness([]);
+  h.context.document.querySelectorAll = selectors => [player, thumbnail].filter(element => selectors.includes(`[data-testid="${element.testid}"]`));
+  h.context.updateFocusedNavigationShelfVisibility();
+  assert.equal(h.classes.has('mwf-native-transient-open'), true);
+  player.visible = false;
+  h.context.updateFocusedNavigationShelfVisibility();
+  assert.equal(h.classes.has('mwf-native-transient-open'), false);
+  assert.equal(h.shelf.hidden, false);
+});
+
 test('closing the native surface restores shelf visibility without changing its contents', () => {
   const nativeElements = [{ visible: true }];
   const h = harness(nativeElements);
