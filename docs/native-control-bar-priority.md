@@ -1,5 +1,25 @@
 # Native transient surfaces: side control bar
 
+## Status drawer follow-up
+
+Navigator accepted the player fix, then reported focused search/add/shelf overlapping
+Status list. Dedicated structural inspection confirmed visible `status-drawer` and
+`status-list-drawer`, without dialog/media-player markers. Add only the observed
+visible `status-drawer` surface to detection; status thumbnails alone do not suspend.
+No row text/names/media was read or clicked. Existing transient policy temporarily
+hides shelf, search, add, chooser and side controls without clearing expansion/state.
+
+A temporary class toggle in the selected live drawer verified all four present
+surfaces (search, add, recents shelf, side controls) computed display none while
+suspended, and restored prior displays after the original root state was restored.
+Tests: 151/151, syntax/diff checks passed. This is structural/CSS evidence, not
+acceptance of the reloaded script. Reload extension + tab; click Status icon (without
+opening unseen statuses), verify clean drawer, then Chats: focused surfaces return.
+Chrome manual acceptance of drawer fix remains pending. The prior player correction
+is user-accepted. DS6 synchronization is still pending deliberate reconciliation.
+
+## Earlier investigation
+
 Navigator reported Foco/Lateral/Ajustar cópia overlapping WhatsApp Status.
 Inspection found a concrete CSS omission: mwf-native-transient-open suppressed
 shelf/search/add/chooser and the individual clipboard control, but not the whole

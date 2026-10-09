@@ -427,7 +427,7 @@
   }
 
   function hasNativeTransientSurface() {
-    const selectors = '[role="dialog"][aria-modal="true"], [data-testid="media-viewer-modal"], [data-testid="status-player-contact-name"]';
+    const selectors = '[role="dialog"][aria-modal="true"], [data-testid="media-viewer-modal"], [data-testid="status-player-contact-name"], [data-testid="status-drawer"]';
     return Array.from(document.querySelectorAll(selectors))
       .some((element) => !isMirrorControl(element) && isVisibleElement(element));
   }

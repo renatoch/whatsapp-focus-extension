@@ -55,6 +55,22 @@ test('observed Status player marker suspends navigation but thumbnail alone does
   assert.equal(h.shelf.hidden, false);
 });
 
+test('visible observed Status drawer suspends actions and shelf, hidden drawer restores them', () => {
+  const drawer = { visible:true, testid:'status-drawer' };
+  const thumbnail = { visible:true, testid:'status-thumbnail' };
+  const h = harness([]);
+  h.context.document.querySelectorAll = selectors => [drawer, thumbnail].filter(element => selectors.includes(`[data-testid="${element.testid}"]`));
+  h.context.updateFocusedNavigationShelfVisibility();
+  assert.equal(h.classes.has('mwf-native-transient-open'), true);
+  assert.equal(h.shelf.hidden, true);
+  drawer.visible = false;
+  h.context.updateFocusedNavigationShelfVisibility();
+  assert.equal(h.classes.has('mwf-native-transient-open'), false);
+  assert.equal(h.shelf.hidden, false);
+  assert.equal(h.recents.hidden, false);
+  assert.equal(h.collections.hidden, false);
+});
+
 test('closing the native surface restores shelf visibility without changing its contents', () => {
   const nativeElements = [{ visible: true }];
   const h = harness(nativeElements);
