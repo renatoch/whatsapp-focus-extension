@@ -61,11 +61,19 @@ test('hidden or extension-owned modal-like elements do not suspend navigation', 
   }
 });
 test('the transient root state hides focused actions and an open collection chooser', () => {
-  for (const id of ['mirror-whatsapp-focus-search-again', 'mirror-whatsapp-focus-add-collection', 'mirror-whatsapp-focus-collection-chooser']) {
+  for (const id of ['mirror-whatsapp-focus-controls', 'mirror-whatsapp-focus-search-again', 'mirror-whatsapp-focus-add-collection', 'mirror-whatsapp-focus-collection-chooser']) {
     assert.match(css, new RegExp(`html\\.mwf-native-transient-open[^{}]*#${id}`));
   }
   assert.match(css, /html\.mwf-native-transient-open[^{}]*\.mwf-focused-navigation-floating/);
   assert.match(css, /html\.mwf-native-transient-open\.mwf-active:not\(\.mwf-overlay-open\) #mirror-whatsapp-focus-add-collection\s*\{[^}]*display:\s*none !important;/s);
+});
+
+test('native control-bar suppression wins the later cascade over ordinary visible controls', () => {
+  const hide = css.indexOf('html.mwf-native-transient-open #mirror-whatsapp-focus-controls');
+  const show = css.indexOf('html:not(.mwf-overlay-open) #mirror-whatsapp-focus-controls');
+  assert.ok(hide > show);
+  const rule = css.slice(hide, css.indexOf('}', hide) + 1);
+  assert.match(rule, /display:\s*none !important/);
 });
 
 test('the existing DOM observer refreshes transient visibility on native mutations', () => {

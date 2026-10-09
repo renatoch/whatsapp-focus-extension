@@ -1091,6 +1091,7 @@ html.mwf-opening-recent #mirror-whatsapp-focus-add-collection {
   display: none !important;
 }
 
+html.mwf-native-transient-open #mirror-whatsapp-focus-controls,
 html.mwf-native-transient-open #mirror-whatsapp-focus-clipboard,
 html.mwf-native-transient-open #mirror-whatsapp-focus-search-again,
 html.mwf-native-transient-open #mirror-whatsapp-focus-add-collection,
