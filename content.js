@@ -74,6 +74,13 @@
   const fixedCollectionRenderCache = new WeakMap();
   let pendingCollectionTitle = "";
 
+  const copyMenu = globalThis.MirrorCopyMenu.createCopyMenu({
+    document, window, clipboard: navigator.clipboard,
+    transform: globalThis.MirrorClipboardConversation.transformClipboard,
+    notify: (message) => showToast(message),
+    openReview: () => openClipboardPanel("review"), openZip: () => openClipboardPanel("zip"),
+  });
+
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
     if (details === undefined) {
@@ -1887,8 +1894,8 @@
     getControlsContainer().appendChild(button);
   }
 
-  function openClipboardPanel() {
-    chrome.runtime.sendMessage({type:"mwf-open-clipboard-panel"}, (response) => {
+  function openClipboardPanel(tool = "review") {
+    chrome.runtime.sendMessage({type:"mwf-open-clipboard-panel", tool}, (response) => {
       if (chrome.runtime.lastError || !response?.ok) showToast("Não foi possível abrir o painel de clipboard.");
     });
   }
@@ -1901,7 +1908,7 @@
     button.textContent = "Ajustar cópia";
     button.title = "Ajustar cópia: clipboard ou ZIP exportado";
     button.setAttribute("aria-label", "Ajustar cópia: clipboard ou ZIP exportado");
-    button.addEventListener("click", openClipboardPanel);
+    button.addEventListener("click", (event) => { if (event.isTrusted) copyMenu.toggle(button); });
     getControlsContainer().appendChild(button);
   }
 

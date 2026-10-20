@@ -1,5 +1,40 @@
 # Clipboard conversation labels
 
+## Current fast-path UI
+
+Navigator rejected review as mandatory friction and explicitly authorized the
+Explorer proposal: side Ajustar cópia opens a compact menu, not a window. Actions:
+Trocar nomes; Trocar nomes e tirar datas; Revisar texto…; ZIP → Markdown….
+The first two read/transform/write directly in the extension's isolated content-script
+world, only on trusted user clicks, with a bounded generic toast, no content preview,
+confirmation, content message, telemetry or persistence. Unknown format does not
+write. Read/write errors are distinguished without exposing content; concurrent
+requests are rejected. Existing granted clipboard permissions are reused. Source
+text/maps remain local operation variables, not retained for undo/history.
+
+Review remains an internal extension window; all actions are sticky above previews.
+ZIP opens its own private window without clipboard scripts. A native chooser click
+is attempted on entry, but Chrome may require clicking the visible file input;
+there is no hidden broad filesystem access. No new permission or web-accessible
+resource. Background receives only route metadata, restricted to existing WhatsApp
+content-script sender. The old toolbar popup remains as an alternative.
+
+Generated Eu/Pessoa N labels are preserved on repeat names adjustment when source
+still has recognizable author headers. Date-less or label-less unsupported text is
+refused, not treated as a new implicit format. Pseudonymization still only changes
+recognized author/quote labels, never all body identifiers.
+
+Validation: Node tests cover menu UI, trusted click gate, quick actions, no window
+on fast path, no writes on malformed/failed reads, failure/success feedback, duplicate
+submissions, disposal and routing. Chrome acceptance is pending: reload extension
+and tab; copy synthetic example; choose names then paste; repeat names+dates; verify
+review actions visible without scrolling and ZIP has no clipboard side effects.
+Builder runtime load failed with provider HTTP 429 during conversation extraction;
+no runtime lifecycle completion was claimed. Navigator's explicit Builder+implement
+authority was used for local code work only. DS6 was not resumed or modified.
+
+## Earlier design history (superseded by current fast path)
+
 Navigator supplied the exact copy format `[HH:MM, DD/MM/YYYY] Name: Text` and
 requested Renato C → Eu, distinct other labels → Pessoa N, consistent quotes, and
 an option to remove date/time. This is a separate popup action, not background
@@ -16,8 +51,8 @@ clipboard-popup.js reads only after Adjust click, disables duplicate submissions
 processes <=4 Mi characters locally, writes only after successful transform and
 reports success only after writeText resolves. Failures do not display clipboard
 content. Checkbox defaults off. No console, telemetry, storage, DOM chat access or
-network. Permission additions are clipboardRead and clipboardWrite; neither is
-used by content.js or ZIP extraction. No background polling or listeners on copy.
+network. Permission additions are clipboardRead and clipboardWrite; ZIP extraction does
+not use them. The later fast path also uses them via isolated content-script code. No background polling or listeners on copy.
 
 Privacy caveat: only author/quote labels are pseudonymized. Names/phones/links/body
 references remain. Original clipboard text is overwritten, not backed up; user can

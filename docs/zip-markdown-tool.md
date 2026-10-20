@@ -1,5 +1,11 @@
 # Explicit ZIP → Markdown tool
 
+Current entry: side Ajustar cópia menu → ZIP → Markdown… opens zip-panel.html,
+a dedicated extension page without clipboard code. Native file chooser is attempted
+on entry; visible input is the fallback if Chrome blocks it. Export logic, limits,
+neutral chat.md name and original ZIP preservation are unchanged. Review clipboard
+is a separate route, with no mandatory review screen on quick clipboard actions.
+
 Latest native direct-chat adjustment: timestamped **Você:** and quoted Você labels
 map to Eu, leaving other participants numbered from Pessoa 1. Single-participant
 omission still applies. Use neutral chat.md and heading Chat for all exports, since

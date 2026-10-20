@@ -1,6 +1,10 @@
 body { margin: 0; background: #f5f8f6; color: #182922; font: 15px/1.5 system-ui,sans-serif; }
 main { max-width: 1100px; padding: 24px; margin: auto; }
 h1 { font-size: 24px; }
+.review-toolbar { position: sticky; top: 0; z-index: 1; padding: 8px 0; background: #f5f8f6; border-bottom: 1px solid #9cafa4; }
+.review-toolbar h1 { margin: 0; }
+.review-toolbar .actions { margin: 8px 0; }
+.review-toolbar p { margin: 4px 0; }
 .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin: 16px 0; }
 button { padding: 10px 16px; border: 0; border-radius: 6px; color: white; background: #175d43; cursor: pointer; }
 button:disabled { opacity: .5; cursor: default; }

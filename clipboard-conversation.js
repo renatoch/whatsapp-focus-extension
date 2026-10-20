@@ -14,10 +14,16 @@
       if (cited) participants.add(cited[2].trim().normalize('NFC'));
     });
     const single = participants.size === 1;
+    const reserved = new Set([...participants].filter(label => /^Pessoa [1-9]\d*$/.test(label)));
+    let nextPerson = 1;
     function person(label) {
       const key = label.trim().normalize('NFC');
-      if (key === 'Renato C') return 'Eu';
-      if (!people.has(key)) people.set(key, `Pessoa ${people.size + 1}`);
+      if (key === 'Renato C' || key === 'Eu') return 'Eu';
+      if (reserved.has(key)) return key;
+      if (!people.has(key)) {
+        while (reserved.has(`Pessoa ${nextPerson}`)) nextPerson++;
+        people.set(key, `Pessoa ${nextPerson++}`);
+      }
       return people.get(key);
     }
     const result = lines.map((line, index) => {

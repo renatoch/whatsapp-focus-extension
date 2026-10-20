@@ -14,6 +14,8 @@ test('loads fixed collections before the content integration', () => {
     'focus-state.js',
     'focused-recents.js',
     'fixed-collections.js',
+    'clipboard-conversation.js',
+    'copy-menu.js',
     'content.js',
   ]);
 });

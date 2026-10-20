@@ -1028,6 +1028,35 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
   min-height: 112px;
 }
 
+#mirror-whatsapp-focus-copy-menu {
+  position: fixed;
+  z-index: 2147483647;
+  display: flex;
+  flex-direction: column;
+  width: min(264px, calc(100vw - 16px));
+  padding: 6px;
+  box-sizing: border-box;
+  border: 1px solid #526259;
+  border-radius: 10px;
+  background: #111b21;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, .3);
+}
+#mirror-whatsapp-focus-copy-menu button {
+  border: 0;
+  padding: 12px;
+  text-align: left;
+  border-radius: 6px;
+  background: transparent;
+  color: #e9edef;
+  font: 14px system-ui, sans-serif;
+  cursor: pointer;
+}
+#mirror-whatsapp-focus-copy-menu button:hover,
+#mirror-whatsapp-focus-copy-menu button:focus-visible { background: #28353d; }
+#mirror-whatsapp-focus-copy-menu button:nth-child(3) { border-top: 1px solid #526259; }
+html.mwf-overlay-open #mirror-whatsapp-focus-copy-menu,
+html.mwf-native-transient-open #mirror-whatsapp-focus-copy-menu { display: none !important; }
+
 html.mwf-overlay-open #mirror-whatsapp-focus-controls {
   display: none !important;
 }

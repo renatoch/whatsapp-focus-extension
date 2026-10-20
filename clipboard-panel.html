@@ -1,21 +1,10 @@
 <!doctype html>
-<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Ajustar cópia</title><link rel="stylesheet" href="clipboard-panel.css"></head>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Revisar texto copiado</title><link rel="stylesheet" href="clipboard-panel.css"></head>
 <body><main>
-<h1>Ajustar cópia</h1>
-<details class="zip-tool">
-<summary>ZIP exportado → Markdown</summary>
-<p>Selecione um ZIP. O título vira Chat; Você vira Eu; outros autores e citações recebem Pessoa 1, Pessoa 2… Com um único participante, os rótulos são omitidos. O resultado será chat.md, sem nome ou telefone do ZIP.</p>
-<label for="archive">ZIP da conversa</label><input id="archive" type="file" accept=".zip,application/zip">
-<p id="zip-status" role="status" aria-live="polite">Processamento local. O ZIP original será mantido.</p>
-<a id="save" hidden>Salvar Markdown</a>
-<p class="note">Limites: ZIP 64 MB, Markdown 16 MB. Nomes no corpo, telefones, links e outras pistas permanecem. Revise antes de compartilhar.</p>
-</details>
-<h2>Texto no clipboard</h2>
-<p>Renato C → Eu. Demais autores e citações → Pessoa 1, Pessoa 2… Com um único participante, os rótulos são omitidos.</p>
-<p>Revise antes de compartilhar: nomes no corpo, telefones, links e outras pistas permanecem.</p>
-<div class="actions"><button id="read" type="button">Ler clipboard novamente</button><label><input id="remove-timestamps" type="checkbox"> Remover data/hora</label></div>
-<div class="previews"><label>Original<textarea id="original" readonly spellcheck="false" placeholder="O trecho copiado aparecerá aqui."></textarea></label><label>Resultado<textarea id="result" readonly spellcheck="false" placeholder="Confira o texto antes de substituir o clipboard."></textarea></label></div>
-<p id="status" role="status" aria-live="polite"></p>
-<div class="actions"><button id="replace" type="button" disabled>Substituir clipboard</button><button id="close" type="button">Fechar e descartar prévia</button></div>
-<p class="note">Leitura apenas ao abrir este painel ou clicar em Ler clipboard novamente. O clipboard só é alterado por Substituir clipboard. Sem envio, armazenamento ou histórico na extensão.</p>
-</main><script src="zip-markdown.js"></script><script src="markdown-pseudonyms.js"></script><script src="export-popup.js"></script><script src="clipboard-conversation.js"></script><script src="clipboard-panel.js"></script></body></html>
+<header class="review-toolbar"><h1>Revisar texto copiado</h1>
+<div class="actions"><button id="read" type="button">Ler clipboard novamente</button><label><input id="remove-timestamps" type="checkbox"> Remover data/hora</label><button id="replace" type="button" disabled>Substituir clipboard</button><button id="close" type="button">Fechar e descartar prévia</button></div>
+<p id="status" role="status" aria-live="polite"></p></header>
+<p>Renato C → Eu. Demais autores e citações → Pessoa N. Um único participante: sem rótulo.</p>
+<div class="previews"><label>Original<textarea id="original" readonly spellcheck="false" placeholder="O trecho copiado aparecerá aqui."></textarea></label><label>Resultado<textarea id="result" readonly spellcheck="false" placeholder="Confira antes de substituir o clipboard."></textarea></label></div>
+<p class="note">Nomes no corpo, telefones, links e outras pistas permanecem. Leitura apenas ao abrir ou clicar em Ler novamente; gravação somente por Substituir clipboard. Sem envio, armazenamento ou histórico.</p>
+</main><script src="clipboard-conversation.js"></script><script src="clipboard-panel.js"></script></body></html>

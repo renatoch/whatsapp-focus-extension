@@ -71,17 +71,24 @@ também no Markdown extraído. A contagem inclui autores de citações reconheci
 se uma segunda pessoa é citada, os rótulos permanecem para evitar ambiguidade.
 Texto, horários (quando mantidos), continuações e quebras de linha são preservados.
 
-Clique em **Ajustar cópia**, na mesma barra lateral de **Foco** e **Lateral**, sem
-precisar mudar de modo. O botão foi retirado do Modo foco para não poluir o card.
-O painel reúne **Texto no clipboard** e **ZIP exportado → Markdown** (clique no
-cabeçalho para expandir a seleção do ZIP). O acesso pelo ícone da extensão continua. Abre uma janela compacta
-da própria extensão, isolada do WhatsApp, com caixas **Original** e **Resultado**
-com rolagem. Ao abrir e receber foco, lê o clipboard uma vez; se o Chrome impedir a
-leitura inicial, use **Ler clipboard novamente**. Não há monitoramento de mudanças.
-A opção **Remover data/hora** atualiza a prévia. Somente **Substituir clipboard**
-aplica o resultado; **Fechar e descartar prévia** remove os textos da janela.
-Nada é colocado no DOM do WhatsApp ou enviado ao script de fundo. A validação manual
-deste painel está pendente. Recarregue extensão e aba para ver o novo botão.
+Clique em **Ajustar cópia**, junto de **Foco** e **Lateral**. Abre um menu compacto:
+
+- **Trocar nomes**: substitui imediatamente o clipboard, mantendo datas.
+- **Trocar nomes e tirar datas**: substitui imediatamente, removendo timestamps dos cabeçalhos.
+- **Revisar texto…**: abre a prévia Original/Resultado em janela isolada; controles no topo, fixos durante rolagem.
+- **ZIP → Markdown…**: abre uma tela exclusiva de arquivo, sem ler o clipboard.
+
+As duas ações rápidas não abrem janela nem exigem confirmação adicional. Um aviso
+curto confirma o resultado sem mostrar conteúdo. Formato desconhecido mantém o
+clipboard. Cliques sintéticos da página são ignorados. O texto é processado no mundo
+isolado da extensão e não é renderizado no DOM do WhatsApp nem enviado ao background.
+Não há monitoramento, histórico ou persistência de texto.
+
+Na revisão, a opção de data/hora atualiza só a prévia; **Substituir clipboard** aplica
+o resultado. Fechar descarta os textos. ZIP tenta abrir o seletor ao entrar; se o
+Chrome bloquear abertura automática, clique em Selecionar ZIP. O botão foi retirado
+do Modo foco. O acesso pelo ícone da extensão continua disponível.
+Recarregue extensão e aba; validação manual deste novo menu ainda está pendente.
 
 O acesso rápido anterior pelo popup continua disponível:
 
@@ -104,7 +111,7 @@ O ajuste rápido pelo popup foi validado pelo usuário; o novo painel de revisã
 1. Recarregue a extensão em `chrome://extensions` após esta atualização.
 2. Clique no botão da extensão na barra do Chrome (fixe-o pelo menu de extensões, se necessário).
 3. Selecione o ZIP exportado em Downloads. Alternativamente, na barra lateral do WhatsApp,
-   clique em **Ajustar cópia** e expanda **ZIP exportado → Markdown** no painel.
+   clique em **Ajustar cópia → ZIP → Markdown…**.
 4. Clique em **Salvar Markdown**. O resultado é **`chat.md`**, sem nome ou telefone do ZIP no arquivo.
 
 O título `Exportação de conversas do WhatsApp: …` vira `…: Chat`. O rótulo nativo **Você** vira **Eu**, inclusive em citações, sem consumir um número de Pessoa. Autores no formato

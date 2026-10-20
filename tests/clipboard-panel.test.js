@@ -37,17 +37,22 @@ test('background accepts only same-extension WhatsApp tab and sends no content t
   assert.equal(opened.length,0);let response;
   listener({type:'mwf-open-clipboard-panel'},{tab:{},id:'extension',url:'https://web.whatsapp.com/'},value=>response=value);
   assert.equal(opened.length,1);assert.equal(response.ok,true);assert.equal(opened[0].url,'chrome-extension://extension/clipboard-panel.html');
+  listener({type:'mwf-open-clipboard-panel',tool:'zip'},{tab:{},id:'extension',url:'https://web.whatsapp.com/'},()=>{});
+  assert.equal(opened[1].url,'chrome-extension://extension/zip-panel.html');
 });
 test('side Ajustar cópia control is idempotent, does not change mode and opens the same isolated panel',()=>{
   const source=fs.readFileSync(path.join(__dirname,'../content.js'),'utf8');
   function extract(name){const start=source.indexOf(`  function ${name}(`);return source.slice(start,source.indexOf('\n  function ',start+1));}
   const elements=new Map(),requests=[];
   const context=vm.createContext({CLIPBOARD_BUTTON_ID:'text',document:{body:{},getElementById:id=>elements.get(id),createElement:()=>({setAttribute(){},addEventListener(type,fn){this[type]=fn;}})},
+    copyMenu:{toggle:()=>requests.push('menu')},
     getControlsContainer:()=>({appendChild:node=>elements.set(node.id,node)}),showToast:()=>{throw Error('Unexpected failure');},
     chrome:{runtime:{sendMessage:(message,cb)=>{requests.push(message.type);cb({ok:true});}}}});
   vm.runInContext(extract('openClipboardPanel')+'\n'+extract('ensureClipboardButton')+'\nensureClipboardButton();ensureClipboardButton();',context);
-  assert.equal(elements.size,1);assert.equal(elements.get('text').textContent,'Ajustar cópia');elements.get('text').click();
-  assert.deepEqual(requests,['mwf-open-clipboard-panel']);
+  assert.equal(elements.size,1);assert.equal(elements.get('text').textContent,'Ajustar cópia');elements.get('text').click({isTrusted:false});assert.deepEqual(requests,[]);
+  elements.get('text').click({isTrusted:true});assert.deepEqual(requests,['menu']);
+  vm.runInContext('openClipboardPanel("review")',context);
+  assert.deepEqual(requests,['menu','mwf-open-clipboard-panel']);
   const css=fs.readFileSync(path.join(__dirname,'../focus.css'),'utf8');assert.match(css,/html\.mwf-native-transient-open #mirror-whatsapp-focus-clipboard/);
   const controls=extract('ensureControls');assert.match(controls,/ensureClipboardButton\(\)/);
 });
@@ -66,11 +71,14 @@ test('unified panel keeps ZIP and clipboard previews/status independent',async()
   nodes.archive.files=[{size:1,name:'Example.zip',arrayBuffer:async()=>new ArrayBuffer(1)}];await nodes.archive.change();
   assert.equal(nodes.result.value,'[12:00, 1/2/2026] Trecho');assert.equal(nodes.status.textContent,before);
   assert.equal(nodes.save.download,'chat.md');assert.match(nodes['zip-status'].textContent,/pronto/);
-  const html=fs.readFileSync(path.join(root,'clipboard-panel.html'),'utf8');
-  assert.match(html,/ZIP exportado/);assert.match(html,/src="zip-markdown.js"/);assert.match(html,/src="clipboard-panel.js"/);
+  const html=fs.readFileSync(path.join(root,'zip-panel.html'),'utf8');
+  assert.match(html,/ZIP exportado/);assert.match(html,/src="zip-markdown.js"/);assert.doesNotMatch(html,/src="clipboard-panel.js"/);
+  const review=fs.readFileSync(path.join(root,'clipboard-panel.html'),'utf8');assert.match(review,/review-toolbar/);assert.doesNotMatch(review,/id="archive"/);
+  assert.ok(review.indexOf('id="replace"') < review.indexOf('class="previews"'));
+  const css=fs.readFileSync(path.join(root,'clipboard-panel.css'),'utf8');assert.match(css,/\.review-toolbar\s*\{[^}]*position: sticky/);
 });
 test('panel is private, focus-overlay action is removed and side button sends only action metadata',()=>{
   const root=path.join(__dirname,'..'),manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json')));
   assert.equal(manifest.background.service_worker,'background.js');assert.equal(manifest.web_accessible_resources.some(rule=>rule.resources.includes('clipboard-panel.html')),false);
-  const source=fs.readFileSync(path.join(root,'content.js'),'utf8');assert.doesNotMatch(source,/data-mwf-action="clipboard-panel"/);assert.match(source,/sendMessage\(\{type:"mwf-open-clipboard-panel"\}/);
+  const source=fs.readFileSync(path.join(root,'content.js'),'utf8');assert.doesNotMatch(source,/data-mwf-action="clipboard-panel"/);assert.match(source,/sendMessage\(\{type:"mwf-open-clipboard-panel", tool\}/);
 });

@@ -9,7 +9,7 @@
   "content_scripts": [
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "js": ["awareness.js", "focus-state.js", "focused-recents.js", "fixed-collections.js", "content.js"],
+      "js": ["awareness.js", "focus-state.js", "focused-recents.js", "fixed-collections.js", "clipboard-conversation.js", "copy-menu.js", "content.js"],
       "css": ["focus.css"],
       "run_at": "document_start"
     }

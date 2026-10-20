@@ -1,0 +1,8 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>ZIP → Markdown</title><link rel="stylesheet" href="clipboard-panel.css"></head>
+<body><main><h1>ZIP → Markdown</h1>
+<label for="archive">Selecionar ZIP exportado</label><input id="archive" type="file" accept=".zip,application/zip" autofocus>
+<p id="zip-status" role="status" aria-live="polite">Selecione um ZIP. O original será mantido.</p><a id="save" hidden>Salvar Markdown</a>
+<p>Resultado: chat.md. Título → Chat, Você → Eu; outros autores e citações → Pessoa N. Com um único participante, os rótulos são omitidos.</p>
+<p class="note">Processamento local. Nomes no corpo, telefones e links permanecem; revise antes de compartilhar. Limites: ZIP 64 MB, Markdown 16 MB. Nenhum acesso ao clipboard nesta tela.</p>
+</main><script src="zip-markdown.js"></script><script src="markdown-pseudonyms.js"></script><script src="export-popup.js"></script><script src="zip-panel.js"></script></body></html>

@@ -2,7 +2,7 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message?.type !== 'mwf-open-clipboard-panel' || !sender.tab ||
       sender.id !== chrome.runtime.id || !sender.url?.startsWith('https://web.whatsapp.com/')) return;
-  chrome.windows.create({url:chrome.runtime.getURL('clipboard-panel.html'), type:'popup', width:1000, height:720, focused:true}, () => {
+  chrome.windows.create({url:chrome.runtime.getURL(message.tool === 'zip' ? 'zip-panel.html' : 'clipboard-panel.html'), type:'popup', width:1000, height:720, focused:true}, () => {
     sendResponse({ok:!chrome.runtime.lastError});
   });
   return true;
