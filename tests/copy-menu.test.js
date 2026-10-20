@@ -10,7 +10,12 @@ function harness({read,write}={}) {
     addEventListener:(event,fn)=>listeners[event]=fn,removeEventListener:event=>delete listeners[event]};
   const clipboard={readText:async()=>{reads++;return read?await read():'[12:00, 1/2/2026] Renato C: Um\n[12:01, 1/2/2026] Amiga: Dois';},
     writeText:async text=>{if(write)await write(text);writes.push(text);}};
-  const api=createCopyMenu({document,window:{innerWidth:1200,innerHeight:800},clipboard,transform:transformClipboard,
+  const runQuick=async removeTimestamps=>{
+    let text;try{text=await clipboard.readText();}catch(_){return {ok:false,error:'read'};}
+    let result;try{result=transformClipboard(text,{removeTimestamps});}catch(_){return {ok:false,error:'format'};}
+    try{await clipboard.writeText(result);return {ok:true};}catch(_){return {ok:false,error:'write'};}
+  };
+  const api=createCopyMenu({document,window:{innerWidth:1200,innerHeight:800},runQuick,
     notify:message=>notifications.push(message),openReview:()=>routes.push('review'),openZip:()=>routes.push('zip')});
   const anchor={getBoundingClientRect:()=>({right:56,top:300}),contains:target=>target===anchor};
   return {api,anchor,nodes,listeners,notifications,writes,routes,reads:()=>reads,menu:()=>menu};
@@ -47,9 +52,9 @@ test('Escape, outside click and repeat toggle close menu and remove listeners',(
   h.listeners.keydown({key:'Escape',preventDefault(){}});assert.equal(h.menu(),null);
   h.api.toggle(h.anchor);h.listeners.pointerdown({target:{}});assert.equal(h.menu(),null);assert.deepEqual(Object.keys(h.listeners),[]);
 });
-test('dispose invalidates pending read before write',async()=>{
+test('dispose suppresses late notifications but does not undo an already-dispatched operation',async()=>{
   let resolve;const h=harness({read:()=>new Promise(done=>resolve=done)});const pending=h.api.adjust(false);
-  h.api.dispose();resolve('[12:00, 1/2/2026] Renato C: Private');await pending;assert.deepEqual(h.writes,[]);assert.deepEqual(h.notifications,[]);
+  h.api.dispose();resolve('[12:00, 1/2/2026] Renato C: Private');await pending;assert.equal(h.writes.length,1);assert.deepEqual(h.notifications,[]);
 });
 test('already numbered labels do not drift on repeated adjustment while dates remain',()=>{
   const source='[12:00, 1/2/2026] Renato C: Um\n[12:01, 1/2/2026] Amiga: Dois';

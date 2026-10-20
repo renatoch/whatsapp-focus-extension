@@ -80,15 +80,19 @@ Clique em **Ajustar cópia**, junto de **Foco** e **Lateral**. Abre um menu comp
 
 As duas ações rápidas não abrem janela nem exigem confirmação adicional. Um aviso
 curto confirma o resultado sem mostrar conteúdo. Formato desconhecido mantém o
-clipboard. Cliques sintéticos da página são ignorados. O texto é processado no mundo
-isolado da extensão e não é renderizado no DOM do WhatsApp nem enviado ao background.
+clipboard. Cliques sintéticos da página são ignorados. O texto é processado numa página interna invisível (`offscreen`) da extensão,
+não no contexto do WhatsApp. O menu e o worker trocam apenas ação e resultado;
+o texto não é renderizado no DOM do WhatsApp nem enviado ao background.
 Não há monitoramento, histórico ou persistência de texto.
 
 Na revisão, a opção de data/hora atualiza só a prévia; **Substituir clipboard** aplica
 o resultado. Fechar descarta os textos. ZIP tenta abrir o seletor ao entrar; se o
 Chrome bloquear abertura automática, clique em Selecionar ZIP. O botão foi retirado
 do Modo foco. O acesso pelo ícone da extensão continua disponível.
-Recarregue extensão e aba; validação manual deste novo menu ainda está pendente.
+Recarregue extensão e aba (a atualização adiciona a permissão técnica `offscreen`).
+O caminho rápido anterior falhou no Chrome do usuário ao ler do contexto da página;
+a correção offscreen ainda precisa de teste manual. O acesso por Revisar texto
+já funcionava e foi preservado.
 
 O acesso rápido anterior pelo popup continua disponível:
 
@@ -99,7 +103,8 @@ Marque **Remover data/hora** se quiser retirar os timestamps dos cabeçalhos de
 mensagem (desmarcado por padrão). Continuações e quebras de linha são mantidas.
 
 O clipboard é lido e substituído **somente nesse clique**, usando as permissões
-`clipboardRead`/`clipboardWrite`. Não há monitoramento, histórico, envio ou
+`clipboardRead`/`clipboardWrite`. O caminho rápido também usa `offscreen` para
+operar numa página interna, sem abrir janela. Não há monitoramento, histórico, envio ou
 armazenamento de texto/mapa de nomes. Texto sem cabeçalhos reconhecidos é recusado.
 O original no clipboard será substituído: copie novamente da origem se precisar.
 Nomes no corpo, telefones, links e datas mencionadas nas mensagens permanecem;

@@ -5,18 +5,31 @@
 Navigator rejected review as mandatory friction and explicitly authorized the
 Explorer proposal: side Ajustar cópia opens a compact menu, not a window. Actions:
 Trocar nomes; Trocar nomes e tirar datas; Revisar texto…; ZIP → Markdown….
-The first two read/transform/write directly in the extension's isolated content-script
-world, only on trusted user clicks, with a bounded generic toast, no content preview,
-confirmation, content message, telemetry or persistence. Unknown format does not
-write. Read/write errors are distinguished without exposing content; concurrent
-requests are rejected. Existing granted clipboard permissions are reused. Source
-text/maps remain local operation variables, not retained for undo/history.
+The first two now dispatch action metadata to the background worker, which creates
+an internal offscreen document (CLIPBOARD reason) for read/transform/write. Only
+trusted clicks dispatch; no content preview, confirmation, text message, telemetry
+or persistence. Unknown format does not write. User reported the previous direct
+content-script read failed while extension-window review worked; exact browser
+exception was not collected. This change removes dependency on page clipboard
+policy/focus rather than claiming a specific exception was proven.
+
+New explicit offscreen permission accompanies existing clipboardRead/Write. The
+invisible document uses execCommand paste/copy in its own textarea: Async Clipboard
+focus requirements are unsuitable for an offscreen document. Field is wiped/removed
+in finally; background attempts closeDocument after every owned operation. If close
+fails, the remaining empty internal document does not poll/read anything. Clipboard
+payload/maps never traverse runtime messages or worker; only action and bounded
+success/error enums do. Worker validates same-extension WhatsApp tab senders,
+serializes requests across tabs, and checks ownership before reusing/closing an
+existing document. Offscreen receiver rejects tab senders; no page-accessible
+resources. Permission/focus/platform restrictions remain a manual Chrome check.
+Errors distinguish read, format, oversize, write, busy and internal unavailable.
 
 Review remains an internal extension window; all actions are sticky above previews.
 ZIP opens its own private window without clipboard scripts. A native chooser click
 is attempted on entry, but Chrome may require clicking the visible file input;
-there is no hidden broad filesystem access. No new permission or web-accessible
-resource. Background receives only route metadata, restricted to existing WhatsApp
+there is no hidden broad filesystem access. No additional web-accessible resource; the offscreen correction adds the named
+permission described above. Background receives only route metadata, restricted to existing WhatsApp
 content-script sender. The old toolbar popup remains as an alternative.
 
 Generated Eu/Pessoa N labels are preserved on repeat names adjustment when source
@@ -24,7 +37,14 @@ still has recognizable author headers. Date-less or label-less unsupported text 
 refused, not treated as a new implicit format. Pseudonymization still only changes
 recognized author/quote labels, never all body identifiers.
 
-Validation: Node tests cover menu UI, trusted click gate, quick actions, no window
+Validation: offscreen integration tests cover action/result-only routing,
+temporary-field wipe, document closure, ownership, concurrent requests, denied paste,
+failed copy, invalid format, oversize and document-creation failures. No real clipboard
+or private content is used by tests. User must reload extension/tab and test both
+fast paths; if Chrome asks, approve the new offscreen permission. Review stays
+unchanged. Native execCommand behavior has not been live-validated by these mocks.
+
+Menu tests cover trusted click gate, quick actions, no window
 on fast path, no writes on malformed/failed reads, failure/success feedback, duplicate
 submissions, disposal and routing. Chrome acceptance is pending: reload extension
 and tab; copy synthetic example; choose names then paste; repeat names+dates; verify

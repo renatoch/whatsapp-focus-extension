@@ -23,7 +23,6 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'focus-state.js',
     'focused-recents.js',
     'fixed-collections.js',
-    'clipboard-conversation.js',
     'copy-menu.js',
     'content.js',
   ]);

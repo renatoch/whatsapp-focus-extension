@@ -43,5 +43,5 @@ test('invalid UTF-8 is refused rather than silently corrupting text',async()=>{
 });
 test('manifest exposes popup with clipboard but no downloads or filesystem permission',()=>{
   const manifest=JSON.parse(fs.readFileSync(path.join(__dirname,'../manifest.json'),'utf8'));
-  assert.equal(manifest.action.default_popup,'export-popup.html');assert.deepEqual(manifest.permissions,['storage','clipboardRead','clipboardWrite']);
+  assert.equal(manifest.action.default_popup,'export-popup.html');assert.deepEqual(manifest.permissions,['storage','clipboardRead','clipboardWrite','offscreen']);
 });

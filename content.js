@@ -75,8 +75,12 @@
   let pendingCollectionTitle = "";
 
   const copyMenu = globalThis.MirrorCopyMenu.createCopyMenu({
-    document, window, clipboard: navigator.clipboard,
-    transform: globalThis.MirrorClipboardConversation.transformClipboard,
+    document, window,
+    runQuick: (removeTimestamps) => new Promise((resolve) => {
+      chrome.runtime.sendMessage({type:"mwf-quick-copy", removeTimestamps}, (response) => {
+        resolve(chrome.runtime.lastError ? {ok:false,error:"unavailable"} : response);
+      });
+    }),
     notify: (message) => showToast(message),
     openReview: () => openClipboardPanel("review"), openZip: () => openClipboardPanel("zip"),
   });

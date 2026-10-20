@@ -1,6 +1,6 @@
 (function exposeCopyMenu(scope) {
   'use strict';
-  function createCopyMenu({document, window, clipboard, transform, notify, openReview, openZip}) {
+  function createCopyMenu({document, window, runQuick, notify, openReview, openZip}) {
     let menu = null, trigger = null, busy = false, running = true;
     function close() {
       if (!menu) return;
@@ -13,20 +13,23 @@
     async function adjust(removeTimestamps) {
       if (!running || busy) return;
       busy = true; close();
-      let writing = false;
       try {
-        const text = await clipboard.readText();
+        const result = await runQuick(removeTimestamps);
         if (!running) return;
-        if (text.length > 4 * 1024 * 1024) throw Error('limit');
-        let result;
-        try { result = transform(text, {removeTimestamps}); }
-        catch (_) { notify('Formato não reconhecido; clipboard mantido.'); return; }
-        if (!running) return;
-        writing = true;
-        await clipboard.writeText(result);
-        if (running) notify(removeTimestamps ? 'Clipboard ajustado — sem datas.' : 'Clipboard ajustado — datas mantidas.');
+        if (result?.ok) {
+          notify(removeTimestamps ? 'Clipboard ajustado — sem datas.' : 'Clipboard ajustado — datas mantidas.');
+        } else {
+          const messages = {
+            format:'Formato não reconhecido; clipboard mantido.',
+            read:'Não foi possível ler o clipboard. Use Revisar texto.',
+            write:'Não foi possível atualizar o clipboard. Use Revisar texto.',
+            large:'Trecho maior que 4 Mi caracteres; clipboard mantido.',
+            busy:'Outro ajuste está em andamento. Tente novamente.',
+          };
+          notify(messages[result?.error] || 'Processamento interno indisponível. Recarregue a extensão ou use Revisar texto.');
+        }
       } catch (_) {
-        if (running) notify(writing ? 'Não foi possível atualizar o clipboard. Use Revisar texto.' : 'Não foi possível ler o clipboard (permissão ou tamanho). Use Revisar texto.');
+        if (running) notify('Processamento interno indisponível. Recarregue a extensão ou use Revisar texto.');
       } finally { busy = false; }
     }
     function toggle(anchor) {
