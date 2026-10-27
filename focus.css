@@ -1053,7 +1053,7 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 }
 #mirror-whatsapp-focus-copy-menu button:hover,
 #mirror-whatsapp-focus-copy-menu button:focus-visible { background: #28353d; }
-#mirror-whatsapp-focus-copy-menu button:nth-child(3) { border-top: 1px solid #526259; }
+#mirror-whatsapp-focus-copy-menu button:nth-child(4) { border-top: 1px solid #526259; }
 html.mwf-overlay-open #mirror-whatsapp-focus-copy-menu,
 html.mwf-native-transient-open #mirror-whatsapp-focus-copy-menu { display: none !important; }
 

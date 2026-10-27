@@ -10,9 +10,9 @@ function harness({read,write}={}) {
     addEventListener:(event,fn)=>listeners[event]=fn,removeEventListener:event=>delete listeners[event]};
   const clipboard={readText:async()=>{reads++;return read?await read():'[12:00, 1/2/2026] Renato C: Um\n[12:01, 1/2/2026] Amiga: Dois';},
     writeText:async text=>{if(write)await write(text);writes.push(text);}};
-  const runQuick=async removeTimestamps=>{
+  const runQuick=async (removeTimestamps,removeNames=true)=>{
     let text;try{text=await clipboard.readText();}catch(_){return {ok:false,error:'read'};}
-    let result;try{result=transformClipboard(text,{removeTimestamps});}catch(_){return {ok:false,error:'format'};}
+    let result;try{result=transformClipboard(text,{removeTimestamps,removeNames});}catch(_){return {ok:false,error:'format'};}
     try{await clipboard.writeText(result);return {ok:true};}catch(_){return {ok:false,error:'write'};}
   };
   const api=createCopyMenu({document,window:{innerWidth:1200,innerHeight:800},runQuick,
@@ -20,9 +20,9 @@ function harness({read,write}={}) {
   const anchor={getBoundingClientRect:()=>({right:56,top:300}),contains:target=>target===anchor};
   return {api,anchor,nodes,listeners,notifications,writes,routes,reads:()=>reads,menu:()=>menu};
 }
-test('menu shows four actions without clipboard access; quick names action writes without opening review',async()=>{
+test('menu shows five actions without clipboard access; quick names action writes without opening review',async()=>{
   const h=harness();h.api.toggle(h.anchor);assert.equal(h.reads(),0);
-  assert.deepEqual(h.menu().children.map(b=>b.textContent),['Trocar nomes','Trocar nomes e tirar datas','Revisar texto…','ZIP → Markdown…']);
+  assert.deepEqual(h.menu().children.map(b=>b.textContent),['Trocar nomes','Trocar nomes e tirar datas','Tirar datas','Revisar texto…','ZIP → Markdown…']);
   await h.menu().children[0].click({isTrusted:true});assert.equal(h.menu(),null);
   assert.deepEqual(h.writes,['[12:00, 1/2/2026] Eu: Um\n[12:01, 1/2/2026] Pessoa 1: Dois']);
   assert.deepEqual(h.routes,[]);assert.match(h.notifications[0],/datas mantidas/);assert.deepEqual(Object.keys(h.listeners),[]);
@@ -32,8 +32,13 @@ test('remove dates quick action is separate and requires trusted click',async()=
   await action.click({isTrusted:false});assert.equal(h.reads(),0);
   await action.click({isTrusted:true});assert.deepEqual(h.writes,['Eu: Um\nPessoa 1: Dois']);
 });
+test('dates-only menu action preserves names, including self, and confirms that behavior',async()=>{
+  const h=harness();h.api.toggle(h.anchor);await h.menu().children[2].click({isTrusted:true});
+  assert.deepEqual(h.writes,['Renato C: Um\nAmiga: Dois']);assert.deepEqual(h.routes,[]);
+  assert.match(h.notifications[0],/nomes mantidos/);
+});
 test('review and ZIP routes do not read or write clipboard',async()=>{
-  const h=harness();for(const index of [2,3]){h.api.toggle(h.anchor);await h.menu().children[index].click({isTrusted:true});}
+  const h=harness();for(const index of [3,4]){h.api.toggle(h.anchor);await h.menu().children[index].click({isTrusted:true});}
   assert.deepEqual(h.routes,['review','zip']);assert.equal(h.reads(),0);assert.deepEqual(h.writes,[]);
 });
 test('unsupported format and read failure leave clipboard untouched and reveal no content',async()=>{

@@ -1,6 +1,15 @@
 (function exposeClipboardConversation(scope) {
   'use strict';
-  function transformClipboard(text, {removeTimestamps = false} = {}) {
+  function transformClipboard(text, {removeTimestamps = false, removeNames = true} = {}) {
+    if (!removeNames) {
+      if (!removeTimestamps) return text;
+      let count = 0;
+      const result = text.split(/(\r\n|\n|\r)/).map((line, index) => index % 2 ? line :
+        line.replace(/^(\ufeff?)\[\d{1,2}:\d{2}(?::\d{2})?,[ \t]*\d{1,2}\/\d{1,2}\/\d{2,4}\][ \t]*/,
+          (_match, bom) => { count++; return bom; })).join('');
+      if (!count) throw new Error('Não encontrei cabeçalhos com data/hora. O clipboard não foi alterado.');
+      return result;
+    }
     const people = new Map(); let authors = 0;
     const header = /^(\ufeff?)(\[\d{1,2}:\d{2}(?::\d{2})?,[ \t]*\d{1,2}\/\d{1,2}\/\d{2,4}\][ \t]+)([^:\r\n]+):([ \t]*)/;
     const quote = /^([ \t]*>[ \t]*_?)([^:\r\n]+):([ \t]*)/;

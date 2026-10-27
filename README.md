@@ -75,10 +75,11 @@ Clique em **Ajustar cópia**, junto de **Foco** e **Lateral**. Abre um menu comp
 
 - **Trocar nomes**: substitui imediatamente o clipboard, mantendo datas.
 - **Trocar nomes e tirar datas**: substitui imediatamente, removendo timestamps dos cabeçalhos.
+- **Tirar datas**: remove somente os timestamps dos cabeçalhos; preserva nomes, citações e texto, inclusive quando há só um participante.
 - **Revisar texto…**: abre a prévia Original/Resultado em janela isolada; controles no topo, fixos durante rolagem.
 - **ZIP → Markdown…**: abre uma tela exclusiva de arquivo, sem ler o clipboard.
 
-As duas ações rápidas não abrem janela nem exigem confirmação adicional. Um aviso
+As três ações rápidas não abrem janela nem exigem confirmação adicional. Um aviso
 curto confirma o resultado sem mostrar conteúdo. Formato desconhecido mantém o
 clipboard. Cliques sintéticos da página são ignorados. O texto é processado numa página interna invisível (`offscreen`) da extensão,
 não no contexto do WhatsApp. O menu e o worker trocam apenas ação e resultado;

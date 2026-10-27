@@ -4,8 +4,14 @@
 
 Navigator rejected review as mandatory friction and explicitly authorized the
 Explorer proposal: side Ajustar cópia opens a compact menu, not a window. Actions:
-Trocar nomes; Trocar nomes e tirar datas; Revisar texto…; ZIP → Markdown….
-The first two now dispatch action metadata to the background worker, which creates
+Trocar nomes; Trocar nomes e tirar datas; Tirar datas; Revisar texto…; ZIP → Markdown…. Dates-only was subsequently requested explicitly: remove only recognized line-start
+[time, date] prefixes and separator whitespace, never authors/self/quotes/body text.
+The removeNames=false flag bypasses the name-mapping and single-person label omission
+entirely. This also handles previously label-stripped timestamped excerpts. Both flags
+are validated booleans at worker/offscreen boundaries; no new permission or payload.
+The offscreen quick path previously received provisional user confirmation (“Agora
+parece que foi”); dates-only still awaits manual Chrome confirmation.
+The three quick actions now dispatch action metadata to the background worker, which creates
 an internal offscreen document (CLIPBOARD reason) for read/transform/write. Only
 trusted clicks dispatch; no content preview, confirmation, text message, telemetry
 or persistence. Unknown format does not write. User reported the previous direct

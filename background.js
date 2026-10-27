@@ -1,6 +1,6 @@
 // Clipboard payloads never pass through this worker; only action metadata/results.
 let quickBusy = false;
-async function quickCopy(removeTimestamps) {
+async function quickCopy(removeTimestamps, removeNames = true) {
   if (quickBusy) return {ok:false, error:'busy'};
   quickBusy = true;
   let owned = false;
@@ -16,7 +16,7 @@ async function quickCopy(removeTimestamps) {
         justification:'Transformar texto copiado somente por clique explícito, sem abrir janela ou guardar histórico.'});
       owned = true;
     }
-    const result = await chrome.runtime.sendMessage({type:'mwf-offscreen-adjust', removeTimestamps});
+    const result = await chrome.runtime.sendMessage({type:'mwf-offscreen-adjust', removeTimestamps, removeNames});
     // Do not forward arbitrary response fields or provider errors to page context.
     if (result?.ok === true) return {ok:true};
     const error = ['read','write','format','large','request'].includes(result?.error) ? result.error : 'unavailable';
@@ -31,8 +31,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (!['mwf-open-clipboard-panel','mwf-quick-copy'].includes(message?.type) || !sender.tab ||
       sender.id !== chrome.runtime.id || !sender.url?.startsWith('https://web.whatsapp.com/')) return;
   if (message.type === 'mwf-quick-copy') {
-    if (typeof message.removeTimestamps !== 'boolean') { sendResponse({ok:false,error:'request'}); return; }
-    quickCopy(message.removeTimestamps).then(sendResponse);
+    if (typeof message.removeTimestamps !== 'boolean' || (message.removeNames !== undefined && typeof message.removeNames !== 'boolean')) { sendResponse({ok:false,error:'request'}); return; }
+    quickCopy(message.removeTimestamps, message.removeNames !== false).then(sendResponse);
     return true;
   }
   chrome.windows.create({url:chrome.runtime.getURL(message.tool === 'zip' ? 'zip-panel.html' : 'clipboard-panel.html'), type:'popup', width:1000, height:720, focused:true}, () => {

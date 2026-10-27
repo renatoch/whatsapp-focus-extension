@@ -17,7 +17,7 @@ function setup({text=sample,paste=true,copy=true,createError=false,initialDocume
       closeDocument:async()=>{closes++;hasDocument=false;}},windows:{create(){throw Error('Quick path must not open window');}}};
   vm.runInNewContext(fs.readFileSync(path.join(root,'background.js'),'utf8'),{chrome});
   const sender={id:'local',tab:{id:1},url:'https://web.whatsapp.com/'};
-  const request=(removeTimestamps=false)=>new Promise(resolve=>workerListener({type:'mwf-quick-copy',removeTimestamps},sender,resolve));
+  const request=(removeTimestamps=false,removeNames=true)=>new Promise(resolve=>workerListener({type:'mwf-quick-copy',removeTimestamps,removeNames},sender,resolve));
   return {request,workerListener,offscreenListener,sender,chrome,messages,fields,clipboardOps,stored:()=>stored,
     creates:()=>creates,closes:()=>closes,hasField:()=>!!field};
 }
@@ -28,6 +28,12 @@ test('background→offscreen transforms both modes without payload transfer or w
     assert.equal(h.creates(),1);assert.equal(h.closes(),1);assert.equal(h.hasField(),false);assert.equal(h.fields[0].value,'');
     assert.deepEqual(h.clipboardOps,['paste','copy']);assert.doesNotMatch(JSON.stringify(h.messages),/Synthetic private|Renato|Reply/);
   }
+});
+test('dates-only travels as flags through worker and offscreen without pseudonymizing authors',async()=>{
+  const h=setup();assert.equal((await h.request(true,false)).ok,true);
+  assert.equal(h.stored(),'Renato C: Synthetic private\nAmiga: Reply');
+  assert.equal(h.messages[0].removeNames,false);assert.equal(h.messages[0].removeTimestamps,true);
+  assert.equal(h.fields[0].value,'');assert.equal(h.closes(),1);
 });
 test('read, format, size and write failures return bounded stages and wipe all temporary text',async()=>{
   for(const [options,stage]of [[{paste:false},'read'],[{text:'private non-chat'},'format'],[{text:'x'.repeat(4*1024*1024+1)},'large'],[{copy:false},'write']]){

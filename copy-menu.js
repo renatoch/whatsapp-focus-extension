@@ -10,14 +10,14 @@
     }
     function outside(event) { if (menu && !menu.contains(event.target) && !trigger?.contains(event.target)) close(); }
     function keydown(event) { if (event.key === 'Escape') { event.preventDefault(); close(); } }
-    async function adjust(removeTimestamps) {
+    async function adjust(removeTimestamps, removeNames = true) {
       if (!running || busy) return;
       busy = true; close();
       try {
-        const result = await runQuick(removeTimestamps);
+        const result = await runQuick(removeTimestamps, removeNames);
         if (!running) return;
         if (result?.ok) {
-          notify(removeTimestamps ? 'Clipboard ajustado — sem datas.' : 'Clipboard ajustado — datas mantidas.');
+          notify(!removeNames ? 'Datas removidas — nomes mantidos.' : removeTimestamps ? 'Clipboard ajustado — sem datas.' : 'Clipboard ajustado — datas mantidas.');
         } else {
           const messages = {
             format:'Formato não reconhecido; clipboard mantido.',
@@ -43,6 +43,7 @@
       const actions = [
         ['Trocar nomes', () => adjust(false)],
         ['Trocar nomes e tirar datas', () => adjust(true)],
+        ['Tirar datas', () => adjust(true, false)],
         ['Revisar texto…', () => { close(); openReview(); }],
         ['ZIP → Markdown…', () => { close(); openZip(); }],
       ];
@@ -52,7 +53,7 @@
       }
       const rect = anchor.getBoundingClientRect();
       menu.style.left = Math.max(8, Math.min(rect.right + 8, window.innerWidth - 280)) + 'px';
-      menu.style.top = Math.max(8, Math.min(rect.top, window.innerHeight - 210)) + 'px';
+      menu.style.top = Math.max(8, Math.min(rect.top, window.innerHeight - 255)) + 'px';
       document.body.appendChild(menu);
       menu.firstElementChild?.focus();
       document.addEventListener('pointerdown', outside, true);

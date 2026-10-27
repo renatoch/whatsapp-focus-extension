@@ -76,8 +76,8 @@
 
   const copyMenu = globalThis.MirrorCopyMenu.createCopyMenu({
     document, window,
-    runQuick: (removeTimestamps) => new Promise((resolve) => {
-      chrome.runtime.sendMessage({type:"mwf-quick-copy", removeTimestamps}, (response) => {
+    runQuick: (removeTimestamps, removeNames = true) => new Promise((resolve) => {
+      chrome.runtime.sendMessage({type:"mwf-quick-copy", removeTimestamps, removeNames}, (response) => {
         resolve(chrome.runtime.lastError ? {ok:false,error:"unavailable"} : response);
       });
     }),
