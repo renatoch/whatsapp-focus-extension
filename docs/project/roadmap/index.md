@@ -77,6 +77,8 @@ See: [`DS6-modular-extension-architecture/index.md`](DS6-modular-extension-archi
 
 ### Later candidates
 
+- **Deferred — preserve current Status/channel at normal-mode expiry:** [prepared plan](../../status-channel-expiry-plan.md), linked from the product backlog. Preserve active Status without extension overlays; closing it after expiry returns immediately to focus. Preserve an open channel while hiding its lateral list (like conversations). No next-person Status blocking in the first slice. Navigator explicitly requested documentation/backlog only, not implementation or a change of current work focus. Channel DOM still requires structural investigation.
+
 - Native mark-unread shortcut: allow an open conversation to be marked as unread without manually searching for it again. This is independent from collections, must mutate WhatsApp's native unread state rather than create an extension-only reminder, and requires real Web-to-mobile synchronization validation.
 - Archived unread filter: replicate the main chat unread filter inside Arquivadas.
 - Configuration and toggles: allow sensitive parameters like delay duration, normal-mode duration, and search minimum letters to be adjusted.

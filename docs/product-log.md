@@ -140,6 +140,10 @@ A validação agregada de 27/08 a 10/09 reuniu 418 eventos permitidos: 103 de 10
 
 Formato: título descritivo no item principal; detalhe curto em subitem; linha em branco entre itens para facilitar leitura em dark mode.
 
+- **[Backlog — plano preparado, execução adiada] Preservar Status e canal ao expirar o modo normal**
+  - O prazo encerra a navegação ampla, não o conteúdo atual: conversa/canal permanecem abertos com sua lateral oculta; Status em visualização permanece sem controles da extensão. Ao fechar o Status após o prazo e revelar sua lista, voltar imediatamente ao Modo foco, sem renovar os cinco minutos. Na primeira versão, não bloquear a troca de pessoa no Status. Canais não depende de “voltar à lista”: ela fica ao lado e deve ser ocultada.
+  - [Plano e testes de aceitação](status-channel-expiry-plan.md). Detecção estrutural de Canais ainda precisa de investigação dedicada sem conteúdo privado. Navigator pediu somente registrar e preservar as decisões, **sem implementar agora**, para manter foco. Atividade separada de DS6; não seleciona nova história nem retoma o refactor.
+
 - **[Em teste] Confirmação explícita quando WhatsApp normal foi aberto há menos de 10 min**
   - Implementação atual: se a última abertura do modo normal foi recente, não há countdown automático; a tela mostra há quanto tempo abriu e pede clique explícito em “Abrir mesmo assim”. Observar se isso quebra melhor o impulso/tédio ou se também vira gesto automático.
   - Avaliar caso específico: quando os 5 min de modo normal acabam e a extensão volta sozinha ao modo foco, faz sentido tratar como “abriu há ~5 min” e exigir confirmação explícita? Pode funcionar como estímulo para continuar na conversa focada em vez de reabrir o painel lateral, mas precisa ser validado em uso real.
