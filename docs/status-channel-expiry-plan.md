@@ -1,9 +1,17 @@
 # Plano — Expiração focada em Status e Canais
 
-**Estado:** em validação Chrome, regra de foco confirmada e atalho de teste implementado; escopo retomado
+**Estado:** Status validado pelo Navigator; layout de Canais ajustado, aguardando confirmação; regra de foco confirmada e atalho de teste implementado; escopo retomado
 explicitamente pelo Navigator após adiamento. Evidência estrutural de Canais e
 implementação/revisão automatizada concluídas. Não é aceitação Chrome ou Done.
 Não autoriza novos recursos, retomada de DS6, merge ou release.
+
+## Ajuste de consistência visual
+
+Navigator confirmou Status como esperado. Para Canais, solicitou manter a coluna
+lateral reservada e ocultar somente seu conteúdo (não expandir o canal). CSS trocado
+de display:none para visibility:hidden/pointer-events:none nos mesmos alvos, também
+em descendentes para não vazar conteúdo nativo. Nenhuma alteração de Status. Suíte:
+202/202; confirmação visual desta geometria pendente.
 
 ## Investigação da regressão
 

@@ -1145,11 +1145,14 @@ html.mwf-expired-status .mwf-focused-navigation-floating {
   pointer-events: none !important;
 }
 
-/* Both targets were evidenced in the dedicated profile. Hide channel drawer and
-   its underlying Chats column, not #main or the native navigation rail. */
+/* Preserve sidebar geometry, but hide both channel and underlying Chats content.
+   Descendant rules prevent native explicit visibility styles from leaking through. */
 html.mwf-channel-focused [data-testid="drawer-left"]:has([data-testid="newsletter-drawer"]),
-html.mwf-channel-focused :has(> #side) {
-  display: none !important;
+html.mwf-channel-focused [data-testid="drawer-left"]:has([data-testid="newsletter-drawer"]) *,
+html.mwf-channel-focused :has(> #side),
+html.mwf-channel-focused :has(> #side) * {
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
 html.mwf-channel-surface.mwf-active:not(.mwf-overlay-open) #mirror-whatsapp-focus-add-collection {
   display: none !important;

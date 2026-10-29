@@ -1,5 +1,18 @@
 # Surface-aware normal-mode expiry
 
+## Channel geometry correction and Status acceptance
+
+Navigator confirmed Status behavior works as expected, then requested channel focus
+preserve the lateral column rather than expanding #main. Channel CSS now uses
+visibility:hidden + pointer-events:none on the same two evidenced native structures
+and their descendants, instead of display:none. This keeps the sidebar's allocated
+width while hiding both newsletter content and underlying Chats; #main and navigation
+rail are untouched. Descendant visibility rules prevent explicit native visibility
+styles from exposing items. No Status policy, timer or observer logic changed.
+Regression test first rejected the collapsing rule, then passed with geometry-
+preserving CSS; full suite remains 202/202. Channel layout needs manual confirmation.
+The earlier width-expansion probe below is historical, not the desired layout now.
+
 ## Urgent observer-loop correction
 
 Navigator reported F5 stalled and Chrome offered to terminate the unresponsive tab.

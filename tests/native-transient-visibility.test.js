@@ -118,9 +118,15 @@ test('native control-bar suppression wins the later cascade over ordinary visibl
   assert.match(rule, /display:\s*none !important/);
 });
 
-test('channel CSS hides only the evidenced sidebar structures and suppresses conflicting conversation actions', () => {
-  assert.match(css,/html\.mwf-channel-focused \[data-testid="drawer-left"\]:has\(\[data-testid="newsletter-drawer"\]\)/);
-  assert.match(css,/html\.mwf-channel-focused :has\(> #side\)\s*\{\s*display: none !important/);
+test('channel CSS preserves sidebar geometry while hiding both native layers and their descendants', () => {
+  const start=css.indexOf('html.mwf-channel-focused [data-testid="drawer-left"]');
+  assert.ok(start>=0);
+  const rule=css.slice(start,css.indexOf('}',start)+1);
+  assert.match(rule,/visibility:\s*hidden !important/);
+  assert.match(rule,/pointer-events:\s*none !important/);
+  assert.doesNotMatch(rule,/display:\s*none/);
+  assert.match(rule,/:has\(> #side\)\s+\*/);
+  assert.match(rule,/\[data-testid="drawer-left"\]:has\(\[data-testid="newsletter-drawer"\]\)\s+\*/);
   assert.doesNotMatch(css,/html\.mwf-channel-focused #main\s*\{[^}]*display:\s*none/);
   assert.match(css,/html\.mwf-channel-surface\.mwf-active:not\(\.mwf-overlay-open\) #mirror-whatsapp-focus-add-collection\s*\{\s*display: none !important/);
 });
