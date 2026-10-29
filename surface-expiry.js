@@ -44,11 +44,13 @@
       if (!running) return;
       cancel();
       const token = generation;
+      const delayMs = typeof durationMs === 'function' ? durationMs() : durationMs;
+      if (!valid(token)) return;
       timer = scheduler.setTimeout(() => {
         if (!valid(token) || timer === null) return;
         timer = null;
         expire(token);
-      }, durationMs);
+      }, delayMs);
     }
     function refresh() {
       if (!running || pending === null || frame !== null) return;

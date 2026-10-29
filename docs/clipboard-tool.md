@@ -36,7 +36,10 @@ ZIP opens its own private window without clipboard scripts. A native chooser cli
 is attempted on entry, but Chrome may require clicking the visible file input;
 there is no hidden broad filesystem access. No additional web-accessible resource; the offscreen correction adds the named
 permission described above. Background receives only route metadata, restricted to existing WhatsApp
-content-script sender. The old toolbar popup remains as an alternative.
+content-script sender. The old toolbar conversion popup has been removed at Navigator request; the Chrome
+icon now opens a static information/shortcut reference (including Alt+Shift+T test
+duration). Copy tools remain in the side menu. clipboard-popup.js and its obsolete
+UI tests were removed; ZIP controllers and offscreen pipeline remain tested.
 
 Generated Eu/Pessoa N labels are preserved on repeat names adjustment when source
 still has recognizable author headers. Date-less or label-less unsupported text is

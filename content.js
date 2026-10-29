@@ -33,6 +33,7 @@
   const HOT_CSS_ID = "mirror-whatsapp-focus-hot-css";
   const HOT_CONFIG_CSS_ID = "mirror-whatsapp-focus-config-css";
   const BYPASS_MS = 5 * 60 * 1000;
+  const TEST_BYPASS_MS = 10000;
   const DEV_REFRESH_MS = 1000;
   const MIN_SEARCH_CHARS = 3;
   const SEARCH_SETTLE_MS = 1000;
@@ -53,6 +54,7 @@
   const fixedCollectionsAdapter = globalThis.chrome?.storage?.local
     ? globalThis.MirrorAwareness?.createChromeStorageAdapter(globalThis.chrome.storage.local)
     : null;
+  let normalExpiryTestMode = false;
   let normalDelayTimer = null;
   let normalDelayInterval = null;
   let searchSettleTimer = null;
@@ -91,7 +93,7 @@
     document, isVisible: isVisibleElement, channelFocusedClass: ROOT_CHANNEL_FOCUSED,
   });
   const surfaceExpiry = globalThis.MirrorSurfaceExpiry.createSurfaceExpiry({
-    scheduler: window, durationMs: BYPASS_MS, inspect: () => nativeSurface.inspect(),
+    scheduler: window, durationMs: () => normalExpiryTestMode ? TEST_BYPASS_MS : BYPASS_MS, inspect: () => nativeSurface.inspect(),
     chooseDestination: chooseNormalExpiryDestination,
     normalizeConversation: (callback) => goToMainChatsThen("expiry", callback),
     onConversation: setSearchFocusedConversation,
@@ -1740,7 +1742,7 @@
         <div class="mwf-actions">
           <button class="mwf-button mwf-button-primary" data-mwf-action="search">Buscar conversa</button>
           <button class="mwf-button mwf-button-secondary" data-mwf-action="continue">Continuar na conversa aberta</button>
-          <button class="mwf-button mwf-button-secondary" data-mwf-action="normal">Ver WhatsApp normal por 5 min</button>
+          <button class="mwf-button mwf-button-secondary" data-mwf-action="normal">${normalExpiryTestMode ? "Ver WhatsApp normal por 10s (teste)" : "Ver WhatsApp normal por 5 min"}</button>
         </div>
         <button class="mwf-awareness-link" data-mwf-action="awareness">Ver padrão de uso</button>
         <section id="mirror-whatsapp-focus-awareness" class="mwf-awareness-panel" aria-label="Padrão de uso" hidden>
@@ -2165,11 +2167,28 @@
     window.setInterval(refreshDevAssets, DEV_REFRESH_MS);
   }
 
+  function toggleExpiryTestMode() {
+    normalExpiryTestMode = !normalExpiryTestMode;
+    document.querySelectorAll('[data-mwf-action="normal"]').forEach((button) => {
+      button.textContent = normalExpiryTestMode ? "Ver WhatsApp normal por 10s (teste)" : "Ver WhatsApp normal por 5 min";
+    });
+    showToast(normalExpiryTestMode
+      ? "Teste: prazo de 10s na próxima abertura do modo normal. Alt+Shift+T restaura 5 min."
+      : "Prazo de 5 min restaurado para a próxima abertura do modo normal.");
+  }
+
   function installKeyboardShortcuts() {
     document.addEventListener(
       "keydown",
       (event) => {
         if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+        if (event.key.toLowerCase() === "t") {
+          if (!event.isTrusted || event.repeat) return;
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          toggleExpiryTestMode();
+          return;
+        }
         if (event.key.toLowerCase() === "f") {
           event.preventDefault();
           event.stopImmediatePropagation();

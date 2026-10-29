@@ -75,6 +75,14 @@ test('explicit channel continuation does not normalize or grant another bypass',
   const other=harness({surface:'conversation'});assert.equal(other.controller.continueChannel(),false);assert.deepEqual(other.events,[]);
 });
 
+test('test duration is sampled at the next opening, never shortens or renews an armed deadline',()=>{
+  const h=harness({surface:'channel'});let duration=300000;
+  const controller=createSurfaceExpiry({...h.deps,durationMs:()=>duration});
+  controller.start();h.c.advance(1000);duration=10000;h.c.advance(10000);assert.deepEqual(h.events,[]);
+  controller.start();h.c.advance(9999);assert.deepEqual(h.events,[]);duration=300000;h.c.advance(1);assert.deepEqual(h.events,['channel']);
+  controller.start();h.c.advance(10000);assert.deepEqual(h.events,['channel']);h.c.advance(290000);assert.deepEqual(h.events,['channel','channel']);
+});
+
 test('reentrant cancellation at focus-return callback prevents the old mode action',()=>{
   let controller;const h=harness({surface:'status-list',hooks:{returned:()=>controller.cancel()}});controller=h.controller;
   controller.start();h.c.advance(300000);assert.deepEqual(h.events,[['returned','blind-overlay']]);

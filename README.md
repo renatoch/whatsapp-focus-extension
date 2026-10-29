@@ -48,7 +48,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - antes de abrir o modo normal, pergunta de forma neutra a intenção, com opções estruturadas — incluindo processar pendências/não lidas — e nota livre opcional;
 - permite voltar ao modo foco antes de declarar uma intenção, registrando somente a ocorrência e o tempo levado, sem inferir o motivo;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, mantendo a pausa consciente de 8s depois da declaração; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
-- ao fim dos 5 minutos, em aba visível e focada, preserva a conversa ou o canal aberto com lateral oculta; Status aberto continua sem menus da extensão e fechar seu visualizador após o prazo retorna imediatamente ao foco. Listas sem conteúdo selecionado e sessões inativas retornam ao foco cego. A exceção não renova o prazo; troca de pessoa em Status permanece permitida. No Modo foco, um canal selecionado oferece **Continuar no canal aberto**, sem renovar o prazo ou navegar para Chats. Atenção: a regra atual ainda volta ao foco se o documento não tiver foco no vencimento, mesmo com aba visível; ajuste dessa política aguarda confirmação. [Evidência e validação Chrome pendente](docs/surface-aware-expiry.md);
+- ao fim dos 5 minutos, em aba visível e focada, preserva a conversa ou o canal aberto com lateral oculta; Status aberto continua sem menus da extensão e fechar seu visualizador após o prazo retorna imediatamente ao foco. Listas sem conteúdo selecionado e sessões inativas retornam ao foco cego. A exceção não renova o prazo; troca de pessoa em Status permanece permitida. No Modo foco, um canal selecionado oferece **Continuar no canal aberto**, sem renovar o prazo ou navegar para Chats. Atenção: a regra atual ainda volta ao foco se o documento não tiver foco no vencimento, mesmo com aba visível; o Navigator confirmou manter essa política para priorizar foco. [Evidência e validação Chrome pendente](docs/surface-aware-expiry.md);
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
 - adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;
@@ -63,6 +63,26 @@ A busca limpa própria ainda não existe. O protótipo atual usa a busca nativa 
 3. Clique em **Load unpacked** / **Carregar sem compactação**.
 4. Selecione a pasta clonada deste projeto.
 5. Abra ou recarregue `https://web.whatsapp.com`.
+
+## Atalhos e teste do prazo
+
+Clique no ícone da extensão no Chrome para consultar **informações e atalhos**.
+O popup antigo de clipboard/ZIP foi retirado; use **Ajustar cópia** na barra lateral.
+
+- **Alt+Shift+F:** voltar ao Modo foco.
+- **Alt+Shift+L:** alternar a lateral quando disponível.
+- **Alt+Shift+T:** alternar **10 segundos (teste)** / **5 minutos** para a próxima
+  abertura do modo normal. Um aviso confirma e o botão existente mostra “10s (teste)”.
+
+Depois da recarga única para instalar esta atualização, não precisa recarregar,
+editar arquivo ou pedir ao assistente para alternar. Não modifica prazo já iniciado,
+a barreira de oito segundos ou um Continue sem timer. A opção fica só na aba;
+recarregá-la restaura cinco minutos. Para testar: ative 10s, abra modo normal,
+selecione canal/Status e mantenha o WhatsApp em foco durante o vencimento.
+
+A regra antiga de foco foi confirmada pelo Navigator: documento sem foco ou aba
+oculta ao expirar retorna ao Modo foco, mesmo em canal/Status. Falsos negativos
+são preferidos à distração prolongada; não ampliar a exceção para outra janela.
 
 ## Ajustar trecho de conversa no clipboard
 
@@ -89,19 +109,13 @@ Não há monitoramento, histórico ou persistência de texto.
 Na revisão, a opção de data/hora atualiza só a prévia; **Substituir clipboard** aplica
 o resultado. Fechar descarta os textos. ZIP tenta abrir o seletor ao entrar; se o
 Chrome bloquear abertura automática, clique em Selecionar ZIP. O botão foi retirado
-do Modo foco. O acesso pelo ícone da extensão continua disponível.
+do Modo foco. O ícone da extensão agora contém somente informações e atalhos.
 Recarregue extensão e aba (a atualização adiciona a permissão técnica `offscreen`).
 O caminho rápido anterior falhou no Chrome do usuário ao ler do contexto da página;
-a correção offscreen ainda precisa de teste manual. O acesso por Revisar texto
-já funcionava e foi preservado.
-
-O acesso rápido anterior pelo popup continua disponível:
-
-No popup da extensão, clique em **Ajustar clipboard** depois de copiar um trecho no
-formato `[12:51, 06/10/2026] Nome: Texto`. `Renato C` vira **Eu**; outros autores e
-citações `> Nome:` / `> _Nome:` recebem **Pessoa 1, Pessoa 2…** de forma consistente.
-Marque **Remover data/hora** se quiser retirar os timestamps dos cabeçalhos de
-mensagem (desmarcado por padrão). Continuações e quebras de linha são mantidas.
+a correção offscreen foi confirmada provisoriamente pelo usuário. Revisar texto
+continua disponível no menu lateral. Formato reconhecido:
+`[12:51, 06/10/2026] Nome: Texto`. Renato C vira Eu; outros autores e citações
+recebem Pessoa N. Datas e nomes podem ser tratados separadamente pelo menu.
 
 O clipboard é lido e substituído **somente nesse clique**, usando as permissões
 `clipboardRead`/`clipboardWrite`. O caminho rápido também usa `offscreen` para
@@ -110,14 +124,13 @@ armazenamento de texto/mapa de nomes. Texto sem cabeçalhos reconhecidos é recu
 O original no clipboard será substituído: copie novamente da origem se precisar.
 Nomes no corpo, telefones, links e datas mencionadas nas mensagens permanecem;
 revise antes de compartilhar. Este modo não altera o mapeamento de nomes do ZIP.
-O ajuste rápido pelo popup foi validado pelo usuário; o novo painel de revisão ainda requer teste no Chrome.
+O popup legado foi removido; a ação rápida pelo menu lateral é o acesso principal.
 
 ## Extrair Markdown de um ZIP exportado
 
 1. Recarregue a extensão em `chrome://extensions` após esta atualização.
-2. Clique no botão da extensão na barra do Chrome (fixe-o pelo menu de extensões, se necessário).
-3. Selecione o ZIP exportado em Downloads. Alternativamente, na barra lateral do WhatsApp,
-   clique em **Ajustar cópia → ZIP → Markdown…**.
+2. Na barra lateral do WhatsApp, clique em **Ajustar cópia → ZIP → Markdown…**.
+3. Selecione o ZIP exportado em Downloads.
 4. Clique em **Salvar Markdown**. O resultado é **`chat.md`**, sem nome ou telefone do ZIP no arquivo.
 
 O título `Exportação de conversas do WhatsApp: …` vira `…: Chat`. O rótulo nativo **Você** vira **Eu**, inclusive em citações, sem consumir um número de Pessoa. Autores no formato

@@ -1,6 +1,6 @@
 # Surface-aware normal-mode expiry
 
-## Regression investigation — focus-policy decision pending
+## Focus policy confirmed; ten-second test shortcut
 
 Navigator reported channel expiry returned blind and the overlay lacked Resume.
 A real timer in the active dedicated-extension session reproduced this exact bounded
@@ -10,9 +10,9 @@ two frames and a settled delay; selected-cell markers stayed present. The suspec
 virtualization/marker-loss cause was NOT reproduced; no classifier cache was added.
 
 Root cause for this reproduced path is the retained focus-policy fallback, not a
-channel selector. Do not silently relax hidden/inactive policy: ask Navigator whether
-a visible native Status/channel should survive expiry when another window has focus.
-That decision is pending; current behavior remains unchanged until confirmation.
+channel selector. Navigator explicitly confirmed KEEPING it: an unfocused document
+or hidden tab must return blind even for native Status/channel, accepting false
+negatives to prioritize focus. This is intentional behavior, not a pending policy bug.
 
 Resume fix: overlay now offers Continuar no canal aberto for a known selected
 channel. Explicit Continue enters native focused-channel continuation directly,
@@ -20,6 +20,17 @@ clears overlay/conflicting mode classes, never normalizes to Chats/captures a re
 and does not start a new bypass. 198 tests pass, including actual Continue/helper/
 overlay wiring. It is independently safe; whole channel-expiry acceptance is still
 pending. Login/linking-screen work is queued next in login-surface-plan.md.
+
+## Test duration without repeated reloads
+
+Alt+Shift+T in the WhatsApp tab toggles a tab-memory flag between 10,000 ms test
+and normal 300,000 ms duration. It is trusted-keydown only, ignores auto-repeat,
+changes the existing full-mode button label and reports the next-opening duration.
+The controller samples duration once at start, never shortens/extends an armed timer.
+Reload resets to normal; no storage, telemetry, permission or background command.
+The eight-second confirmation delay is unchanged. The toolbar popup is now static
+information/shortcut reference, with all legacy clipboard/ZIP UI removed.
+200 tests pass after shortcut/popup cleanup; native Chrome acceptance remains pending.
 
 ## Initially implemented scope; Chrome acceptance pending
 
