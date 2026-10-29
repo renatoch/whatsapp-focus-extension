@@ -1,8 +1,27 @@
-# Plano adiado — Expiração focada em Status e Canais
+# Plano — Expiração focada em Status e Canais
 
-**Estado:** backlog; plano registrado, execução adiada a pedido do Navigator.
-**Autoridade atual:** documentação e preservação do acordo, não implementação,
-inspeção no navegador, retomada de DS6, merge ou release.
+**Estado:** em preparação, retomado explicitamente pelo Navigator após o adiamento.
+**Autoridade atual:** preparar testes e investigação; implementar somente o recorte
+funcional acordado após evidência estrutural de Canais. Não autoriza novos recursos,
+retomada de DS6, merge ou release.
+
+## Checkpoint de retomada
+
+- Alvo: stable worktree `whatsapp-focus-extension`, branch main, base `7d99cc5`.
+  DS6 permanece intacta e não será sincronizada implicitamente.
+- Três caracterizações novas em `tests/normal-expiry-baseline.test.js`: limite exato
+  dos cinco minutos/ordem de normalização, fallback inativo e lacuna atual de não
+  consultar superfície nativa. Suíte completa: 174/174. Nenhuma mudança de produção.
+- O teste da lacuna documenta temporariamente o comportamento antigo; migrar sua
+  expectativa ao implementar a classificação de Status/Canal, não preservar o bug.
+- Chrome dedicado iniciado com perfil MirrorWhatsAppFocusDebug, loopback 9222;
+  aguardando Navigator abrir um canal escolhido, com sua lateral visível. Não
+  abrir canais/conversas/status por iniciativa do agente nem ler conteúdo.
+- Próximo passo exato: colher estrutura do canal selecionado, validar container
+  lateral e foreground sem conteúdo; então TDD da nova política. Caso essa evidência
+  seja insuficiente, pedir só a mudança de superfície necessária. Fechar o perfil
+  e verificar porta fechada ao fim da investigação.
+- Sem aceitação Chrome/Done ou mudança de comportamento instalada nesta etapa.
 
 ## Objetivo
 
@@ -155,6 +174,7 @@ retomada/conclusão de DS6; merge, release ou publicação.
 
 ## Próxima ação segura
 
-Manter no backlog. Quando o Navigator decidir retomar: ler este plano, conferir
-estado real dos branches/docs e confirmar o alvo de implementação; caracterizar a
-política e inspecionar Canais com sua participação. **Não implementar agora.**
+Aguardar a janela de investigação com canal escolhido e selecionado pelo Navigator;
+inspecionar sua estrutura, sem conteúdo, para destravar o plano. A preparação e
+suas evidências estão registradas acima; não é preciso reabrir as decisões de
+produto. Não implementar seletores de Canais por suposição.
