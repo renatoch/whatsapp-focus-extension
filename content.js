@@ -1367,8 +1367,10 @@
     const surface = nativeSurface.inspect();
     const canContinue = hasOpenConversation() && (surface === "conversation" || surface === "channel");
     overlay.classList.toggle("mwf-has-conversation", canContinue);
+    const continueLabel = surface === "channel" ? "Continuar no canal aberto" : "Continuar na conversa aberta";
     overlay.querySelectorAll('[data-mwf-action="continue"]').forEach((button) => {
-      button.textContent = surface === "channel" ? "Continuar no canal aberto" : "Continuar na conversa aberta";
+      // Replacing equal text still emits childList mutations and re-enters this observer.
+      if (button.textContent !== continueLabel) button.textContent = continueLabel;
     });
     if (!ready) updateOverlayLoadingProgress();
     overlay.querySelectorAll("[data-mwf-action]").forEach((button) => {

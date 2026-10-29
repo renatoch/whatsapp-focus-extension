@@ -12,7 +12,9 @@ retorno cego pela regra antiga. Marcadores permaneceram estáveis após ocultaç
 não houve evidência de perda de seleção/virtualização. Navigator confirmou manter
 a política antiga: sem foco no documento ou aba oculta, retornar ao Modo foco,
 mesmo com falsos negativos. Não ampliar a exceção para outro aplicativo. Retomada explícita do canal pelo overlay foi corrigida e coberta
-por testes, sem novo bypass, normalização ou captura de título. Suíte após atalho de teste e retirada do popup legado: 200. Alt+Shift+T alterna
+por testes, sem novo bypass, normalização ou captura de título. Suíte após atalho de teste, retirada do popup legado e correção urgente de loop
+no observer: 202. A atualização de rótulo Continue deve ser idempotente para não
+realimentar o observer de childList e travar a aba. Ver evidência vinculada. Alt+Shift+T alterna
 10s/5min na próxima abertura, só na aba, sem reload recorrente. O popup do Chrome
 contém informações e atalhos; as ferramentas de cópia ficam no menu lateral.
 Login/vinculação foi solicitado como próxima atividade, sem deslogar contas; ver

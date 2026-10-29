@@ -1,5 +1,24 @@
 # Surface-aware normal-mode expiry
 
+## Urgent observer-loop correction
+
+Navigator reported F5 stalled and Chrome offered to terminate the unresponsive tab.
+Code inspection found the Continue-label update unconditionally replaced textContent
+inside updateOverlayState, which itself is called by a subtree childList observer.
+Even equal textContent replacement generates child-list mutations: the callback
+could continually reschedule itself and starve navigation/input tasks. This defect
+was introduced with channel-resume labeling, not by the test-duration shortcut.
+
+Two regression tests failed first: stable updates must not rewrite owned text nodes,
+and a simulated child-list feedback queue must settle. The fix only assigns the
+Continue label when its text differs. Full suite: 202/202; syntax/diff checks pass.
+No selector, expiry policy, channel content, storage or permissions changed.
+
+Recovery requires terminating only the hung tab if it cannot reload, reloading the
+extension from chrome://extensions, then opening a new WhatsApp tab. Do not kill the
+whole normal Chrome profile or repeatedly force F5 in the starved renderer. Manual
+browser confirmation is pending; no private-content inspection was performed.
+
 ## Focus policy confirmed; ten-second test shortcut
 
 Navigator reported channel expiry returned blind and the overlay lacked Resume.
