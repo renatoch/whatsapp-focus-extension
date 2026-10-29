@@ -24,6 +24,8 @@ test('loads the pure focused-recents boundary before the content script', () => 
     'focused-recents.js',
     'fixed-collections.js',
     'copy-menu.js',
+    'native-surface.js',
+    'surface-expiry.js',
     'content.js',
   ]);
 });

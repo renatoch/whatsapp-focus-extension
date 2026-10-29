@@ -140,9 +140,9 @@ A validação agregada de 27/08 a 10/09 reuniu 418 eventos permitidos: 103 de 10
 
 Formato: título descritivo no item principal; detalhe curto em subitem; linha em branco entre itens para facilitar leitura em dark mode.
 
-- **[Em preparação — aguardando evidência de Canais] Preservar Status e canal ao expirar o modo normal**
+- **[Em validação Chrome] Preservar Status e canal ao expirar o modo normal**
   - O prazo encerra a navegação ampla, não o conteúdo atual: conversa/canal permanecem abertos com sua lateral oculta; Status em visualização permanece sem controles da extensão. Ao fechar o Status após o prazo e revelar sua lista, voltar imediatamente ao Modo foco, sem renovar os cinco minutos. Na primeira versão, não bloquear a troca de pessoa no Status. Canais não depende de “voltar à lista”: ela fica ao lado e deve ser ocultada.
-  - [Plano e testes de aceitação](status-channel-expiry-plan.md). Detecção estrutural de Canais ainda precisa de investigação dedicada sem conteúdo privado. Originalmente adiado para manter foco; Navigator depois autorizou a retomada com preparação de testes e janela dedicada. Caracterização atual: 174 testes passando, nenhuma mudança de produção; aguardando canal selecionado pelo usuário para inspeção estrutural. Atividade separada de DS6; não retoma o refactor.
+  - [Plano e testes de aceitação](status-channel-expiry-plan.md). Investigação estrutural de Canais concluída sem texto privado: #main é reutilizado, drawer newsletter e coluna Chats ficam separados. Ocultação reversível preservou o mesmo #main e ampliou seu espaço. Implementação com 195 testes passando; [evidência e rota de aceitação](surface-aware-expiry.md). Falta validação do script recarregado no Chrome. Expiração em conteúdo nativo não emite falso retorno ao foco; alternar Lateral antes do fim não cancela o prazo. Atividade separada de DS6, que permanece intacta.
 
 - **[Em teste] Confirmação explícita quando WhatsApp normal foi aberto há menos de 10 min**
   - Implementação atual: se a última abertura do modo normal foi recente, não há countdown automático; a tela mostra há quanto tempo abriu e pede clique explícito em “Abrir mesmo assim”. Observar se isso quebra melhor o impulso/tédio ou se também vira gesto automático.

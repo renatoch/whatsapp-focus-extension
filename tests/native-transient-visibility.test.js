@@ -16,7 +16,8 @@ function harness(nativeElements = []) {
   const shelf = { hidden: false, querySelector: (selector) => selector.includes('recents') ? recents : collections };
   const document = { getElementById: () => shelf, querySelectorAll: () => nativeElements };
   const classes = new Set();
-  const base = { FOCUSED_RECENTS_ID: 'shelf', ROOT_NATIVE_TRANSIENT: 'mwf-native-transient-open', document,
+  const base = { FOCUSED_RECENTS_ID: 'shelf', ROOT_NATIVE_TRANSIENT: 'mwf-native-transient-open',
+    ROOT_CHANNEL_SURFACE:'mwf-channel-surface', nativeSurface:{inspect:()=> 'conversation'}, document,
     root: () => ({ classList: { toggle: (name, force) => force ? classes.add(name) : classes.delete(name) } }),
     isSearching: () => false };
   let context;
@@ -89,6 +90,18 @@ test('hidden or extension-owned modal-like elements do not suspend navigation', 
     assert.equal(h.shelf.hidden, false);
   }
 });
+test('channel surfaces suppress conversation shelf without masquerading as a native modal', () => {
+  for (const surface of ['channel','channel-list']) {
+    const h=harness([]);h.context.nativeSurface.inspect=()=>surface;
+    h.context.updateFocusedNavigationShelfVisibility();
+    assert.equal(h.shelf.hidden,true);assert.equal(h.classes.has('mwf-channel-surface'),true);
+    assert.equal(h.classes.has('mwf-native-transient-open'),false);
+    assert.equal(h.recents.hidden,false);assert.equal(h.collections.hidden,false);
+    h.context.nativeSurface.inspect=()=> 'conversation';h.context.updateFocusedNavigationShelfVisibility();
+    assert.equal(h.classes.has('mwf-channel-surface'),false);assert.equal(h.shelf.hidden,false);
+  }
+});
+
 test('the transient root state hides focused actions and an open collection chooser', () => {
   for (const id of ['mirror-whatsapp-focus-controls', 'mirror-whatsapp-focus-search-again', 'mirror-whatsapp-focus-add-collection', 'mirror-whatsapp-focus-collection-chooser']) {
     assert.match(css, new RegExp(`html\\.mwf-native-transient-open[^{}]*#${id}`));
@@ -103,6 +116,13 @@ test('native control-bar suppression wins the later cascade over ordinary visibl
   assert.ok(hide > show);
   const rule = css.slice(hide, css.indexOf('}', hide) + 1);
   assert.match(rule, /display:\s*none !important/);
+});
+
+test('channel CSS hides only the evidenced sidebar structures and suppresses conflicting conversation actions', () => {
+  assert.match(css,/html\.mwf-channel-focused \[data-testid="drawer-left"\]:has\(\[data-testid="newsletter-drawer"\]\)/);
+  assert.match(css,/html\.mwf-channel-focused :has\(> #side\)\s*\{\s*display: none !important/);
+  assert.doesNotMatch(css,/html\.mwf-channel-focused #main\s*\{[^}]*display:\s*none/);
+  assert.match(css,/html\.mwf-channel-surface\.mwf-active:not\(\.mwf-overlay-open\) #mirror-whatsapp-focus-add-collection\s*\{\s*display: none !important/);
 });
 
 test('the existing DOM observer refreshes transient visibility on native mutations', () => {

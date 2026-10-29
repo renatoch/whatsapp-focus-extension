@@ -48,7 +48,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - antes de abrir o modo normal, pergunta de forma neutra a intenção, com opções estruturadas — incluindo processar pendências/não lidas — e nota livre opcional;
 - permite voltar ao modo foco antes de declarar uma intenção, registrando somente a ocorrência e o tempo levado, sem inferir o motivo;
 - oferece uma válvula de escape: **Ver WhatsApp normal por 5 min**, mantendo a pausa consciente de 8s depois da declaração; se o modo normal foi aberto há menos de 10 min, exige confirmação explícita sem countdown automático;
-- ao fim dos 5 minutos, preserva uma conversa aberta quando a aba continua visível e focada, escondendo apenas a lateral; sessões inativas ou sem conversa retornam ao modo foco cego;
+- ao fim dos 5 minutos, em aba visível e focada, preserva a conversa ou o canal aberto com lateral oculta; Status aberto continua sem menus da extensão e fechar seu visualizador após o prazo retorna imediatamente ao foco. Listas sem conteúdo selecionado e sessões inativas retornam ao foco cego. A exceção não renova o prazo; troca de pessoa em Status permanece permitida. [Evidência e validação Chrome pendente](docs/surface-aware-expiry.md);
 - adiciona botão vertical **Voltar ao modo foco** na barra lateral esquerda, para não cobrir conteúdo da conversa;
 - adiciona botão **Lateral** para mostrar/ocultar a barra lateral no modo full/manual;
 - adiciona atalhos `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar lateral;

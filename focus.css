@@ -1130,6 +1130,31 @@ html.mwf-native-transient-open .mwf-focused-navigation-floating {
   pointer-events: none !important;
 }
 
+/* Channels reuse #main; never draw conversation navigation on their native UI. */
+html.mwf-channel-surface #mirror-whatsapp-focus-search-again,
+html.mwf-channel-surface #mirror-whatsapp-focus-add-collection,
+html.mwf-channel-surface #mirror-whatsapp-focus-collection-chooser,
+html.mwf-channel-surface #mirror-whatsapp-focus-sidebar,
+html.mwf-channel-surface .mwf-focused-navigation-floating,
+html.mwf-expired-status #mirror-whatsapp-focus-controls,
+html.mwf-expired-status #mirror-whatsapp-focus-search-again,
+html.mwf-expired-status #mirror-whatsapp-focus-add-collection,
+html.mwf-expired-status #mirror-whatsapp-focus-collection-chooser,
+html.mwf-expired-status .mwf-focused-navigation-floating {
+  display: none !important;
+  pointer-events: none !important;
+}
+
+/* Both targets were evidenced in the dedicated profile. Hide channel drawer and
+   its underlying Chats column, not #main or the native navigation rail. */
+html.mwf-channel-focused [data-testid="drawer-left"]:has([data-testid="newsletter-drawer"]),
+html.mwf-channel-focused :has(> #side) {
+  display: none !important;
+}
+html.mwf-channel-surface.mwf-active:not(.mwf-overlay-open) #mirror-whatsapp-focus-add-collection {
+  display: none !important;
+}
+
 /* Override the more-specific active-mode rule that normally shows this button. */
 html.mwf-native-transient-open.mwf-active:not(.mwf-overlay-open) #mirror-whatsapp-focus-add-collection {
   display: none !important;

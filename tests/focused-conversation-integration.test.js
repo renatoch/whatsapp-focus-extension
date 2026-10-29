@@ -16,10 +16,9 @@ test('focused conversation state explicitly enforces the hidden-sidebar invarian
 });
 
 test('focused expiry normalizes nested views before applying focused state', () => {
-  assert.match(
-    content,
-    /if \(expiryDestination === "focused-conversation"\) \{\s*goToMainChatsThen\("expiry", \(\) => setSearchFocusedConversation\(\)\);/
-  );
+  // Ordering is exercised with the real controller in normal-expiry-baseline.test.js.
+  assert.match(content, /normalizeConversation: \(callback\) => goToMainChatsThen\("expiry", callback\)/);
+  assert.match(content, /onConversation: setSearchFocusedConversation/);
 });
 
 test('intent prompt keeps focused exit independent and preserves agreed search delay', () => {

@@ -13,6 +13,15 @@ test('preserves a visible focused open conversation when full mode expires', () 
   );
 });
 
+test('surface-aware policy preserves native tasks and never uses a background conversation for lists', () => {
+  const active={visibilityState:'visible',documentHasFocus:true,hasOpenConversation:true};
+  for(const [surface,expected]of [['channel','focused-channel'],['status-player','status-player'],['status-list','blind-overlay'],['channel-list','blind-overlay'],['unknown','blind-overlay']]) {
+    assert.equal(FocusState.chooseExpiryDestination({...active,surface}),expected);
+    assert.equal(FocusState.chooseExpiryDestination({...active,surface,documentHasFocus:false}),'blind-overlay');
+    assert.equal(FocusState.chooseExpiryDestination({...active,surface,visibilityState:'hidden'}),'blind-overlay');
+  }
+});
+
 test('returns to blind overlay when the document is not focused', () => {
   assert.equal(
     FocusState.chooseExpiryDestination({

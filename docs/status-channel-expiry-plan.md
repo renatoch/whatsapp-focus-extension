@@ -1,11 +1,26 @@
 # Plano — Expiração focada em Status e Canais
 
-**Estado:** em preparação, retomado explicitamente pelo Navigator após o adiamento.
-**Autoridade atual:** preparar testes e investigação; implementar somente o recorte
-funcional acordado após evidência estrutural de Canais. Não autoriza novos recursos,
-retomada de DS6, merge ou release.
+**Estado:** implementado localmente, em validação Chrome; escopo retomado
+explicitamente pelo Navigator após adiamento. Evidência estrutural de Canais e
+implementação/revisão automatizada concluídas. Não é aceitação Chrome ou Done.
+Não autoriza novos recursos, retomada de DS6, merge ou release.
 
-## Checkpoint de retomada
+## Resultado da execução
+
+- [Evidência, arquitetura e rota curta de aceitação](surface-aware-expiry.md).
+- 195/195 testes; novo `native-surface.js` identifica primeiro plano por marcadores
+  observados; `surface-expiry.js` possui o prazo/continuação e invalida callbacks antigos.
+- Canal selecionado mantém #main e oculta newsletter drawer + coluna Chats por baixo;
+  visualizador de Status continua e o foco retorna ao fechar para uma lista conhecida.
+- Listas sem conteúdo selecionado e aba inativa mantêm retorno cego. Troca de pessoa
+  em Status não é bloqueada e o prazo não é renovado. Nenhum campo de telemetria novo.
+- Teste temporário de geometria no perfil dedicado confirmou ocultação sem trocar
+  o nó #main. Não houve validação ao vivo do novo script recarregado. Chrome dedicado
+  encerrado e porta 9222 fechada; perfil/login preservados.
+- Ação pendente: Navigator recarregar extensão/aba e conferir uma expiração natural
+  em canal e outra em Status. DS6 permanece sem alterações.
+
+## Checkpoint de retomada (histórico, antes da implementação)
 
 - Alvo: stable worktree `whatsapp-focus-extension`, branch main, base `7d99cc5`.
   DS6 permanece intacta e não será sincronizada implicitamente.
@@ -43,8 +58,9 @@ Já houve inspeção estrutural dedicada de Status e correções de sobreposiç�
 da expiração. Marcadores observados: `status-player-contact-name` no visualizador;
 `status-drawer` e `status-list-drawer` na lista. Ver
 [native-control-bar-priority.md](native-control-bar-priority.md).
-**Canais ainda não foi investigado**: não assumir seletores, equivalência de DOM,
-cabeçalho ou container de lateral com conversas comuns.
+Canais inicialmente não tinha evidência; a investigação desta execução confirmou
+os marcadores e o layout descritos em `surface-aware-expiry.md`. Não extrapolar para
+outros layouts nem supor equivalência com o DOM de conversas comuns.
 
 ## Decisões acordadas
 
@@ -174,7 +190,7 @@ retomada/conclusão de DS6; merge, release ou publicação.
 
 ## Próxima ação segura
 
-Aguardar a janela de investigação com canal escolhido e selecionado pelo Navigator;
-inspecionar sua estrutura, sem conteúdo, para destravar o plano. A preparação e
-suas evidências estão registradas acima; não é preciso reabrir as decisões de
-produto. Não implementar seletores de Canais por suposição.
+Validação curta do Navigator no Chrome após reload; usar o guia de evidência
+vinculado acima. Se falhar, reproduzir somente a superfície escolhida pelo usuário
+e comparar estrutura, sem conteúdo. Não acrescentar seletores por suposição nem
+retomar DS6 para corrigir esta entrega.

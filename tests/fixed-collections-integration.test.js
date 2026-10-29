@@ -15,6 +15,8 @@ test('loads fixed collections before the content integration', () => {
     'focused-recents.js',
     'fixed-collections.js',
     'copy-menu.js',
+    'native-surface.js',
+    'surface-expiry.js',
     'content.js',
   ]);
 });

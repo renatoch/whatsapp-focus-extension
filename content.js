@@ -11,6 +11,9 @@
   const ROOT_OVERLAY_OPEN = "mwf-overlay-open";
   const ROOT_OPENING_RECENT = "mwf-opening-recent";
   const ROOT_NATIVE_TRANSIENT = "mwf-native-transient-open";
+  const ROOT_CHANNEL_SURFACE = "mwf-channel-surface";
+  const ROOT_CHANNEL_FOCUSED = "mwf-channel-focused";
+  const ROOT_EXPIRED_STATUS = "mwf-expired-status";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
@@ -50,7 +53,6 @@
   const fixedCollectionsAdapter = globalThis.chrome?.storage?.local
     ? globalThis.MirrorAwareness?.createChromeStorageAdapter(globalThis.chrome.storage.local)
     : null;
-  let bypassTimer = null;
   let normalDelayTimer = null;
   let normalDelayInterval = null;
   let searchSettleTimer = null;
@@ -85,6 +87,29 @@
     openReview: () => openClipboardPanel("review"), openZip: () => openClipboardPanel("zip"),
   });
 
+  const nativeSurface = globalThis.MirrorNativeSurface.createNativeSurface({
+    document, isVisible: isVisibleElement, channelFocusedClass: ROOT_CHANNEL_FOCUSED,
+  });
+  const surfaceExpiry = globalThis.MirrorSurfaceExpiry.createSurfaceExpiry({
+    scheduler: window, durationMs: BYPASS_MS, inspect: () => nativeSurface.inspect(),
+    chooseDestination: chooseNormalExpiryDestination,
+    normalizeConversation: (callback) => goToMainChatsThen("expiry", callback),
+    onConversation: setSearchFocusedConversation,
+    onChannel: () => continueNativeSurface("channel"),
+    onStatus: () => continueNativeSurface("status"),
+    onBlind: () => setActive({showOverlay:true}),
+    onReturned: (expiryDestination) => recordAwareness("focus_returned", {reason:"expiry", expiryDestination}),
+    clearContinuation: () => root().classList.remove(ROOT_CHANNEL_FOCUSED, ROOT_EXPIRED_STATUS),
+  });
+
+  function continueNativeSurface(kind) {
+    root().classList.remove(ROOT_NORMAL);
+    root().classList.add(kind === "channel" ? ROOT_CHANNEL_FOCUSED : ROOT_EXPIRED_STATUS);
+    const overlay = getOverlay();
+    if (overlay) overlay.hidden = true;
+    updateFocusedNavigationShelfVisibility();
+  }
+
   function debugLog(message, details = undefined) {
     if (!DEBUG) return;
     if (details === undefined) {
@@ -112,6 +137,7 @@
   }
 
   function setActive({ showOverlay }) {
+    surfaceExpiry.cancel();
     recentCaptureToken += 1;
     closeFixedCollectionChooser();
     if (normalAttemptStartedAt) finishNormalAttempt("attempt_cancelled");
@@ -136,6 +162,7 @@
   }
 
   function setNormal() {
+    surfaceExpiry.cancel();
     closeFixedCollectionChooser();
     clearNormalDelay();
     root().classList.remove(ROOT_ACTIVE, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT);
@@ -145,6 +172,7 @@
   }
 
   function setSearchMode() {
+    surfaceExpiry.cancel();
     recentCaptureToken += 1;
     closeFixedCollectionChooser();
     debugLog("setSearchMode:start", {
@@ -222,6 +250,7 @@
   }
 
   function setSidebarOpen() {
+    surfaceExpiry.cancelContinuation();
     const overlay = getOverlay();
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_OPEN);
@@ -233,6 +262,7 @@
   }
 
   function setSidebarHiddenManually() {
+    surfaceExpiry.cancelContinuation();
     const overlay = getOverlay();
     root().classList.remove(ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_OVERLAY_OPEN);
     root().classList.add(ROOT_SIDEBAR_HIDDEN);
@@ -247,6 +277,7 @@
   }
 
   function setSearchFocusedConversation() {
+    surfaceExpiry.cancel();
     const overlay = getOverlay();
     window.clearTimeout(searchSettleTimer);
     searchSettleTimer = null;
@@ -444,8 +475,12 @@
   }
 
   function updateFocusedNavigationShelfVisibility() {
-    const suspended = hasNativeTransientSurface();
-    root().classList.toggle(ROOT_NATIVE_TRANSIENT, suspended);
+    const surface = nativeSurface.inspect();
+    const channel = surface === "channel" || surface === "channel-list";
+    root().classList.toggle(ROOT_CHANNEL_SURFACE, channel);
+    const transient = hasNativeTransientSurface();
+    const suspended = transient || channel;
+    root().classList.toggle(ROOT_NATIVE_TRANSIENT, transient);
     const shelf = document.getElementById(FOCUSED_RECENTS_ID);
     if (!shelf) return;
     const recents = shelf.querySelector("[data-mwf-focused-recents-focused]");
@@ -1313,6 +1348,7 @@
   }
 
   function updateOverlayState() {
+    surfaceExpiry.refresh();
     updateFocusedNavigationShelfVisibility();
     if (isSearching() && root().classList.contains(ROOT_SEARCH_NAVIGATION) &&
         !root().classList.contains(ROOT_OPENING_RECENT)) isolateEmptySearchControls();
@@ -1320,7 +1356,7 @@
     if (!overlay) return;
     const ready = isWhatsAppReady();
     overlay.classList.toggle("mwf-ready", ready);
-    overlay.classList.toggle("mwf-has-conversation", hasOpenConversation());
+    overlay.classList.toggle("mwf-has-conversation", hasOpenConversation() && nativeSurface.inspect() === "conversation");
     if (!ready) updateOverlayLoadingProgress();
     overlay.querySelectorAll("[data-mwf-action]").forEach((button) => {
       button.disabled = !ready;
@@ -1876,9 +1912,7 @@
     button.textContent = "Foco";
     button.title = "Voltar ao modo foco (Alt+Shift+F)";
     button.addEventListener("click", () => {
-      if (root().classList.contains(ROOT_NORMAL)) recordAwareness("focus_returned", { reason: "manual" });
-      if (bypassTimer) window.clearTimeout(bypassTimer);
-      bypassTimer = null;
+      if (root().classList.contains(ROOT_NORMAL) || surfaceExpiry.isContinuing()) recordAwareness("focus_returned", { reason: "manual" });
       setActive({ showOverlay: true });
     });
 
@@ -2128,9 +2162,7 @@
         if (event.key.toLowerCase() === "f") {
           event.preventDefault();
           event.stopImmediatePropagation();
-          if (root().classList.contains(ROOT_NORMAL)) recordAwareness("focus_returned", { reason: "manual" });
-          if (bypassTimer) window.clearTimeout(bypassTimer);
-          bypassTimer = null;
+          if (root().classList.contains(ROOT_NORMAL) || surfaceExpiry.isContinuing()) recordAwareness("focus_returned", { reason: "manual" });
           setActive({ showOverlay: true });
         }
         if (event.key.toLowerCase() === "l") {
@@ -2286,30 +2318,21 @@
     }
   }
 
-  function chooseNormalExpiryDestination() {
+  function chooseNormalExpiryDestination(surface = nativeSurface.inspect()) {
     return globalThis.MirrorFocusState?.chooseExpiryDestination({
       visibilityState: document.visibilityState,
       documentHasFocus: document.hasFocus(),
-      hasOpenConversation: hasOpenConversation(),
+      hasOpenConversation: hasOpenConversation(), surface,
     }) || "blind-overlay";
   }
 
   function setNormalTemporarily(route = "immediate") {
     finishNormalAttempt("normal_opened", { route });
     clearNormalDelay();
-    if (bypassTimer) window.clearTimeout(bypassTimer);
+    surfaceExpiry.cancel();
     recordNormalOpenedAt();
     setNormal();
-    bypassTimer = window.setTimeout(() => {
-      bypassTimer = null;
-      const expiryDestination = chooseNormalExpiryDestination();
-      recordAwareness("focus_returned", { reason: "expiry", expiryDestination });
-      if (expiryDestination === "focused-conversation") {
-        goToMainChatsThen("expiry", () => setSearchFocusedConversation());
-      } else {
-        setActive({ showOverlay: true });
-      }
-    }, BYPASS_MS);
+    surfaceExpiry.start();
   }
 
   function boot() {
