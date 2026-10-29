@@ -18,6 +18,8 @@ function harness(surface){
     onChannel:()=>context.continueNativeSurface('channel'),onStatus:()=>context.continueNativeSurface('status'),onBlind:()=>context.setActive(),
     onReturned:destination=>events.push(['returned',destination]),clearContinuation:()=>classList.remove('channel-focused','expired-status')});
   context.surfaceExpiry=expiry;
+  context.nativeSurface={inspect:()=>surface};
+  Object.assign(context,Object.fromEntries(['ROOT_ACTIVE','ROOT_OVERLAY_OPEN','ROOT_SEARCHING','ROOT_SEARCH_FOCUSED','ROOT_SEARCH_TOO_SHORT','ROOT_SEARCH_WAITING','ROOT_SIDEBAR_OPEN','ROOT_SIDEBAR_HIDDEN','ROOT_OPENING_RECENT'].map(name=>[name,name])));
   return {flags,overlay,events,listeners,context,expiry,start:()=>{expiry.start();timer();},change:value=>{surface=value;},frame:()=>frame()};
 }
 test('actual native-entry helper hides overlay and does not cancel its own continuation',()=>{
@@ -39,8 +41,27 @@ test('observer closure applies focus only after expired Status is gone and revea
   assert.equal(h.expiry.isContinuing(),false);assert.equal(h.flags.has('expired-status'),false);assert.equal(h.overlay.hidden,false);
   assert.deepEqual(h.events,['visibility',['returned','blind-overlay'],'active']);
 });
+test('explicit Continue from the blind card resumes channel without native navigation, capture or a renewed timer',()=>{
+  const h=harness('channel');h.flags.add('ROOT_ACTIVE');h.flags.add('ROOT_OVERLAY_OPEN');
+  vm.runInContext(extract('continueOpenConversation')+'\ncontinueOpenConversation();',h.context);
+  assert.equal(h.flags.has('ROOT_ACTIVE'),false);assert.equal(h.flags.has('ROOT_OVERLAY_OPEN'),false);
+  assert.equal(h.flags.has('channel-focused'),true);assert.equal(h.overlay.hidden,true);
+  assert.equal(h.expiry.isContinuing(),true);assert.deepEqual(h.events,['visibility']);
+});
+
+test('channel is offered on the focus card with a truthful action label',()=>{
+  for(const surface of ['channel','conversation','channel-list']){
+    const classes=new Set(),button={};const overlay={classList:{toggle:(name,force)=>force?classes.add(name):classes.delete(name)},querySelectorAll:()=>[button]};
+    const context=vm.createContext({surfaceExpiry:{refresh(){}},updateFocusedNavigationShelfVisibility(){},isSearching:()=>false,
+      getOverlay:()=>overlay,isWhatsAppReady:()=>true,hasOpenConversation:()=>true,nativeSurface:{inspect:()=>surface}});
+    vm.runInContext(extract('updateOverlayState')+'\nupdateOverlayState();',context);
+    assert.equal(classes.has('mwf-has-conversation'),surface!=='channel-list');
+    assert.equal(button.textContent,surface==='channel'?'Continuar no canal aberto':'Continuar na conversa aberta');
+  }
+});
+
 test('composition cancels continuation for explicit transitions and refreshes it through existing observer',()=>{
   for(const method of ['setActive','setNormal','setSearchMode','setSidebarOpen','setSidebarHiddenManually','setSearchFocusedConversation'])assert.match(extract(method),/surfaceExpiry\.cancel(?:Continuation)?\(\)/,method);
   assert.match(extract('updateOverlayState'),/surfaceExpiry\.refresh\(\)/);
-  assert.match(extract('updateOverlayState'),/nativeSurface\.inspect\(\) === "conversation"/);
+  assert.match(extract('updateOverlayState'),/surface === "conversation" \|\| surface === "channel"/);
 });

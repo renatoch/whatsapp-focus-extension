@@ -103,7 +103,9 @@
   });
 
   function continueNativeSurface(kind) {
-    root().classList.remove(ROOT_NORMAL);
+    root().classList.remove(ROOT_NORMAL, ROOT_ACTIVE, ROOT_OVERLAY_OPEN, ROOT_SEARCHING,
+      ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN,
+      ROOT_SIDEBAR_HIDDEN, ROOT_OPENING_RECENT);
     root().classList.add(kind === "channel" ? ROOT_CHANNEL_FOCUSED : ROOT_EXPIRED_STATUS);
     const overlay = getOverlay();
     if (overlay) overlay.hidden = true;
@@ -998,6 +1000,10 @@
   }
 
   function continueOpenConversation() {
+    if (nativeSurface.inspect() === "channel") {
+      surfaceExpiry.continueChannel();
+      return;
+    }
     debugLog("continueOpenConversation:start", {
       ready: isWhatsAppReady(),
       rootClass: root().className,
@@ -1356,7 +1362,12 @@
     if (!overlay) return;
     const ready = isWhatsAppReady();
     overlay.classList.toggle("mwf-ready", ready);
-    overlay.classList.toggle("mwf-has-conversation", hasOpenConversation() && nativeSurface.inspect() === "conversation");
+    const surface = nativeSurface.inspect();
+    const canContinue = hasOpenConversation() && (surface === "conversation" || surface === "channel");
+    overlay.classList.toggle("mwf-has-conversation", canContinue);
+    overlay.querySelectorAll('[data-mwf-action="continue"]').forEach((button) => {
+      button.textContent = surface === "channel" ? "Continuar no canal aberto" : "Continuar na conversa aberta";
+    });
     if (!ready) updateOverlayLoadingProgress();
     overlay.querySelectorAll("[data-mwf-action]").forEach((button) => {
       button.disabled = !ready;

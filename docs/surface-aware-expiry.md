@@ -1,6 +1,27 @@
 # Surface-aware normal-mode expiry
 
-## Implemented scope; Chrome acceptance pending
+## Regression investigation — focus-policy decision pending
+
+Navigator reported channel expiry returned blind and the overlay lacked Resume.
+A real timer in the active dedicated-extension session reproduced this exact bounded
+snapshot: surface=channel, visible=true, documentHasFocus=false, hasMain=true,
+destination=blind-overlay. Detection remained channel before/after layout hiding,
+two frames and a settled delay; selected-cell markers stayed present. The suspected
+virtualization/marker-loss cause was NOT reproduced; no classifier cache was added.
+
+Root cause for this reproduced path is the retained focus-policy fallback, not a
+channel selector. Do not silently relax hidden/inactive policy: ask Navigator whether
+a visible native Status/channel should survive expiry when another window has focus.
+That decision is pending; current behavior remains unchanged until confirmation.
+
+Resume fix: overlay now offers Continuar no canal aberto for a known selected
+channel. Explicit Continue enters native focused-channel continuation directly,
+clears overlay/conflicting mode classes, never normalizes to Chats/captures a recent
+and does not start a new bypass. 198 tests pass, including actual Continue/helper/
+overlay wiring. It is independently safe; whole channel-expiry acceptance is still
+pending. Login/linking-screen work is queued next in login-surface-plan.md.
+
+## Initially implemented scope; Chrome acceptance pending
 
 The five-minute deadline no longer normalizes every active #main to Chats.
 
@@ -46,7 +67,8 @@ closed. Profile remains, without copying/removing its login.
   measurement and restores it before paint, preventing self-hidden detection loops.
 - `focus-state.js`: pure expiry decision with optional surface, preserving old input
   compatibility. New destination labels are internal, not new telemetry enums.
-- `surface-expiry.js`: owns bypass timer, continuation state, generation guards and
+- `surface-expiry.js`: explicit `continueChannel` supports resume from Focus without
+  a new deadline. It owns bypass timer, continuation state, generation guards and
   one queued animation frame. A new bypass/manual focus/explicit focused transition
   cancels obsolete work. Sidebar-only toggles retain the original unexpired timer;
   they can cancel an already-expired continuation. It does not own normal countdown,

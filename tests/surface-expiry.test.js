@@ -67,6 +67,14 @@ test('sidebar toggles preserve the original bypass deadline but cancel an expire
   h.controller.cancelContinuation();assert.equal(h.controller.isContinuing(),false);
 });
 
+test('explicit channel continuation does not normalize or grant another bypass',()=>{
+  const h=harness({surface:'channel'});h.controller.start();assert.equal(h.c.tasks.size,1);
+  assert.equal(h.controller.continueChannel(),true);assert.equal(h.c.tasks.size,0);
+  assert.equal(h.controller.isContinuing(),true);assert.deepEqual(h.events,['channel']);
+  h.controller.refresh();h.c.advance(16);assert.deepEqual(h.events,['channel']);
+  const other=harness({surface:'conversation'});assert.equal(other.controller.continueChannel(),false);assert.deepEqual(other.events,[]);
+});
+
 test('reentrant cancellation at focus-return callback prevents the old mode action',()=>{
   let controller;const h=harness({surface:'status-list',hooks:{returned:()=>controller.cancel()}});controller=h.controller;
   controller.start();h.c.advance(300000);assert.deepEqual(h.events,[['returned','blind-overlay']]);

@@ -1,9 +1,21 @@
 # Plano — Expiração focada em Status e Canais
 
-**Estado:** implementado localmente, em validação Chrome; escopo retomado
+**Estado:** em correção de regressão, aguardando decisão sobre foco da janela; escopo retomado
 explicitamente pelo Navigator após adiamento. Evidência estrutural de Canais e
 implementação/revisão automatizada concluídas. Não é aceitação Chrome ou Done.
 Não autoriza novos recursos, retomada de DS6, merge ou release.
+
+## Investigação da regressão
+
+A expiração real reproduziu canal reconhecido + aba visível + documento sem foco →
+retorno cego pela regra antiga. Marcadores permaneceram estáveis após ocultação;
+não houve evidência de perda de seleção/virtualização. Antes de mudar a política,
+confirmar com Navigator se a exceção deve valer para Status/Canal visíveis mesmo
+com foco em outro aplicativo. Aba oculta é uma decisão separada; não ampliar ambas
+implicitamente. Retomada explícita do canal pelo overlay foi corrigida e coberta
+por testes, sem novo bypass, normalização ou captura de título. Suíte atual: 198.
+Login/vinculação foi solicitado como próxima atividade, sem deslogar contas; ver
+[plano seguinte](login-surface-plan.md).
 
 ## Resultado da execução
 
@@ -190,7 +202,7 @@ retomada/conclusão de DS6; merge, release ou publicação.
 
 ## Próxima ação segura
 
-Validação curta do Navigator no Chrome após reload; usar o guia de evidência
-vinculado acima. Se falhar, reproduzir somente a superfície escolhida pelo usuário
+Confirmar a política de documento sem foco antes de mudar esse fallback. Depois,
+validar a correção no Chrome após reload; usar o guia de evidência vinculado acima. Se falhar, reproduzir somente a superfície escolhida pelo usuário
 e comparar estrutura, sem conteúdo. Não acrescentar seletores por suposição nem
 retomar DS6 para corrigir esta entrega.

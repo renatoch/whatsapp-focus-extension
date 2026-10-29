@@ -65,13 +65,20 @@
         blind(token);
       });
     }
+    function continueChannel() {
+      if (!running || inspect() !== 'channel') return false;
+      cancel();
+      pending = 'channel';
+      onChannel();
+      return true;
+    }
     function cancelContinuation() {
       // A manual sidebar toggle narrows/reveals normal mode; it must not grant a
       // fresh unlimited session before the original five-minute deadline.
       if (timer === null) cancel();
     }
     function dispose() { if (running) { cancel(); running = false; } }
-    return Object.freeze({start, cancel, cancelContinuation, refresh, dispose, isContinuing:() => pending !== null});
+    return Object.freeze({start, cancel, cancelContinuation, continueChannel, refresh, dispose, isContinuing:() => pending !== null});
   }
   const api = Object.freeze({createSurfaceExpiry});
   scope.MirrorSurfaceExpiry = api;

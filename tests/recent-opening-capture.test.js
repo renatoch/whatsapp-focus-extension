@@ -85,6 +85,7 @@ test('continue normalizes and enters the shared focused surface before capturing
   const transitions = [];
   Object.assign(h.context, {
     debugLog: () => {}, isWhatsAppReady: () => true,
+    nativeSurface: {inspect:()=> 'conversation'},
     hasOpenConversation: () => true, findNativeSearchField: () => null,
     describeElement: () => null, isNestedListView: () => false,
     goToMainChatsThen: (_source, callback) => { transitions.push('normalize'); callback(); },
