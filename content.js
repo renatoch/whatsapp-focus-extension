@@ -15,6 +15,8 @@
   const ROOT_CHANNEL_FOCUSED = "mwf-channel-focused";
   const ROOT_EXPIRED_STATUS = "mwf-expired-status";
   const ROOT_AUTH_SURFACE = "mwf-auth-surface";
+  const ROOT_MARK_UNREAD = "mwf-mark-unread";
+  const MARK_UNREAD_ID = "mirror-whatsapp-focus-mark-unread";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
@@ -78,6 +80,8 @@
   let expandedFixedCollectionName = "";
   const fixedCollectionRenderCache = new WeakMap();
   let pendingCollectionTitle = "";
+  let unreadContext = null;
+  let unreadLookupReadyAt = 0;
 
   const copyMenu = globalThis.MirrorCopyMenu.createCopyMenu({
     document, window,
@@ -110,7 +114,75 @@
     onTransition: resetForAuthTransition,
   });
 
+  const unreadDom = globalThis.MirrorMarkUnread.createUnreadDom({
+    document, window, isVisible: isVisibleElement, readHeader: readActiveConversationTitle,
+  });
+  const markUnread = globalThis.MirrorMarkUnread.createMarkUnreadAction({
+    dom: unreadDom, scheduler: window, normalize: globalThis.MirrorFocusedRecents.normalizeTitle,
+    canStart: canMarkUnread, stillAllowed: () => !authSurface.isActive() &&
+      Boolean(document.querySelector("#side")) && !hasNativeTransientSurface() && unreadContext === unreadContextKey(),
+    prepareLookup: (title, alive) => {
+      unreadLookupReadyAt = 0;
+      goToMainChatsThen("mark-unread", () => {
+        if (!alive()) return;
+        const field = findNativeSearchField({allowHidden:true});
+        if (field) {
+          setNativeSearchText(field, title);
+          unreadLookupReadyAt = Date.now() + SEARCH_SETTLE_MS;
+        }
+      });
+    },
+    lookup: (title) => {
+      const field = findNativeSearchField({allowHidden:true});
+      return {accepted:Boolean(field && unreadLookupReadyAt > 0 && Date.now() >= unreadLookupReadyAt &&
+        globalThis.MirrorFocusedRecents.normalizeTitle(getSearchText(field)) === title),
+        candidates:focusedSearchCandidates().candidates};
+    },
+    onBegin: () => {
+      surfaceExpiry.cancel(); clearNormalDelay(); copyMenu.close(); closeFixedCollectionChooser();
+      recentCaptureToken += 1; recentNavigationToken += 1;
+      root().classList.add(ROOT_MARK_UNREAD);
+      unreadContext = unreadContextKey();
+    },
+    onEnd: () => { root().classList.remove(ROOT_MARK_UNREAD); unreadContext = null; unreadLookupReadyAt = 0; },
+    onBusy: updateMarkUnreadButton,
+    onResult: (result) => {
+      if (result.ok && !hasOpenConversation()) {
+        setSearchMode();
+        showToast("Conversa marcada como não lida. Você pode buscar outra.");
+      } else {
+        setActive({showOverlay:true});
+        showToast(result.closed ? "Conversa fechada, mas não consegui confirmar a marcação como não lida." :
+          "Não consegui marcar com segurança. A conversa não foi marcada como não lida.");
+      }
+    },
+  });
+
+  function unreadContextKey() {
+    return [recentNavigationToken, ...[ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED,
+      ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT]
+      .map(name => root().classList.contains(name))].join(":");
+  }
+
+  function canMarkUnread() {
+    return !authSurface.isActive() && !markUnread.isBusy() && !isSearching() &&
+      !root().classList.contains(ROOT_OPENING_RECENT) && getOverlay()?.hidden === true &&
+      !hasNativeTransientSurface() && nativeSurface.inspect() === "conversation" &&
+      Boolean(readActiveConversationTitle());
+  }
+
+  function updateMarkUnreadButton() {
+    const button = document.getElementById(MARK_UNREAD_ID);
+    if (!button) return;
+    const busy = markUnread.isBusy();
+    button.hidden = !busy && !canMarkUnread();
+    button.disabled = busy;
+    const label = busy ? "Marcando…" : "Não lida e sair";
+    if (button.textContent !== label) button.textContent = label;
+  }
+
   function resetForAuthTransition() {
+    markUnread.cancel();
     recentNavigationToken += 1;
     setActive({showOverlay:true});
   }
@@ -1367,6 +1439,8 @@
   }
 
   function updateOverlayState() {
+    markUnread.reconcile();
+    updateMarkUnreadButton();
     surfaceExpiry.refresh();
     updateFocusedNavigationShelfVisibility();
     if (isSearching() && root().classList.contains(ROOT_SEARCH_NAVIGATION) &&
@@ -1979,6 +2053,19 @@
     getControlsContainer().appendChild(button);
   }
 
+  function ensureMarkUnreadButton() {
+    if (!document.body || document.getElementById(MARK_UNREAD_ID)) return;
+    const button = document.createElement("button");
+    button.id = MARK_UNREAD_ID; button.type = "button"; button.hidden = true;
+    button.textContent = "Não lida e sair";
+    button.title = "Marcar como não lida e sair desta conversa, mantendo a busca focada. Esc cancela.";
+    button.addEventListener("click", (event) => {
+      if (event.isTrusted) void markUnread.run();
+    });
+    getControlsContainer().appendChild(button);
+    updateMarkUnreadButton();
+  }
+
   function ensureSearchGateMessage() {
     if (!document.body || document.getElementById(SEARCH_GATE_ID)) return;
 
@@ -2095,6 +2182,7 @@
     ensureReturnButton();
     ensureSidebarButton();
     ensureClipboardButton();
+    ensureMarkUnreadButton();
     ensureSearchAgainButton();
     ensureSearchGateMessage();
     ensureFocusedRecentsShelf();
@@ -2197,6 +2285,15 @@
     document.addEventListener(
       "keydown",
       (event) => {
+        if (markUnread.isBusy()) {
+          const focusShortcut = event.altKey && event.shiftKey && !event.ctrlKey && !event.metaKey && event.key.toLowerCase() === "f";
+          if (!focusShortcut) {
+            event.preventDefault(); event.stopImmediatePropagation();
+            if (event.key === "Escape") { markUnread.cancel(); setActive({showOverlay:true}); }
+            return;
+          }
+          markUnread.cancel();
+        }
         if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
         if (authSurface.isActive()) return;
         if (event.key.toLowerCase() === "t") {

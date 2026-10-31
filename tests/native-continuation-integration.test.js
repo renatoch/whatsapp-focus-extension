@@ -6,7 +6,7 @@ function extract(name){const start=source.indexOf(`  function ${name}(`);assert.
 function harness(surface){
   const flags=new Set(['normal']),overlay={hidden:false},events=[],listeners={};let timer,frame;
   const classList={add:(...values)=>values.forEach(v=>flags.add(v)),remove:(...values)=>values.forEach(v=>flags.delete(v)),contains:v=>flags.has(v)};
-  const context=vm.createContext({authSurface:{isActive:()=>false},root:()=>({classList}),getOverlay:()=>overlay,ROOT_NORMAL:'normal',ROOT_CHANNEL_FOCUSED:'channel-focused',ROOT_EXPIRED_STATUS:'expired-status',
+  const context=vm.createContext({markUnread:{isBusy:()=>false},authSurface:{isActive:()=>false},root:()=>({classList}),getOverlay:()=>overlay,ROOT_NORMAL:'normal',ROOT_CHANNEL_FOCUSED:'channel-focused',ROOT_EXPIRED_STATUS:'expired-status',
     updateFocusedNavigationShelfVisibility:()=>events.push('visibility'),RETURN_ID:'return',
     document:{body:{},getElementById:()=>null,createElement:()=>({addEventListener:(_event,fn)=>listeners.button=fn}),addEventListener:(event,fn)=>listeners[event]=fn},
     getControlsContainer:()=>({appendChild(){}}),recordAwareness:(type,details)=>events.push([type,JSON.parse(JSON.stringify(details))]),
@@ -52,7 +52,7 @@ test('explicit Continue from the blind card resumes channel without native navig
 test('Continue labels stay concise in confirmation and descriptive on the focus card',()=>{
   for(const confirmation of [false,true]) for(const surface of ['channel','conversation','channel-list']){
     const classes=new Set(),button={closest:selector=>confirmation&&selector==='.mwf-normal-confirm'?{}:null};const overlay={classList:{toggle:(name,force)=>force?classes.add(name):classes.delete(name)},querySelectorAll:()=>[button]};
-    const context=vm.createContext({surfaceExpiry:{refresh(){}},updateFocusedNavigationShelfVisibility(){},isSearching:()=>false,
+    const context=vm.createContext({markUnread:{reconcile(){}},updateMarkUnreadButton(){},surfaceExpiry:{refresh(){}},updateFocusedNavigationShelfVisibility(){},isSearching:()=>false,
       getOverlay:()=>overlay,isWhatsAppReady:()=>true,hasOpenConversation:()=>true,nativeSurface:{inspect:()=>surface}});
     vm.runInContext(extract('updateOverlayState')+'\nupdateOverlayState();',context);
     assert.equal(classes.has('mwf-has-conversation'),surface!=='channel-list');

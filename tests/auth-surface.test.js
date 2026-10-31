@@ -33,7 +33,7 @@ test('authentication loss during bypass cancels the old expiry instead of resumi
   const source=fs.readFileSync(path.join(__dirname,'../content.js'),'utf8');
   const start=source.indexOf('  function resetForAuthTransition(');
   const callback=source.slice(start,source.indexOf('\n  function ',start+1));
-  const context=vm.createContext({setActive:options=>{assert.equal(options.showOverlay,true);expiry.cancel();}});
+  const context=vm.createContext({markUnread:{cancel(){}},setActive:options=>{assert.equal(options.showOverlay,true);expiry.cancel();}});
   vm.runInContext('let recentNavigationToken=4;\n'+callback,context);
   assert.match(source,/onTransition: resetForAuthTransition/);
   const document={documentElement:{classList:{toggle(){},remove(){}}},querySelector:()=>null,querySelectorAll:()=>[{visible:true}]};

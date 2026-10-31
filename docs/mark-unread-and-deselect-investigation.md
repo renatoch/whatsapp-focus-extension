@@ -1,5 +1,11 @@
 # Investigation — mark unread and deselect
 
+## Subsequent implementation
+
+Navigator confirmed mobile unread sync and subsequently authorized implementation.
+The initial investigation below is historical; the action now has an implementation
+checkpoint with 249 tests. [Current design, limits and acceptance](mark-unread-and-deselect.md).
+
 ## Scope and intended result
 
 Navigator authorized INVESTIGATION, not implementation, of a native action for an
@@ -83,11 +89,13 @@ verified closed, linked profile retained. Chosen conversation was not reopened.
 
 ## Remaining investigation/acceptance
 
-- Navigator to confirm unread sync in the mobile LIST, without opening the chat.
-  Keep it closed in all clients during the observation; external opening may reread.
+- Navigator CONFIRMED unread sync in the mobile list. Keep the chat closed in other
+  clients when testing; external opening can reread it.
 - Archived conversation route was NOT exercised. Must preserve archive membership
   and confirm native commands/target lookup without unarchiving or opening others.
-- Hover/menu opening under the extension's concealed-list mode was NOT exercised.
-- No production feature, UI action, shortcut, persistent reminder or automated
-  regression suite was added; existing application remains at the previous tested
-  223-test login checkpoint. Implementation requires separate authorization.
+- Subsequently exercised native close/hover/menu/mark with #side initially hidden
+  and a temporary opaque mask: main absent, no menus left, icon-unread-count present.
+  Integrated hidden-global-search/button acceptance still pending.
+- This investigation checkpoint did not implement the feature. Later authorization
+  produced the separate implementation documented above, without a new shortcut or
+  persistent reminder. Original baseline was 223 tests; current checkpoint is 249.

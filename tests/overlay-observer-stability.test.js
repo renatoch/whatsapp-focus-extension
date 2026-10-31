@@ -5,7 +5,7 @@ function harness(confirmation=false){
   let surface='channel',writes=0,queued=0,text='';
   const button={closest:()=>confirmation?{}:null,get textContent(){return text;},set textContent(value){text=value;writes++;queued++;}};
   const overlay={classList:{toggle(){}},querySelectorAll:()=>[button]};
-  const context=vm.createContext({surfaceExpiry:{refresh(){}},updateFocusedNavigationShelfVisibility(){},isSearching:()=>false,
+  const context=vm.createContext({markUnread:{reconcile(){}},updateMarkUnreadButton(){},surfaceExpiry:{refresh(){}},updateFocusedNavigationShelfVisibility(){},isSearching:()=>false,
     getOverlay:()=>overlay,isWhatsAppReady:()=>true,hasOpenConversation:()=>true,nativeSurface:{inspect:()=>surface}});
   vm.runInContext(extract('updateOverlayState'),context);
   return {update:()=>context.updateOverlayState(),button,writes:()=>writes,setSurface:value=>{surface=value;},

@@ -18,6 +18,7 @@ test('loads fixed collections before the content integration', () => {
     'native-surface.js',
     'surface-expiry.js',
     'auth-surface.js',
+    'mark-unread.js',
     'content.js',
   ]);
 });
