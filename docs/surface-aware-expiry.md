@@ -1,5 +1,13 @@
 # Surface-aware normal-mode expiry
 
+## Closure — Navigator accepted
+
+Navigator confirmed “Tá ótimo, pode fechar” after the header-fallback correction.
+Status/channel expiry is accepted and closed as a product activity, with 212 passing
+tests at the final implementation checkpoint. Dedicated debug Chrome is closed and
+port 9222 verified closed; linked profile retained. No DS6 merge or release authorized.
+Investigation/pending statements below describe earlier checkpoints, not current status.
+
 ## Missing channel selection marker — evidenced fallback
 
 Dedicated-profile re-entry tracing observed main content present, a newsletter
@@ -25,7 +33,7 @@ precedence. 212/212 pass. A readonly real-browser factory check recognized the c
 conversation as conversation and rejected it behind a simulated channel list; this
 is NOT end-to-end Chrome acceptance of the channel deadline correction. The temporary
 factory namespace was restored; re-entry trace observer/listeners were removed.
-Manual acceptance of the missing-selection fallback remains pending.
+Navigator subsequently accepted the missing-selection fallback and authorized closure.
 
 ## Immediate channel fallback investigation — unresolved
 
