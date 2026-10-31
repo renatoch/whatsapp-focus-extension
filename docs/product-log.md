@@ -261,8 +261,9 @@ Formato: título descritivo no item principal; detalhe curto em subitem; linha e
 - **[Ideia/Próximo ajuste] Contar quantas vezes o WhatsApp normal foi aberto no dia e na semana**
   - Complementar o tempo desde a última abertura com volume de reaberturas: “abriu WhatsApp normal X vezes hoje” e talvez “Y vezes nesta semana”. Objetivo: tornar visível o padrão cumulativo de escape, não só o intervalo desde a última vez.
 
-- **[Ideia/Próximo ajuste] Marcar conversa focada como não lida e sair sem abrir o modo full**
-  - Quando estiver em modo de ver apenas a conversa, permitir marcar a conversa atual como não lida e sair dela mantendo esse estado, sem precisar voltar para o WhatsApp normal/lista completa.
+- **[Investigado — não implementado] Marcar conversa focada como não lida e desselecionar**
+  - WhatsApp permanece aberto, sem conversa selecionada, com busca/recentes/coleções disponíveis; não é fechar o aplicativo nem bloquear no overlay inicial. [Evidência e plano](mark-unread-and-deselect-investigation.md). Caminho nativo comum confirmado: Fechar conversa no cabeçalho → marcar não lida pelo dropdown da linha → reabrir menu e confirmar Marcar como lida, sem reabrir a conversa.
+  - Menu sintético de botão direito não abriu; mouseover + botão context-btn funcionou. Revalidar alvo por título exato após rerender, nunca por nó antigo conectado. Sem código de produto novo. Pendentes: sincronização no celular, Arquivadas e menu sob máscara de navegação focada. Implementação requer nova autorização.
 
 - **[Ideia/Exploração] Sumarizar conversas do dia anterior para entender temas e foco**
   - Gerar uma visão das conversas em que houve mensagem enviada no dia anterior — e talvez também conversas lidas, incluindo mensagens antigas que não estavam marcadas como não lidas — para perceber quais temas ocuparam atenção e como o tempo ficou pulverizado entre conversas. Incluir contador de quantas conversas privadas e de grupo tiveram mensagem enviada no dia; para grupos, se possível registrar/estimar quantidade de participantes para diferenciar grupos grandes e pequenos. Em cada conversa, registrar também a quantidade de mensagens do dia, tanto em grupos quanto em conversas individuais.
