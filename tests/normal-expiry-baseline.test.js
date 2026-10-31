@@ -15,7 +15,7 @@ function harness({focused=true, visible=true, conversation=true,surface=conversa
   let time=1000000, deadline, expiry;
   const effects=[], normalized=[];
   const context = vm.createContext({
-    globalThis: {MirrorFocusState:require('../focus-state.js')},
+    globalThis: {MirrorFocusState:require('../focus-state.js')},normalExpiryTestMode:false,
     document:{visibilityState:visible?'visible':'hidden',hasFocus:()=>focused},
     hasOpenConversation:()=>conversation, nativeSurface:{inspect:()=>surface}, BYPASS_MS:300000,
     finishNormalAttempt:(type,details)=>effects.push([type,JSON.parse(JSON.stringify(details))]),

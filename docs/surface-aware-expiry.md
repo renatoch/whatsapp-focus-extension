@@ -1,5 +1,24 @@
 # Surface-aware normal-mode expiry
 
+## Immediate channel fallback investigation — unresolved
+
+Navigator reports a channel returns directly to the blind focus card despite the
+screen being active, rather than briefly preserving the channel then falling back.
+This points to the deadline destination decision; document focus or surface
+classification cannot be inferred from the user's visible window alone. Do not
+assume the earlier unfocused reproduction explains this new report.
+
+While the tab's test toggle is enabled, a blind expiry decision now shows the
+existing diagnostic toast (10s, explicit Close/Copy diagnostic). It samples document
+focus, tab visibility, open-content presence and surface once at the decision;
+only an allowlisted surface enum and three booleans enter the diagnostic. No DOM,
+name, message, URL, console, persisted storage or new awareness event is included.
+The optional copy action is explicit and reuses the existing local diagnostic copy.
+Ordinary mode is silent; focus policy, timer and Status behavior are unchanged.
+Four new tests cover unfocused recognized channel, focused channel-list fallback,
+quiet normal mode/success, and rejection of arbitrary surface strings: 207/207 pass.
+This is evidence collection, not a claim that the new immediate-fallback bug is fixed.
+
 ## Compact confirmation labels
 
 Navigator reported the longer Continue label pushed “Abrir mesmo assim” onto another

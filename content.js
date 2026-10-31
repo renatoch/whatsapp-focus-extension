@@ -2354,11 +2354,25 @@
   }
 
   function chooseNormalExpiryDestination(surface = nativeSurface.inspect()) {
-    return globalThis.MirrorFocusState?.chooseExpiryDestination({
-      visibilityState: document.visibilityState,
-      documentHasFocus: document.hasFocus(),
-      hasOpenConversation: hasOpenConversation(), surface,
+    const visibilityState = document.visibilityState;
+    const documentHasFocus = document.hasFocus();
+    const hasOpenContent = hasOpenConversation();
+    const destination = globalThis.MirrorFocusState?.chooseExpiryDestination({
+      visibilityState, documentHasFocus, hasOpenConversation: hasOpenContent, surface,
     }) || "blind-overlay";
+    if (normalExpiryTestMode && destination === "blind-overlay") {
+      const labels = {
+        channel: "canal", "channel-list": "lista de canais", conversation: "conversa",
+        "status-player": "Status", "status-list": "lista de Status", unknown: "superfície não identificada",
+      };
+      const knownSurface = Object.hasOwn(labels, surface) ? surface : "unknown";
+      const tabVisible = visibilityState === "visible";
+      const yesNo = value => value ? "sim" : "não";
+      showToast(`Teste — ${labels[knownSurface]}; aba visível: ${yesNo(tabVisible)}; documento em foco: ${yesNo(documentHasFocus)}; conteúdo aberto: ${yesNo(hasOpenContent)}.`, {
+        surface: knownSurface, tabVisible, documentHasFocus, hasOpenContent,
+      });
+    }
+    return destination;
   }
 
   function setNormalTemporarily(route = "immediate") {
