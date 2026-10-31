@@ -19,6 +19,22 @@ Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 - Esse acesso é necessário para ocultar a lateral, limpar previews e controlar o modo foco, mas significa que qualquer pessoa instalando a extensão precisa confiar no código.
 - O hot-refresh de desenvolvimento (`focus.css` e `dev-config.json` em `web_accessible_resources`) é uma conveniência de prototipagem. Antes de uma versão pública/distribuível, ele deve ser removido ou protegido por build/flag de desenvolvimento.
 
+## Login e vinculação
+
+O Modo foco não cobre o QR nem a entrada do número de telefone reconhecidos pela
+estrutura nativa. Nessas telas, os controles da extensão ficam ocultos e a página
+pode rolar normalmente. Não é preciso desativar a extensão para esses estados.
+
+A proteção cega continua por baixo: volta ao desaparecer a tela de login, inclusive
+no carregamento desconhecido, ou ao surgir a interface autenticada. Uma sessão
+normal anterior não é retomada automaticamente. Nenhum QR, código, token ou número
+é lido, gravado ou enviado pela extensão; não há permissões novas.
+
+Recarregue extensão e aba uma vez para instalar o novo script. Não deslogue uma
+conta funcionando só para testar. QR/entrada de telefone foram verificados num
+perfil desvinculado; etapas posteriores de código e vínculo real ainda não foram
+exercitadas. [Evidência e limites](docs/login-surface-plan.md).
+
 ## Como documentar o MVP
 
 - `README.md`: uso atual, instalação, teste e limitações práticas.

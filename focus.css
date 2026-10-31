@@ -1,3 +1,13 @@
+/* Login is exempt only with an evidenced marker and no authenticated surface.
+   Keep blind mode underneath so removing the marker restores the overlay even
+   before the JS observer runs. Never grant an exemption for missing #side alone. */
+html.mwf-auth-surface:has([data-testid="link-device-qr-code"], [data-testid="link-device-phone-number-entry-screen"]):not(:has(#side, #main)) [id^="mirror-whatsapp-focus-"]:not(style) {
+  display: none !important;
+}
+html.mwf-auth-surface:has([data-testid="link-device-qr-code"], [data-testid="link-device-phone-number-entry-screen"]):not(:has(#side, #main)) body {
+  overflow: auto !important;
+}
+
 html.mwf-active #side {
   display: none !important;
 }

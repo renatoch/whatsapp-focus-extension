@@ -17,6 +17,7 @@ test('loads fixed collections before the content integration', () => {
     'copy-menu.js',
     'native-surface.js',
     'surface-expiry.js',
+    'auth-surface.js',
     'content.js',
   ]);
 });

@@ -1,5 +1,16 @@
 # Local browser investigation (Windows Chrome)
 
+## Login investigation checkpoint
+
+Login evidence was collected in a separately authorized, fresh unlinked Windows
+profile named MirrorWhatsAppFocusLoginDebug-<random>, NOT the retained linked
+MirrorWhatsAppFocusDebug profile. Loopback port 9222 only. No QR/image/code/input
+value capture; no number entry, linking, logout or profile copy/removal. See
+[login evidence](login-surface-plan.md) for observed selectors and acceptance limits.
+Actual manifest JS/CSS were exercised in a CDP isolated world, not installed by
+bypassing Chrome extension installation controls. The fresh browser was closed
+gracefully and port 9222 verified closed; existing linked profiles untouched.
+
 Use a dedicated Chrome profile for DOM/event investigation; never copy the real
 profile, cookies or credentials. This setup does not resume DS6 or authorize
 release/merge/deployment.

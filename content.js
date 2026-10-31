@@ -14,6 +14,7 @@
   const ROOT_CHANNEL_SURFACE = "mwf-channel-surface";
   const ROOT_CHANNEL_FOCUSED = "mwf-channel-focused";
   const ROOT_EXPIRED_STATUS = "mwf-expired-status";
+  const ROOT_AUTH_SURFACE = "mwf-auth-surface";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
   const SIDEBAR_BUTTON_ID = "mirror-whatsapp-focus-sidebar";
@@ -103,6 +104,16 @@
     onReturned: (expiryDestination) => recordAwareness("focus_returned", {reason:"expiry", expiryDestination}),
     clearContinuation: () => root().classList.remove(ROOT_CHANNEL_FOCUSED, ROOT_EXPIRED_STATUS),
   });
+
+  const authSurface = globalThis.MirrorAuthSurface.createAuthSurface({
+    document, isVisible: isVisibleElement, Observer: MutationObserver,
+    onTransition: resetForAuthTransition,
+  });
+
+  function resetForAuthTransition() {
+    recentNavigationToken += 1;
+    setActive({showOverlay:true});
+  }
 
   function continueNativeSurface(kind) {
     root().classList.remove(ROOT_NORMAL, ROOT_ACTIVE, ROOT_OVERLAY_OPEN, ROOT_SEARCHING,
@@ -2187,6 +2198,7 @@
       "keydown",
       (event) => {
         if (!event.altKey || !event.shiftKey || event.ctrlKey || event.metaKey) return;
+        if (authSurface.isActive()) return;
         if (event.key.toLowerCase() === "t") {
           if (!event.isTrusted || event.repeat) return;
           event.preventDefault();
@@ -2385,6 +2397,7 @@
   }
 
   function boot() {
+    authSurface.start();
     startDevRefresh();
     installKeyboardShortcuts();
     installSearchGateHandler();
@@ -2403,7 +2416,7 @@
     });
   }
 
-  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL, ROOT_OPENING_RECENT);
+  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL, ROOT_OPENING_RECENT, ROOT_AUTH_SURFACE);
   root().classList.add(ROOT_ACTIVE, ROOT_OVERLAY_OPEN);
   boot();
 })();
