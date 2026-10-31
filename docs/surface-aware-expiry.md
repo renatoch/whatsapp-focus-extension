@@ -1,5 +1,14 @@
 # Surface-aware normal-mode expiry
 
+## Compact confirmation labels
+
+Navigator reported the longer Continue label pushed “Abrir mesmo assim” onto another
+row. Restored “Continuar na conversa” in the normal-mode confirmation and used the
+analogous “Continuar no canal” there. Main focus-card labels retain “aberta”/“aberto”.
+No font, button spacing, timer or Status change. Text replacement remains guarded
+by equality to avoid the previous observer loop. Label-context and observer-settling
+regressions pass; full suite 203/203. Chrome line placement awaits confirmation.
+
 ## Channel geometry correction and Status acceptance
 
 Navigator confirmed Status behavior works as expected, then requested channel focus

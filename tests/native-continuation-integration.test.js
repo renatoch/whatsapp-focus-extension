@@ -49,14 +49,16 @@ test('explicit Continue from the blind card resumes channel without native navig
   assert.equal(h.expiry.isContinuing(),true);assert.deepEqual(h.events,['visibility']);
 });
 
-test('channel is offered on the focus card with a truthful action label',()=>{
-  for(const surface of ['channel','conversation','channel-list']){
-    const classes=new Set(),button={};const overlay={classList:{toggle:(name,force)=>force?classes.add(name):classes.delete(name)},querySelectorAll:()=>[button]};
+test('Continue labels stay concise in confirmation and descriptive on the focus card',()=>{
+  for(const confirmation of [false,true]) for(const surface of ['channel','conversation','channel-list']){
+    const classes=new Set(),button={closest:selector=>confirmation&&selector==='.mwf-normal-confirm'?{}:null};const overlay={classList:{toggle:(name,force)=>force?classes.add(name):classes.delete(name)},querySelectorAll:()=>[button]};
     const context=vm.createContext({surfaceExpiry:{refresh(){}},updateFocusedNavigationShelfVisibility(){},isSearching:()=>false,
       getOverlay:()=>overlay,isWhatsAppReady:()=>true,hasOpenConversation:()=>true,nativeSurface:{inspect:()=>surface}});
     vm.runInContext(extract('updateOverlayState')+'\nupdateOverlayState();',context);
     assert.equal(classes.has('mwf-has-conversation'),surface!=='channel-list');
-    assert.equal(button.textContent,surface==='channel'?'Continuar no canal aberto':'Continuar na conversa aberta');
+    assert.equal(button.textContent,surface==='channel'
+      ? (confirmation?'Continuar no canal':'Continuar no canal aberto')
+      : (confirmation?'Continuar na conversa':'Continuar na conversa aberta'));
   }
 });
 
