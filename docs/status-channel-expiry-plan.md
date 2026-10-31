@@ -5,6 +5,16 @@ explicitamente pelo Navigator após adiamento. Evidência estrutural de Canais e
 implementação/revisão automatizada concluídas. Não é aceitação Chrome ou Done.
 Não autoriza novos recursos, retomada de DS6, merge ou release.
 
+## Correção do reconhecimento sem seleção na lista
+
+Evidência de reentrada mostrou #main aberto sem aria-selected nos itens, mesmo com
+foco/visibilidade verdadeiros. Cabeçalho nativo do canal possui botão de notificações;
+conversa escolhida pelo Navigator possui Pesquisar. O classificador aceita esse
+controle visível e escopado ao cabeçalho, exigindo drawer + #main visíveis e ausência
+de footer/editor. Sem cache de títulos, sem presumir que qualquer #main seja canal.
+212/212 testes; aceitação Chrome dessa correção ainda pendente. Status e política de
+foco permanecem inalterados. Detalhes em surface-aware-expiry.md.
+
 ## Ajuste de consistência visual
 
 Navigator confirmou Status como esperado. Para Canais, solicitou manter a coluna

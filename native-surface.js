@@ -15,7 +15,14 @@
         if (drawers.length) {
           const selected = drawers.some(drawer => [...drawer.querySelectorAll('[data-testid="newsletter-tab-newsletter-cell"]')]
             .some(cell => cell.getAttribute('aria-selected') === 'true' || cell.querySelector('[aria-selected="true"]')));
-          return selected && visible('#main').length ? 'channel' : 'channel-list';
+          if (!visible('#main').length) return 'channel-list';
+          if (selected) return 'channel';
+          // Re-entry can retain channel content without a selected list cell.
+          // Observed in the native channel header: "Reativar notificações";
+          // a regular conversation instead exposes Search. Never infer from #main alone.
+          const notificationHeader = visible('#main [data-testid="conversation-header"] button[aria-label*="notifica" i]').length > 0;
+          const hasConversationInput = Boolean(document.querySelector('#main footer, #main [contenteditable="true"]'));
+          return notificationHeader && !hasConversationInput ? 'channel' : 'channel-list';
         }
         return visible('#main').length ? 'conversation' : 'unknown';
       } finally { if (focused) classes.add(channelFocusedClass); }

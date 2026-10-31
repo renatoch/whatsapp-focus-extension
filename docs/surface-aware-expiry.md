@@ -1,5 +1,32 @@
 # Surface-aware normal-mode expiry
 
+## Missing channel selection marker — evidenced fallback
+
+Dedicated-profile re-entry tracing observed main content present, a newsletter
+drawer with cells but zero selected markers, while document focus and visibility
+were true. Other re-entries retained selection; this is not proof that every
+already-open channel fails. The first timed trace ended before the reported
+successful test and is NOT evidence of that success; Navigator supplied that
+manual result. Clicking Messages after expired channel continuation returned to
+focus as designed.
+
+Bounded header inspection found a native notification BUTTON (“Reativar notificações”)
+in the selected channel, versus a Search button (“Pesquisar”) in a user-chosen
+ordinary conversation. No names/messages/IDs/HTML were exported. The adapter now
+accepts a missing list-selection marker only with a visible newsletter drawer,
+visible #main, visible conversation-header notification button (aria-label contains
+“notifica”, based on that observed control), and no footer/contenteditable composer.
+No header-control or classification cache; unknown/stale background content remains
+channel-list. Status precedence and unfocused/hidden fallback are unchanged.
+
+Five new regression tests cover positive header detection, ambiguous/hidden/input
+rejection, self-hidden sidebar measurement, header disappearance and Status
+precedence. 212/212 pass. A readonly real-browser factory check recognized the chosen
+conversation as conversation and rejected it behind a simulated channel list; this
+is NOT end-to-end Chrome acceptance of the channel deadline correction. The temporary
+factory namespace was restored; re-entry trace observer/listeners were removed.
+Manual acceptance of the missing-selection fallback remains pending.
+
 ## Immediate channel fallback investigation — unresolved
 
 Navigator reports a channel returns directly to the blind focus card despite the
