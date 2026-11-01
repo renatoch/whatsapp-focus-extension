@@ -16,6 +16,8 @@
   const ROOT_EXPIRED_STATUS = "mwf-expired-status";
   const ROOT_AUTH_SURFACE = "mwf-auth-surface";
   const ROOT_MARK_UNREAD = "mwf-mark-unread";
+  const ROOT_UNREAD_VISIBLE_SIDEBAR = "mwf-unread-visible-sidebar";
+  const UNREAD_SIDEBAR_BLOCK_ID = "mirror-whatsapp-focus-unread-side-block";
   const ROOT_UNREAD_HEADER_SLOT = "mwf-unread-header-slot";
   const MARK_UNREAD_ID = "mirror-whatsapp-focus-mark-unread";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
@@ -151,8 +153,10 @@
       clearNormalDelay(); copyMenu.close(); closeFixedCollectionChooser();
       recentCaptureToken += 1; recentNavigationToken += 1;
       root().classList.add(ROOT_MARK_UNREAD);
+      root().classList.toggle(ROOT_UNREAD_VISIBLE_SIDEBAR, preserveSidebar);
       unreadContext = unreadContextKey(); unreadOrigin.key = unreadContext;
       showMarkUnreadProgress(true);
+      updateUnreadSidebarBlock();
     },
     prepareFinish: prepareMarkUnreadFinish,
     finishReady: markUnreadFinishReady,
@@ -163,7 +167,8 @@
         // A replaced native field must never strand the transaction mask/progress.
       }
       showMarkUnreadProgress(false);
-      root().classList.remove(ROOT_MARK_UNREAD);
+      root().classList.remove(ROOT_MARK_UNREAD, ROOT_UNREAD_VISIBLE_SIDEBAR);
+      document.getElementById(UNREAD_SIDEBAR_BLOCK_ID)?.remove();
       unreadContext = null; unreadLookupReadyAt = 0; unreadRestoreReadyAt = 0;
       if (result?.cancelled) unreadOrigin = null;
     },
@@ -182,6 +187,40 @@
       }
     },
   });
+
+  function updateUnreadSidebarBlock() {
+    let block = document.getElementById(UNREAD_SIDEBAR_BLOCK_ID);
+    if (!root().classList.contains(ROOT_MARK_UNREAD) || !unreadOrigin?.preserveSidebar) {
+      block?.remove(); return;
+    }
+    const side = document.querySelector("#side");
+    if (!side) { block?.remove(); return; }
+    if (!block) {
+      block = document.createElement("div");
+      block.id = UNREAD_SIDEBAR_BLOCK_ID; block.setAttribute("aria-hidden", "true");
+      block.addEventListener("wheel", guardUnreadSidebarInput, {passive:false});
+      document.body.appendChild(block);
+    }
+    const rect = side.getBoundingClientRect();
+    for (const [name, value] of Object.entries({left:rect.left, top:rect.top, width:rect.width, height:rect.height})) {
+      const css = `${Math.round(value)}px`;
+      if (block.style[name] !== css) block.style[name] = css;
+    }
+  }
+
+  function guardUnreadSidebarInput(event) {
+    if (!event.isTrusted || !markUnread.isBusy()) return;
+    const block = document.getElementById(UNREAD_SIDEBAR_BLOCK_ID);
+    if (!block?.contains(event.target)) return;
+    event.preventDefault(); event.stopImmediatePropagation();
+  }
+
+  function installUnreadSidebarPointerGuard() {
+    for (const type of ["pointerdown", "pointerup", "mousedown", "mouseup", "click", "dblclick", "contextmenu"]) {
+      window.addEventListener(type, guardUnreadSidebarInput, true);
+    }
+    window.addEventListener("resize", updateUnreadSidebarBlock);
+  }
 
   function showMarkUnreadProgress(visible) {
     const existing = document.getElementById(UNREAD_PROGRESS_ID);
@@ -1522,6 +1561,7 @@
 
   function updateOverlayState() {
     markUnread.reconcile();
+    updateUnreadSidebarBlock();
     updateMarkUnreadButton();
     surfaceExpiry.refresh();
     updateFocusedNavigationShelfVisibility();
@@ -2579,6 +2619,7 @@
 
   function boot() {
     authSurface.start();
+    installUnreadSidebarPointerGuard();
     startDevRefresh();
     installKeyboardShortcuts();
     installSearchGateHandler();

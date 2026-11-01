@@ -50,8 +50,9 @@ confirma o indicador nativo e preserva o modo de origem:
   regra normal de expiração continua valendo.
 
 Durante os segundos de processamento, aparece **Marcando como não lida…** com um
-indicador de atividade. Lista e menus nativos ficam temporariamente mascarados para
-as buscas internas. Ao concluir, a extensão não duplica o aviso de sucesso nativo;
+indicador de atividade. **No modo normal, a lateral permanece visível sob uma
+camada translúcida de bloqueio**, com leve desfoque; cliques não atingem a lista.
+No modo focado, ela continua oculta. Os menus nativos usados internamente não aparecem. Ao concluir, a extensão não duplica o aviso de sucesso nativo;
 exibe aviso final somente em caso de erro. **Esc** ou **Alt+Shift+F** cancela.
 
 É uma marcação do próprio WhatsApp, não um lembrete da extensão; abrir a conversa

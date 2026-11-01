@@ -1097,6 +1097,16 @@ html.mwf-channel-surface #mirror-whatsapp-focus-mark-unread { display: none !imp
 /* Transaction mask: never reveal the native list or its command popups.
    Filter leaves native popup opacity animations intact. */
 html.mwf-mark-unread #side { display: flex !important; opacity: 0 !important; pointer-events: none !important; }
+/* Normal/explicit-sidebar origin stays recognizable; only focused origin is concealed. */
+html.mwf-mark-unread.mwf-unread-visible-sidebar #side { opacity: 1 !important; }
+#mirror-whatsapp-focus-unread-side-block {
+  position: fixed;
+  background: rgba(32, 44, 51, .18);
+  backdrop-filter: blur(1px);
+  cursor: progress;
+  pointer-events: auto;
+  z-index: 2147483645;
+}
 html.mwf-mark-unread [role="menu"] { filter: opacity(0) !important; pointer-events: none !important; }
 html.mwf-mark-unread #app,
 html.mwf-mark-unread #mirror-whatsapp-focus-mark-unread,

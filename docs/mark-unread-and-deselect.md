@@ -11,12 +11,14 @@ button was removed after Navigator accepted the action but found the column nois
 It is available only for a known conversation, not Channel/Status/login, search or
 a native modal. The action/controller/native mutation sequence is unchanged.
 
-Implementation is on main; 269 Node tests pass at this checkpoint. Navigator
+Implementation is on main; 275 Node tests pass at this checkpoint. Navigator
 accepted both the installed common focused flow and header placement. Subsequent
 feedback: several seconds felt stalled, native/extension success notices duplicated,
 and normal-mode use wrongly hid the sidebar. Activity/error-only feedback and
-origin-mode preservation are now implemented; their installed-runtime confirmation
-and Archived remain pending. No DS6 work/release.
+origin-mode preservation are now implemented. Navigator then requested that normal
+mode keep the panel visible DURING processing, not merely restore it afterward.
+A translucent blocking layer now replaces normal-origin concealment; visual
+confirmation of this refinement and Archived remain pending. No DS6 work/release.
 [Initial native investigation](mark-unread-and-deselect-investigation.md).
 
 ## End state
@@ -38,12 +40,18 @@ clipboard, telemetry events, storage keys, permissions or backend were added.
 1. Snapshot the origin mode and, only for a visible sidebar, its current search
    query transiently. Preserve an existing normal-mode deadline; cancel old bypass
    only for focused origin. Cancel countdown/capture/navigation work and close menus.
-   Add only mwf-mark-unread; do not enter normal mode or reuse another operation's
-   opening-recent class. Ignore typing/duplicate clicks during the short transaction.
+   Add mwf-mark-unread and, only for a visible origin, mwf-unread-visible-sidebar;
+   do not enter normal mode or reuse another operation's opening-recent class. Ignore typing/duplicate clicks during the short transaction.
    Escape or Alt+Shift+F can cancel; auth/new navigation invalidates the operation.
-2. Keep #side rendered but opacity=0/pointer-events=none. Native command menus use
-   filter:opacity(0), preserving native opacity animations. Block native pointer
-   interaction while busy. The header envelope becomes disabled with aria-busy;
+2. Keep #side rendered/pointer-events=none. Focused origin remains opacity=0;
+   normal/explicit-sidebar origin is opacity=1 beneath a fixed, translucent blocker
+   following #side bounds, with mild 1px backdrop blur. This is the live panel, not
+   a cloned/frozen DOM or screenshot; internal search can update beneath the layer.
+   Native command menus still use filter:opacity(0), preserving opacity animations.
+   Trusted pointer actions on the blocker are stopped at window capture; synthetic
+   native actions are not intercepted. Wheel blocking is local to the temporary
+   blocker (no permanent nonpassive global wheel listener). Block native interaction
+   while busy. The header envelope becomes disabled with aria-busy;
    it disappears when its conversation header closes. A separate polite status
    “Marcando como não lida…” and reduced-motion-aware spinner persists until cleanup.
    No lateral button is added; no unrelated toast is hidden by progress cleanup.
@@ -66,13 +74,31 @@ clipboard, telemetry events, storage keys, permissions or backend were added.
    Focused origin uses setSearchMode; visible origin does NOT call setNormal,
    setSearchMode, start or cancel the original deadline. A read-only hasDeadline
    getter detects expiry even before delayed native normalization changes classes.
-8. Remove progress/mask on success, failure, cancellation or auth loss. Success
+8. Remove progress/mask/blocker/visible-origin class on success, failure,
+   cancellation or auth loss. Success
    relies on WhatsApp's own notice; no extension success toast. Errors distinguish
    unconfirmed marking from confirmed marking with failed query restoration. Normal
    origin keeps its lateral on errors too; focused errors use the protective focus
    surface. Secondary field-restoration exceptions cannot strand the mask/progress.
    Cancelled/superseded work never restores an old query, forces a late landing or
    unmasks a newer run. Origin/query snapshots are discarded, never persisted.
+
+## Normal-origin blocking layer refinement
+
+Navigator approved keeping the normal panel visible instead of blanking it. A
+higher-specificity rule overrides only the normal-origin sidebar opacity; focused
+concealment and native popup hiding are unchanged. The extension-owned decorative
+blocker uses native geometry only, never copies/reads list content, stays out of the
+accessibility tree and cannot affect the query/deadline/controller lifecycle. It
+updates on DOM commits/resize, with idempotent styles and bounded ownership.
+Pointer capture is restricted to trusted input targeting this owned layer while the
+transaction is busy, so internal mouseover/click automation still works. Removal
+restores normal interaction; the existing polite progress status remains the single
+activity message. Mode-key comparison deliberately excludes the visual-only flag.
+Six new tests cover geometry/no clone, idempotence/resize, focused absence/cleanup,
+trusted vs synthetic input, scoped wheel handling and normal/focused CSS cascade.
+Existing mode/deadline/error/cancellation tests also verify blocker cleanup: 275 pass.
+No new live account mutation or browser session was needed for this cosmetic change.
 
 ## Feedback and mode-preservation checks
 
@@ -82,7 +108,7 @@ expires at the original deadline, never at a fresh five minutes. Covered focused
 landing without success toast, explicit side-open without a deadline, normal errors,
 query restoration/settle, cancellation and expiry during work, accessible/idempotent
 progress, independent toast ownership, missing/replaced fields, bounded finalization
-and cleanup exceptions. Existing full suite passes (269); no new live browser/account
+and cleanup exceptions. That checkpoint passed 269 tests (current total 275); no new live browser/account
 actions were used for these feedback fixes. Processing is not claimed instantaneous;
 visible progress explains native lookup/confirmation/restoration waits.
 
