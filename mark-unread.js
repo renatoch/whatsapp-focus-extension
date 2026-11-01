@@ -53,7 +53,7 @@
   }
 
   function createMarkUnreadAction({dom, scheduler, normalize, prepareLookup, lookup,
-    canStart, stillAllowed, onBegin, onEnd, onResult, onBusy}) {
+    canStart, stillAllowed, onBegin, onEnd, onResult, onBusy, prepareFinish = () => {}, finishReady = () => true}) {
     let current = null, running = true;
     const CANCELLED = Symbol('cancelled');
     function valid(op) {
@@ -110,7 +110,7 @@
       current = null;
       for (const abort of op.waits.values()) abort();
       op.waits.clear(); op.title = '';
-      dom.dismiss(); onEnd(); onBusy(false);
+      dom.dismiss(); onEnd({ok:false, cancelled:true, closed:op.closed}); onBusy(false);
     }
     function reconcile() { if (current && !valid(current)) cancel(); }
     async function run() {
@@ -154,16 +154,24 @@
           confirmed = row;
           return success;
         }, 'verify');
+        check(op);
+        try {
+          prepareFinish(() => valid(op));
+          await until(op, finishReady, 'restore');
+        } catch (error) {
+          if (error === CANCELLED) throw error;
+          fail('restore');
+        }
         check(op); result = {ok:true, closed:true};
       } catch (error) {
         result = error === CANCELLED ? {ok:false, cancelled:true, closed:op.closed}
-          : {ok:false, error:['lookup','ambiguous','menu','close','mark','verify'].includes(error?.code) ? error.code : 'unavailable', closed:op.closed};
+          : {ok:false, error:['lookup','ambiguous','menu','close','mark','verify','restore'].includes(error?.code) ? error.code : 'unavailable', closed:op.closed};
       } finally {
         if (current === op) {
           current = null;
           for (const abort of op.waits.values()) abort();
           op.waits.clear(); op.title = '';
-          dom.dismiss(); onEnd(); onBusy(false);
+          dom.dismiss(); onEnd(result); onBusy(false);
           if (!result.cancelled) onResult(result);
         }
       }

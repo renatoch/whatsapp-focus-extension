@@ -1,7 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const {createMarkUnreadAction}=require('../mark-unread.js');
 function harness(options={}){
- const events=[],results=[],jobs=new Map();let id=0,main=true,title='Private chosen title',menu=null,unread=!!options.alreadyUnread,allowed=true;
+ const events=[],results=[],endings=[],jobs=new Map();let id=0,main=true,title='Private chosen title',menu=null,unread=!!options.alreadyUnread,allowed=true;
  let row={isConnected:true};let candidates=[{title,clickTarget:row}];let controller;
  const scheduler={setTimeout(fn){const key=++id;jobs.set(key,fn);queueMicrotask(()=>{if(jobs.delete(key))fn();});return key;},clearTimeout:key=>jobs.delete(key)};
  const dom={readHeader:()=>main?title:'',hasMain:()=>main,menus:()=>menu?[{}]:[],
@@ -14,8 +14,9 @@ function harness(options={}){
   dismiss(){menu=null;events.push('dismiss');},unread:()=>unread&&!options.noBadge};
  controller=createMarkUnreadAction({dom,scheduler,normalize:value=>String(value||'').trim(),
   prepareLookup(){events.push('lookup');},lookup:()=>({accepted:!options.rejectedSearch,candidates}),canStart:()=>!options.ineligible,stillAllowed:()=>allowed,
-  onBegin:()=>events.push('mask'),onEnd:()=>events.push('unmask'),onBusy:value=>events.push(value?'busy':'idle'),onResult:result=>results.push(result)});
- return {controller,events,results,setCandidates:value=>{candidates=value;},row:()=>row,setAllowed:value=>{allowed=value;},setTitle:value=>{title=value;},main:()=>main};
+  onBegin:()=>events.push('mask'),onEnd:result=>{endings.push(result);events.push('unmask');},onBusy:value=>events.push(value?'busy':'idle'),onResult:result=>results.push(result),
+  prepareFinish:options.prepareFinish?()=>options.prepareFinish(controller):undefined,finishReady:options.finishReady});
+ return {controller,events,results,endings,setCandidates:value=>{candidates=value;},row:()=>row,setAllowed:value=>{allowed=value;},setTitle:value=>{title=value;},main:()=>main};
 }
 test('masked native route closes first, marks once and verifies a newly rendered row',async()=>{
  const h=harness({replaceAfterMark:true});const result=await h.controller.run();assert.deepEqual(result,{ok:true,closed:true});assert.equal(h.main(),false);
@@ -65,6 +66,21 @@ test('a superseded run cannot clear a newer run mask or finish its navigation',a
  const h=harness();const old=h.controller.run();await Promise.resolve();h.controller.cancel();const fresh=h.controller.run();
  assert.equal((await old).cancelled,true);assert.equal((await fresh).ok,true);assert.equal(h.results.length,1);
  assert.equal(h.events.filter(x=>x==='unmask').length,2);assert.equal(h.events.filter(x=>x==='unread').length,1);
+});
+test('final context restoration finishes before unmasking or notifying the caller',async()=>{
+ let checks=0,h;h=harness({prepareFinish:()=>h.events.push('restore-context'),finishReady:()=>{checks++;assert.equal(h.results.length,0);return checks>1;}});
+ assert.equal((await h.controller.run()).ok,true);assert.ok(h.events.indexOf('restore-context')<h.events.indexOf('unmask'));assert.equal(h.results.length,1);
+});
+test('cancellation during final restoration cleans progress ownership and cannot announce success',async()=>{
+ const h=harness({prepareFinish:controller=>controller.cancel()});const result=await h.controller.run();
+ assert.equal(result.cancelled,true);assert.equal(h.endings[0].cancelled,true);assert.equal(h.events.filter(x=>x==='unmask').length,1);assert.deepEqual(h.results,[]);
+});
+test('failure to restore context is reported separately from native marking',async()=>{
+ const h=harness({finishReady:()=>false});const result=await h.controller.run();assert.equal(result.error,'restore');assert.equal(result.closed,true);assert.equal(h.events.includes('unread'),true);assert.equal(result.ok,false);
+});
+test('a thrown restoration hook is bounded as restoration failure after marking, not success',async()=>{
+ const h=harness({prepareFinish:()=>{throw Error('Unavailable field');}});const result=await h.controller.run();
+ assert.equal(result.error,'restore');assert.equal(result.closed,true);assert.equal(h.controller.isBusy(),false);assert.equal(h.events.at(-1),'idle');
 });
 test('disposal forbids restart and leaves no native action in flight',async()=>{
  const h=harness();const pending=h.controller.run();h.controller.dispose();await pending;assert.equal((await h.controller.run()).ok,false);assert.equal(h.events.includes('unread'),false);

@@ -43,15 +43,22 @@ foi removido. O principal caso é a conversa já focada, com a lista oculta: nã
 preciso abrir o modo completo. O ícone não aparece em Canais, Status ou login.
 
 A ação fecha/desseleciona a conversa antes de marcá-la nativamente como não lida,
-confirma o indicador nativo e deixa **busca vazia, recentes e coleções** disponíveis.
-Não fecha o WhatsApp nem deixa você preso no overlay inicial. Lista e menus nativos
-ficam ocultos durante a operação; clique repetido/teclas não iniciam outra ação.
-**Esc** ou **Alt+Shift+F** cancela. Em caso de falha, o aviso não presume sucesso.
+confirma o indicador nativo e preserva o modo de origem:
+- **Modo focado:** deixa busca vazia, recentes e coleções disponíveis.
+- **Modo normal/lateral aberta:** mantém a lateral ao terminar e restaura a busca
+  anterior, sem reiniciar nem prolongar o prazo original. Se o prazo vencer, a
+  regra normal de expiração continua valendo.
+
+Durante os segundos de processamento, aparece **Marcando como não lida…** com um
+indicador de atividade. Lista e menus nativos ficam temporariamente mascarados para
+as buscas internas. Ao concluir, a extensão não duplica o aviso de sucesso nativo;
+exibe aviso final somente em caso de erro. **Esc** ou **Alt+Shift+F** cancela.
 
 É uma marcação do próprio WhatsApp, não um lembrete da extensão; abrir a conversa
 em outro cliente pode marcá-la como lida novamente. Não desfaz recibos enviados.
 Recarregue extensão e aba uma vez. O fluxo focado comum foi validado pelo usuário;
-a nova posição no cabeçalho e Arquivadas ainda aguardam confirmação visual. [Detalhes e teste](docs/mark-unread-and-deselect.md).
+o ícone no cabeçalho também foi validado. Os ajustes de feedback/modo normal e
+Arquivadas ainda aguardam confirmação. [Detalhes e teste](docs/mark-unread-and-deselect.md).
 
 ## Como documentar o MVP
 

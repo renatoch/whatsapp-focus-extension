@@ -80,7 +80,7 @@
       if (timer === null) cancel();
     }
     function dispose() { if (running) { cancel(); running = false; } }
-    return Object.freeze({start, cancel, cancelContinuation, continueChannel, refresh, dispose, isContinuing:() => pending !== null});
+    return Object.freeze({start, cancel, cancelContinuation, continueChannel, refresh, dispose, isContinuing:() => pending !== null, hasDeadline:() => running && timer !== null});
   }
   const api = Object.freeze({createSurfaceExpiry});
   scope.MirrorSurfaceExpiry = api;

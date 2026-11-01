@@ -29,6 +29,7 @@
   const AWARENESS_PANEL_ID = "mirror-whatsapp-focus-awareness";
   const LAST_NORMAL_OPEN_KEY = "mirror-whatsapp-focus-last-normal-opened-at";
   const TOAST_ID = "mirror-whatsapp-focus-toast";
+  const UNREAD_PROGRESS_ID = "mirror-whatsapp-focus-unread-progress";
   const CONTROLS_ID = "mirror-whatsapp-focus-controls";
   const FOCUSED_RECENTS_ID = "mirror-whatsapp-focus-recents";
   const FIXED_COLLECTIONS_KEY = "mirror-whatsapp-focus-fixed-collections-v1";
@@ -83,6 +84,8 @@
   let pendingCollectionTitle = "";
   let unreadContext = null;
   let unreadLookupReadyAt = 0;
+  let unreadOrigin = null;
+  let unreadRestoreReadyAt = 0;
 
   const copyMenu = globalThis.MirrorCopyMenu.createCopyMenu({
     document, window,
@@ -121,7 +124,8 @@
   const markUnread = globalThis.MirrorMarkUnread.createMarkUnreadAction({
     dom: unreadDom, scheduler: window, normalize: globalThis.MirrorFocusedRecents.normalizeTitle,
     canStart: canMarkUnread, stillAllowed: () => !authSurface.isActive() &&
-      Boolean(document.querySelector("#side")) && !hasNativeTransientSurface() && unreadContext === unreadContextKey(),
+      Boolean(document.querySelector("#side")) && !hasNativeTransientSurface() && unreadContext === unreadContextKey() &&
+      (!unreadOrigin?.hadDeadline || surfaceExpiry.hasDeadline()),
     prepareLookup: (title, alive) => {
       unreadLookupReadyAt = 0;
       goToMainChatsThen("mark-unread", () => {
@@ -140,24 +144,78 @@
         candidates:focusedSearchCandidates().candidates};
     },
     onBegin: () => {
-      surfaceExpiry.cancel(); clearNormalDelay(); copyMenu.close(); closeFixedCollectionChooser();
+      const preserveSidebar = root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN);
+      const field = preserveSidebar ? findNativeSearchField({allowHidden:true}) : null;
+      unreadOrigin = {preserveSidebar, search:field ? getSearchText(field) : "", hadDeadline:preserveSidebar && surfaceExpiry.hasDeadline()};
+      if (!preserveSidebar) surfaceExpiry.cancel();
+      clearNormalDelay(); copyMenu.close(); closeFixedCollectionChooser();
       recentCaptureToken += 1; recentNavigationToken += 1;
       root().classList.add(ROOT_MARK_UNREAD);
-      unreadContext = unreadContextKey();
+      unreadContext = unreadContextKey(); unreadOrigin.key = unreadContext;
+      showMarkUnreadProgress(true);
     },
-    onEnd: () => { root().classList.remove(ROOT_MARK_UNREAD); unreadContext = null; unreadLookupReadyAt = 0; },
+    prepareFinish: prepareMarkUnreadFinish,
+    finishReady: markUnreadFinishReady,
+    onEnd: (result) => {
+      try {
+        if (!result?.ok && !result?.cancelled) restoreUnreadSearch();
+      } catch (_error) {
+        // A replaced native field must never strand the transaction mask/progress.
+      }
+      showMarkUnreadProgress(false);
+      root().classList.remove(ROOT_MARK_UNREAD);
+      unreadContext = null; unreadLookupReadyAt = 0; unreadRestoreReadyAt = 0;
+      if (result?.cancelled) unreadOrigin = null;
+    },
     onBusy: updateMarkUnreadButton,
     onResult: (result) => {
+      const origin = unreadOrigin; unreadOrigin = null;
+      const preserveSidebar = origin?.preserveSidebar && origin.key === unreadContextKey() &&
+        (!origin.hadDeadline || surfaceExpiry.hasDeadline());
       if (result.ok && !hasOpenConversation()) {
-        setSearchMode();
-        showToast("Conversa marcada como não lida. Você pode buscar outra.");
+        if (!preserveSidebar) setSearchMode();
       } else {
-        setActive({showOverlay:true});
-        showToast(result.closed ? "Conversa fechada, mas não consegui confirmar a marcação como não lida." :
+        if (!preserveSidebar) setActive({showOverlay:true});
+        showToast(result.error === "restore" ? "Marcação confirmada, mas não consegui restaurar a busca da lateral." :
+          result.closed ? "Conversa fechada, mas não consegui confirmar a marcação como não lida." :
           "Não consegui marcar com segurança. A conversa não foi marcada como não lida.");
       }
     },
   });
+
+  function showMarkUnreadProgress(visible) {
+    const existing = document.getElementById(UNREAD_PROGRESS_ID);
+    if (!visible) { existing?.remove(); return; }
+    if (existing || !document.body) return;
+    const status = document.createElement("div");
+    status.id = UNREAD_PROGRESS_ID;
+    status.setAttribute("role", "status"); status.setAttribute("aria-live", "polite");
+    const spinner = document.createElement("span");
+    spinner.className = "mwf-unread-spinner"; spinner.setAttribute("aria-hidden", "true");
+    const text = document.createElement("span"); text.textContent = "Marcando como não lida…";
+    status.append(spinner, text); document.body.appendChild(status);
+  }
+
+  function restoreUnreadSearch() {
+    if (!unreadOrigin?.preserveSidebar || unreadOrigin.key !== unreadContextKey() ||
+        (unreadOrigin.hadDeadline && !surfaceExpiry.hasDeadline())) return false;
+    const field = findNativeSearchField({allowHidden:true});
+    if (!field) return false;
+    if (getSearchText(field) !== unreadOrigin.search) setNativeSearchText(field, unreadOrigin.search);
+    return true;
+  }
+
+  function prepareMarkUnreadFinish() {
+    unreadRestoreReadyAt = 0;
+    if (unreadOrigin?.preserveSidebar && restoreUnreadSearch()) unreadRestoreReadyAt = Date.now() + SEARCH_SETTLE_MS;
+  }
+
+  function markUnreadFinishReady() {
+    if (!unreadOrigin?.preserveSidebar) return true;
+    const field = findNativeSearchField({allowHidden:true});
+    return Boolean(field && unreadRestoreReadyAt > 0 && Date.now() >= unreadRestoreReadyAt &&
+      getSearchText(field) === unreadOrigin.search);
+  }
 
   function unreadContextKey() {
     return [recentNavigationToken, ...[ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED,
@@ -167,6 +225,7 @@
 
   function canMarkUnread() {
     return !authSurface.isActive() && !markUnread.isBusy() && !isSearching() &&
+      (!root().classList.contains(ROOT_NORMAL) || surfaceExpiry.hasDeadline()) &&
       !root().classList.contains(ROOT_OPENING_RECENT) && getOverlay()?.hidden === true &&
       !hasNativeTransientSurface() && nativeSurface.inspect() === "conversation" &&
       Boolean(readActiveConversationTitle());

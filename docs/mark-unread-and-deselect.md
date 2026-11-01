@@ -11,17 +11,21 @@ button was removed after Navigator accepted the action but found the column nois
 It is available only for a known conversation, not Channel/Status/login, search or
 a native modal. The action/controller/native mutation sequence is unchanged.
 
-Implementation is on main; 255 Node tests pass at this UI checkpoint. Navigator
-accepted the installed common focused flow (“Funcionou!”). New header placement
-visual acceptance and Archived remain pending. No DS6 work/release.
+Implementation is on main; 269 Node tests pass at this checkpoint. Navigator
+accepted both the installed common focused flow and header placement. Subsequent
+feedback: several seconds felt stalled, native/extension success notices duplicated,
+and normal-mode use wrongly hid the sidebar. Activity/error-only feedback and
+origin-mode preservation are now implemented; their installed-runtime confirmation
+and Archived remain pending. No DS6 work/release.
 [Initial native investigation](mark-unread-and-deselect-investigation.md).
 
 ## End state
 
-WhatsApp remains open. The conversation is natively unread AND deselected; the user
-lands in EMPTY focused search, with existing recents/collections available. No full
-list, new normal-mode bypass, mandatory confirmation, new shortcut or extension-only
-reminder. Mark unread does not reverse read receipts or override reading elsewhere.
+WhatsApp remains open. The conversation is natively unread AND deselected. From
+focused mode the user lands in EMPTY focused search/recents/collections; from normal
+mode or an explicitly visible sidebar, that mode remains, with its previous native
+main-list query restored. No new normal-mode bypass, mandatory confirmation, new
+shortcut or extension-only reminder. Mark unread does not reverse read receipts or override reading elsewhere.
 Opening the chat on another client can mark it read again, as normal WhatsApp behavior.
 
 ## Implementation
@@ -31,14 +35,18 @@ adapter. The title is operation-local, case-sensitive after the existing NFKC ti
 normalization, and cleared on completion/cancellation. No title/state history,
 clipboard, telemetry events, storage keys, permissions or backend were added.
 
-1. Cancel old bypass/countdown/capture/navigation work and close extension menus.
+1. Snapshot the origin mode and, only for a visible sidebar, its current search
+   query transiently. Preserve an existing normal-mode deadline; cancel old bypass
+   only for focused origin. Cancel countdown/capture/navigation work and close menus.
    Add only mwf-mark-unread; do not enter normal mode or reuse another operation's
    opening-recent class. Ignore typing/duplicate clicks during the short transaction.
    Escape or Alt+Shift+F can cancel; auth/new navigation invalidates the operation.
 2. Keep #side rendered but opacity=0/pointer-events=none. Native command menus use
    filter:opacity(0), preserving native opacity animations. Block native pointer
    interaction while busy. The header envelope becomes disabled with aria-busy;
-   it disappears when its conversation header closes. No lateral button is added.
+   it disappears when its conversation header closes. A separate polite status
+   “Marcando como não lida…” and reduced-motion-aware spinner persists until cleanup.
+   No lateral button is added; no unrelated toast is hidden by progress cleanup.
 3. Use the existing hidden native-search route, scoped strictly to Conversas/Chats.
    Wait the existing 1000ms settle interval AFTER input dispatch, then require a
    unique exact-title result stable over two samples. Never trust old query results,
@@ -52,12 +60,36 @@ clipboard, telemetry events, storage keys, permissions or backend were added.
 6. Reacquire the unique result after marking and confirm a visible native
    icon-unread-count on a stable row, twice, while #main remains absent. Native
    badge confirmation avoids reopening a verification popup solely to dismiss it.
-7. Remove the transaction mask and call the existing setSearchMode for the empty
-   focused landing. On failure do not claim success: distinguish a chat already
-   closed with unconfirmed marking. Fall back to the protective focus surface.
-   Cancelled/superseded runs never force a late landing or unmask a newer run.
+7. Before unmasking a still-valid visible-sidebar origin, restore its previous
+   main-list query and wait for the usual search settle interval. A bounded final
+   hook keeps cancellation/deadline guards active throughout this restoration.
+   Focused origin uses setSearchMode; visible origin does NOT call setNormal,
+   setSearchMode, start or cancel the original deadline. A read-only hasDeadline
+   getter detects expiry even before delayed native normalization changes classes.
+8. Remove progress/mask on success, failure, cancellation or auth loss. Success
+   relies on WhatsApp's own notice; no extension success toast. Errors distinguish
+   unconfirmed marking from confirmed marking with failed query restoration. Normal
+   origin keeps its lateral on errors too; focused errors use the protective focus
+   surface. Secondary field-restoration exceptions cannot strand the mask/progress.
+   Cancelled/superseded work never restores an old query, forces a late landing or
+   unmasks a newer run. Origin/query snapshots are discarded, never persisted.
 
-## Header placement (current)
+## Feedback and mode-preservation checks
+
+New tests exercise actual composition callbacks with the real surface-expiry
+controller: the original zero-valued timer handle survives normal completion and
+expires at the original deadline, never at a fresh five minutes. Covered focused
+landing without success toast, explicit side-open without a deadline, normal errors,
+query restoration/settle, cancellation and expiry during work, accessible/idempotent
+progress, independent toast ownership, missing/replaced fields, bounded finalization
+and cleanup exceptions. Existing full suite passes (269); no new live browser/account
+actions were used for these feedback fixes. Processing is not claimed instantaneous;
+visible progress explains native lookup/confirmation/restoration waits.
+
+Nested/Archived views and all native list-filter/scroll state are NOT claimed as
+restored by this patch; the verified scope is mode/visibility and main-list query.
+
+## Header placement (accepted by Navigator)
 
 The button remains extension-owned under body, NOT a foreign child of React's
 native toolbar or menu. Require exactly one visible native Search button in
@@ -108,8 +140,9 @@ result composition. JS syntax, manifest file/load order and diff checks pass.
 1. Reload extension and WhatsApp tab once (new manifest script).
 2. Choose an already-read conversation you are willing to mark unread; keep it
    closed in other clients. Enter focused view with the native list hidden.
-3. Click the envelope to the left of Search (tooltip: Marcar como não lida e sair da conversa). No native list/menu should flash into view. The chat should
-   disappear, followed by empty focused search/recents/collections and a short toast.
+3. Click the envelope to the left of Search (tooltip: Marcar como não lida e sair da conversa). Activity should appear immediately and persist even after
+   the chat closes; it disappears at completion. Focused origin lands in empty
+   focused search/recents/collections. No extension success toast should duplicate WA.
 4. Check mobile unread state from the list without opening the chat. Then search or
    open another recent to verify the landing is usable. Do not open an unread chat
    merely for validation unless the user chooses to do so.

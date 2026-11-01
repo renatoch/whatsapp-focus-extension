@@ -1064,6 +1064,36 @@ html.mwf-overlay-open #mirror-whatsapp-focus-mark-unread,
 html.mwf-native-transient-open #mirror-whatsapp-focus-mark-unread,
 html.mwf-channel-surface #mirror-whatsapp-focus-mark-unread { display: none !important; }
 
+#mirror-whatsapp-focus-unread-progress {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: calc(100vw - 32px);
+  padding: 10px 14px;
+  border: 1px solid rgba(233, 237, 239, .2);
+  border-radius: 20px;
+  background: #202c33;
+  color: #e9edef;
+  font: 13px/1.4 system-ui, sans-serif;
+  pointer-events: none;
+  z-index: 2147483647;
+}
+.mwf-unread-spinner {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  border: 2px solid rgba(233, 237, 239, .25);
+  border-top-color: #00a884;
+  border-radius: 50%;
+  animation: mwf-unread-spin .8s linear infinite;
+}
+@keyframes mwf-unread-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .mwf-unread-spinner { animation: none; } }
+
 /* Transaction mask: never reveal the native list or its command popups.
    Filter leaves native popup opacity animations intact. */
 html.mwf-mark-unread #side { display: flex !important; opacity: 0 !important; pointer-events: none !important; }

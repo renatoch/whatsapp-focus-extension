@@ -4,11 +4,13 @@ function extract(name){const start=source.indexOf(`  function ${name}(`);assert.
 test('button is available for a known conversation with hidden sidebar, never Channel/Status/login',()=>{
  let surface='conversation',auth=false,busy=false;const flags=new Set(['mwf-active','mwf-sidebar-hidden']);
  const context=vm.createContext({authSurface:{isActive:()=>auth},markUnread:{isBusy:()=>busy},isSearching:()=>false,
-  ROOT_OPENING_RECENT:'opening',root:()=>({classList:{contains:name=>flags.has(name)}}),getOverlay:()=>({hidden:true}),hasNativeTransientSurface:()=>false,
+  ROOT_NORMAL:'normal',ROOT_OPENING_RECENT:'opening',root:()=>({classList:{contains:name=>flags.has(name)}}),getOverlay:()=>({hidden:true}),hasNativeTransientSurface:()=>false,
   nativeSurface:{inspect:()=>surface},readActiveConversationTitle:()=> 'Private title'});
  vm.runInContext(extract('canMarkUnread'),context);assert.equal(context.canMarkUnread(),true);
  for(const value of ['channel','channel-list','status-player','status-list','unknown']){surface=value;assert.equal(context.canMarkUnread(),false);}
  surface='conversation';auth=true;assert.equal(context.canMarkUnread(),false);auth=false;busy=true;assert.equal(context.canMarkUnread(),false);
+ busy=false;flags.add('normal');context.surfaceExpiry={hasDeadline:()=>false};assert.equal(context.canMarkUnread(),false);
+ context.surfaceExpiry.hasDeadline=()=>true;assert.equal(context.canMarkUnread(),true);
 });
 test('header refresh never replaces the envelope children and creates no lateral action',()=>{
  assert.doesNotMatch(extract('updateMarkUnreadButton'),/textContent|innerHTML/);
@@ -19,10 +21,10 @@ test('header refresh never replaces the envelope children and creates no lateral
 test('actual result composition lands in empty focused search rather than the initial overlay',()=>{
  let options;const events=[];
  const context=vm.createContext({globalThis:{MirrorMarkUnread:{createUnreadDom:()=>({}),createMarkUnreadAction:value=>(options=value,{})},MirrorFocusedRecents:{normalizeTitle:v=>v}},
-  document:{},window:{},isVisibleElement(){},readActiveConversationTitle(){},canMarkUnread(){},updateMarkUnreadButton(){},
+  document:{},window:{},unreadOrigin:null,isVisibleElement(){},readActiveConversationTitle(){},canMarkUnread(){},updateMarkUnreadButton(){},
   setSearchMode:()=>events.push('search'),showToast:()=>events.push('toast'),setActive:()=>events.push('overlay'),hasOpenConversation:()=>false});
  const start=source.indexOf('  const unreadDom ='),end=source.indexOf('  function unreadContextKey()',start);vm.runInContext(source.slice(start,end),context);
- options.onResult({ok:true,closed:true});assert.deepEqual(events,['search','toast']);
+ options.onResult({ok:true,closed:true});assert.deepEqual(events,['search']);
 });
 test('hidden lookup waits for native search settle instead of trusting results from a previous query',()=>{
  let options,time=100,field={value:''};

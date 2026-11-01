@@ -21,6 +21,11 @@ test('exact five-minute deadline, one expiry, zero-valued timer handles and no a
   h.c.advance(299999);assert.deepEqual(h.events,[]);h.c.advance(1);assert.deepEqual(h.events,['channel']);h.c.force(handle);
   h.c.advance(600000);assert.deepEqual(h.events,['channel']);assert.equal(h.c.tasks.size,0);assert.equal(h.controller.isContinuing(),true);
 });
+test('deadline ownership can be observed without cancelling or extending its original handle',()=>{
+ const h=harness({surface:'unknown'});assert.equal(h.controller.hasDeadline(),false);h.controller.start();const handles=[...h.c.tasks.keys()];
+ assert.equal(h.controller.hasDeadline(),true);assert.deepEqual([...h.c.tasks.keys()],handles);h.c.advance(300000);assert.equal(h.controller.hasDeadline(),false);
+ h.controller.start();assert.equal(h.controller.hasDeadline(),true);h.controller.cancel();assert.equal(h.controller.hasDeadline(),false);
+});
 test('conversation preserves normalization then focus; late or duplicate completion cannot redirect newer work',()=>{
   const h=harness();h.controller.start();h.c.advance(300000);assert.deepEqual(h.events,['normalize']);
   h.callbacks[0]();h.callbacks[0]();assert.deepEqual(h.events,['normalize',['returned','focused-conversation'],'conversation']);
