@@ -1,4 +1,9 @@
-# Mark unread and leave the conversation — prototype
+# Mark unread and leave the conversation — accepted
+
+Navigator confirmed “Ficou ótimo. Pode concluir esse item” after validating the
+normal-sidebar blocker refinement. This activity is accepted and closed; final
+implementation checkpoint has 275 passing tests. No new implementation, DS6 work
+or release is authorized by closure. Archived-specific coverage is not inferred.
 
 ## State and placement
 
@@ -17,8 +22,8 @@ feedback: several seconds felt stalled, native/extension success notices duplica
 and normal-mode use wrongly hid the sidebar. Activity/error-only feedback and
 origin-mode preservation are now implemented. Navigator then requested that normal
 mode keep the panel visible DURING processing, not merely restore it afterward.
-A translucent blocking layer now replaces normal-origin concealment; visual
-confirmation of this refinement and Archived remain pending. No DS6 work/release.
+A translucent blocking layer now replaces normal-origin concealment and was
+accepted by Navigator. Archived-specific coverage remains a separate unvalidated edge. No DS6 work/release.
 [Initial native investigation](mark-unread-and-deselect-investigation.md).
 
 ## End state

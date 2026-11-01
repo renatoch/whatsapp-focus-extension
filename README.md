@@ -58,8 +58,8 @@ exibe aviso final somente em caso de erro. **Esc** ou **Alt+Shift+F** cancela.
 É uma marcação do próprio WhatsApp, não um lembrete da extensão; abrir a conversa
 em outro cliente pode marcá-la como lida novamente. Não desfaz recibos enviados.
 Recarregue extensão e aba uma vez. O fluxo focado comum foi validado pelo usuário;
-o ícone no cabeçalho também foi validado. Os ajustes de feedback/modo normal e
-Arquivadas ainda aguardam confirmação. [Detalhes e teste](docs/mark-unread-and-deselect.md).
+ícone, feedback e bloqueio visual no modo normal também foram aceitos, encerrando
+o item. O caso específico de Arquivadas ainda não foi validado. [Detalhes e teste](docs/mark-unread-and-deselect.md).
 
 ## Como documentar o MVP
 
