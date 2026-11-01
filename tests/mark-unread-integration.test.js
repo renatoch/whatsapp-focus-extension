@@ -10,11 +10,11 @@ test('button is available for a known conversation with hidden sidebar, never Ch
  for(const value of ['channel','channel-list','status-player','status-list','unknown']){surface=value;assert.equal(context.canMarkUnread(),false);}
  surface='conversation';auth=true;assert.equal(context.canMarkUnread(),false);auth=false;busy=true;assert.equal(context.canMarkUnread(),false);
 });
-test('busy button text updates are idempotent under DOM observer callbacks',()=>{
- let writes=0,text='',busy=false;const button={get textContent(){return text;},set textContent(v){text=v;writes++;}};
- const context=vm.createContext({document:{getElementById:()=>button},MARK_UNREAD_ID:'id',markUnread:{isBusy:()=>busy},canMarkUnread:()=>true});
- vm.runInContext(extract('updateMarkUnreadButton'),context);context.updateMarkUnreadButton();context.updateMarkUnreadButton();assert.equal(writes,1);
- busy=true;context.updateMarkUnreadButton();context.updateMarkUnreadButton();assert.equal(writes,2);assert.equal(button.disabled,true);
+test('header refresh never replaces the envelope children and creates no lateral action',()=>{
+ assert.doesNotMatch(extract('updateMarkUnreadButton'),/textContent|innerHTML/);
+ assert.match(extract('ensureMarkUnreadButton'),/<svg aria-hidden="true"/);
+ assert.match(extract('ensureMarkUnreadButton'),/document.body.appendChild\(button\)/);
+ assert.doesNotMatch(extract('ensureMarkUnreadButton'),/getControlsContainer/);
 });
 test('actual result composition lands in empty focused search rather than the initial overlay',()=>{
  let options;const events=[];

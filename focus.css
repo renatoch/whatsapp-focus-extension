@@ -996,10 +996,7 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 #mirror-whatsapp-focus-controls {
   position: fixed;
   left: 6px;
-  top: clamp(92px, calc(100vh - 420px), 300px);
-  max-height: calc(100vh - 108px);
-  overflow-y: auto;
-  overflow-x: hidden;
+  top: 300px;
   z-index: 2147483646;
   display: flex;
   flex-direction: column;
@@ -1008,7 +1005,6 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 
 #mirror-whatsapp-focus-return,
 #mirror-whatsapp-focus-sidebar,
-#mirror-whatsapp-focus-mark-unread,
 #mirror-whatsapp-focus-clipboard {
   width: 50px;
   min-height: 72px;
@@ -1032,23 +1028,48 @@ html.mwf-searching.mwf-search-navigation:not(.mwf-opening-recent) #side [data-mw
 }
 
 #mirror-whatsapp-focus-sidebar,
-#mirror-whatsapp-focus-mark-unread,
 #mirror-whatsapp-focus-clipboard {
   background: #28353d;
   color: #e9edef;
   border: 1px solid rgba(233, 237, 239, 0.22);
 }
 
-#mirror-whatsapp-focus-clipboard,
-#mirror-whatsapp-focus-mark-unread {
+#mirror-whatsapp-focus-clipboard {
   min-height: 112px;
 }
+
+/* Reserve a leading slot beside Search; do not mutate React-owned header children. */
+html.mwf-unread-header-slot #main [data-testid="conversation-header"] button:is([aria-label="Pesquisar"], [aria-label="Buscar"], [aria-label="Search"]) {
+  margin-inline-start: 44px !important;
+}
+#mirror-whatsapp-focus-mark-unread {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  z-index: 2147483646;
+}
+#mirror-whatsapp-focus-mark-unread svg { display: block; pointer-events: none; }
+#mirror-whatsapp-focus-mark-unread:hover { background: rgba(127, 127, 127, .14); }
+#mirror-whatsapp-focus-mark-unread:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+#mirror-whatsapp-focus-mark-unread:disabled { opacity: .45; cursor: wait; }
+#mirror-whatsapp-focus-mark-unread[hidden],
+html.mwf-overlay-open #mirror-whatsapp-focus-mark-unread,
+html.mwf-native-transient-open #mirror-whatsapp-focus-mark-unread,
+html.mwf-channel-surface #mirror-whatsapp-focus-mark-unread { display: none !important; }
 
 /* Transaction mask: never reveal the native list or its command popups.
    Filter leaves native popup opacity animations intact. */
 html.mwf-mark-unread #side { display: flex !important; opacity: 0 !important; pointer-events: none !important; }
 html.mwf-mark-unread [role="menu"] { filter: opacity(0) !important; pointer-events: none !important; }
 html.mwf-mark-unread #app,
+html.mwf-mark-unread #mirror-whatsapp-focus-mark-unread,
 html.mwf-mark-unread #mirror-whatsapp-focus-controls { pointer-events: none !important; }
 html.mwf-mark-unread #mirror-whatsapp-focus-search-again,
 html.mwf-mark-unread #mirror-whatsapp-focus-search-gate,

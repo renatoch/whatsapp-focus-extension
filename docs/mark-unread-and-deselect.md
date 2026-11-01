@@ -5,11 +5,15 @@
 Navigator confirmed the investigation's unread state synced to the mobile list,
 then explicitly authorized implementation. The principal case is ALREADY FOCUSED:
 only the conversation visible, #side hidden. The new trusted-click action is
-“Não lida e sair”, in the left control column below Ajustar cópia. It is available
-only for a known conversation, not Channel/Status/login, search or a native modal.
+an envelope to the LEFT OF SEARCH in the conversation header, with tooltip and
+accessible name “Marcar como não lida e sair da conversa”. The previous lateral
+button was removed after Navigator accepted the action but found the column noisy.
+It is available only for a known conversation, not Channel/Status/login, search or
+a native modal. The action/controller/native mutation sequence is unchanged.
 
-Implementation is on main; 249 Node tests pass at this checkpoint. Integrated
-installed-button acceptance and Archived remain pending. No DS6 work/release.
+Implementation is on main; 255 Node tests pass at this UI checkpoint. Navigator
+accepted the installed common focused flow (“Funcionou!”). New header placement
+visual acceptance and Archived remain pending. No DS6 work/release.
 [Initial native investigation](mark-unread-and-deselect-investigation.md).
 
 ## End state
@@ -33,8 +37,8 @@ clipboard, telemetry events, storage keys, permissions or backend were added.
    Escape or Alt+Shift+F can cancel; auth/new navigation invalidates the operation.
 2. Keep #side rendered but opacity=0/pointer-events=none. Native command menus use
    filter:opacity(0), preserving native opacity animations. Block native pointer
-   interaction while busy. The control shows Marcando…; short viewports can scroll
-   the control column instead of losing the fourth button below the screen.
+   interaction while busy. The header envelope becomes disabled with aria-busy;
+   it disappears when its conversation header closes. No lateral button is added.
 3. Use the existing hidden native-search route, scoped strictly to Conversas/Chats.
    Wait the existing 1000ms settle interval AFTER input dispatch, then require a
    unique exact-title result stable over two samples. Never trust old query results,
@@ -53,10 +57,34 @@ clipboard, telemetry events, storage keys, permissions or backend were added.
    closed with unconfirmed marking. Fall back to the protective focus surface.
    Cancelled/superseded runs never force a late landing or unmask a newer run.
 
+## Header placement (current)
+
+The button remains extension-owned under body, NOT a foreign child of React's
+native toolbar or menu. Require exactly one visible native Search button in
+#main conversation-header (observed Pesquisar, supported Search/Buscar labels).
+A reversible mwf-unread-header-slot CSS rule reserves 44px at Search's inline start;
+position the 40px envelope in that slot, using native color and direction. Missing
+anchor or insufficient header space hides the icon and removes the margin. Refresh
+on native DOM replacement and resize; do not repeatedly write SVG/text/styles.
+Explicit hidden/overlay/native-transient/channel CSS guards protect native surfaces.
+Busy state disables the icon and exposes aria-busy; no new shortcut/storage/API.
+The three-button lateral controls return to their original geometry.
+
+A live layout-only probe used the actual UI functions/CSS under a temporary distinct
+ID, with a no-op action. The existing protective focus overlay was NOT removed;
+only the temporary probe icon's conditional display guard was overridden to measure
+its rectangle underneath it. It reserved the slot, remained body-owned with native
+header children untouched, retained its SVG, and fit completely inside the native
+header immediately left of Search. All probe nodes/styles/resize listeners/classes
+were removed. This is geometry evidence, not installed new-header acceptance.
+Dedicated debug Chrome was closed gracefully; port 9222 verified closed, linked
+profile retained. No new unread mutation occurred during this placement check.
+
 ## Evidence executed
 
 The initial investigation established close → mark → native-menu verification and
-Navigator confirmed mobile sync. A subsequent live probe started from focused mode
+Navigator confirmed mobile sync. Navigator subsequently accepted the installed
+common focused action, then requested and approved this less intrusive placement. A subsequent live probe started from focused mode
 (#side display:none), kept the native sidebar opacity=0 and popups concealed, closed
 the chosen read chat, invoked Mark unread through row hover/context-btn, and ended
 with #main absent, zero remaining native menuitems, the exact row reacquired and
@@ -80,7 +108,7 @@ result composition. JS syntax, manifest file/load order and diff checks pass.
 1. Reload extension and WhatsApp tab once (new manifest script).
 2. Choose an already-read conversation you are willing to mark unread; keep it
    closed in other clients. Enter focused view with the native list hidden.
-3. Click Não lida e sair. No native list/menu should flash into view. The chat should
+3. Click the envelope to the left of Search (tooltip: Marcar como não lida e sair da conversa). No native list/menu should flash into view. The chat should
    disappear, followed by empty focused search/recents/collections and a short toast.
 4. Check mobile unread state from the list without opening the chat. Then search or
    open another recent to verify the landing is usable. Do not open an unread chat

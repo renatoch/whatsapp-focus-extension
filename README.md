@@ -37,9 +37,10 @@ exercitadas. [Evidência e limites](docs/login-surface-plan.md).
 
 ## Marcar como não lida e sair da conversa
 
-Na coluna de controles à esquerda, abaixo de **Ajustar cópia**, use **Não lida e
-sair**. O principal caso é a conversa já focada, com a lista lateral oculta: não é
-preciso abrir o modo completo. O botão não aparece em Canais, Status ou login.
+Use o **ícone de envelope à esquerda da lupa**, no cabeçalho da conversa. O tooltip
+é **Marcar como não lida e sair da conversa**. O botão anterior da coluna lateral
+foi removido. O principal caso é a conversa já focada, com a lista oculta: não é
+preciso abrir o modo completo. O ícone não aparece em Canais, Status ou login.
 
 A ação fecha/desseleciona a conversa antes de marcá-la nativamente como não lida,
 confirma o indicador nativo e deixa **busca vazia, recentes e coleções** disponíveis.
@@ -49,8 +50,8 @@ ficam ocultos durante a operação; clique repetido/teclas não iniciam outra a�
 
 É uma marcação do próprio WhatsApp, não um lembrete da extensão; abrir a conversa
 em outro cliente pode marcá-la como lida novamente. Não desfaz recibos enviados.
-Recarregue extensão e aba uma vez. Protótipo com validação do botão instalado e
-Arquivadas ainda pendente. [Detalhes e teste](docs/mark-unread-and-deselect.md).
+Recarregue extensão e aba uma vez. O fluxo focado comum foi validado pelo usuário;
+a nova posição no cabeçalho e Arquivadas ainda aguardam confirmação visual. [Detalhes e teste](docs/mark-unread-and-deselect.md).
 
 ## Como documentar o MVP
 

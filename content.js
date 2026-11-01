@@ -16,6 +16,7 @@
   const ROOT_EXPIRED_STATUS = "mwf-expired-status";
   const ROOT_AUTH_SURFACE = "mwf-auth-surface";
   const ROOT_MARK_UNREAD = "mwf-mark-unread";
+  const ROOT_UNREAD_HEADER_SLOT = "mwf-unread-header-slot";
   const MARK_UNREAD_ID = "mirror-whatsapp-focus-mark-unread";
   const OVERLAY_ID = "mirror-whatsapp-focus-overlay";
   const RETURN_ID = "mirror-whatsapp-focus-return";
@@ -171,14 +172,36 @@
       Boolean(readActiveConversationTitle());
   }
 
+  function findUnreadHeaderAnchor() {
+    const matches = Array.from(document.querySelectorAll('#main [data-testid="conversation-header"] button'))
+      .filter(button => ["Pesquisar", "Buscar", "Search"].includes(button.getAttribute("aria-label")) && isVisibleElement(button));
+    return matches.length === 1 ? matches[0] : null;
+  }
+
   function updateMarkUnreadButton() {
     const button = document.getElementById(MARK_UNREAD_ID);
     if (!button) return;
     const busy = markUnread.isBusy();
-    button.hidden = !busy && !canMarkUnread();
+    const anchor = busy || canMarkUnread() ? findUnreadHeaderAnchor() : null;
+    root().classList.toggle(ROOT_UNREAD_HEADER_SLOT, Boolean(anchor));
+    button.hidden = !anchor;
     button.disabled = busy;
-    const label = busy ? "Marcando…" : "Não lida e sair";
-    if (button.textContent !== label) button.textContent = label;
+    if (button.getAttribute("aria-busy") !== String(busy)) button.setAttribute("aria-busy", String(busy));
+    if (!anchor) return;
+    // Our CSS reserves a 44px margin, without inserting children into React's header.
+    const rect = anchor.getBoundingClientRect();
+    const header = anchor.closest('[data-testid="conversation-header"]').getBoundingClientRect();
+    const nativeStyle = window.getComputedStyle(anchor);
+    const left = nativeStyle.direction === "rtl" ? rect.right + 2 : rect.left - 42;
+    const top = rect.top + (rect.height - 40) / 2;
+    if (left < header.left + 4 || left + 40 > header.right - 4 || top < header.top || top + 40 > header.bottom) {
+      button.hidden = true;
+      root().classList.remove(ROOT_UNREAD_HEADER_SLOT);
+      return;
+    }
+    for (const [name, value] of Object.entries({left:`${Math.round(left)}px`, top:`${Math.round(top)}px`, color:nativeStyle.color})) {
+      if (button.style[name] !== value) button.style[name] = value;
+    }
   }
 
   function resetForAuthTransition() {
@@ -2057,12 +2080,14 @@
     if (!document.body || document.getElementById(MARK_UNREAD_ID)) return;
     const button = document.createElement("button");
     button.id = MARK_UNREAD_ID; button.type = "button"; button.hidden = true;
-    button.textContent = "Não lida e sair";
-    button.title = "Marcar como não lida e sair desta conversa, mantendo a busca focada. Esc cancela.";
+    button.title = "Marcar como não lida e sair da conversa";
+    button.setAttribute("aria-label", button.title);
+    button.innerHTML = '<svg aria-hidden="true" focusable="false" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 6 9 7 9-7"/></svg>';
     button.addEventListener("click", (event) => {
       if (event.isTrusted) void markUnread.run();
     });
-    getControlsContainer().appendChild(button);
+    document.body.appendChild(button);
+    window.addEventListener("resize", updateMarkUnreadButton);
     updateMarkUnreadButton();
   }
 
@@ -2513,7 +2538,7 @@
     });
   }
 
-  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL, ROOT_OPENING_RECENT, ROOT_AUTH_SURFACE);
+  root().classList.remove(ROOT_SEARCHING, ROOT_SEARCH_FOCUSED, ROOT_SEARCH_TOO_SHORT, ROOT_SEARCH_WAITING, ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_NORMAL, ROOT_OPENING_RECENT, ROOT_AUTH_SURFACE, ROOT_UNREAD_HEADER_SLOT);
   root().classList.add(ROOT_ACTIVE, ROOT_OVERLAY_OPEN);
   boot();
 })();
