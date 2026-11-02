@@ -1,4 +1,9 @@
-# Archived unread filter — native investigation / design decision pending
+# Archived unread filter — reanalysis: logical data is already available
+
+The initial scroll/snapshot proposal below is superseded, NOT approved. Navigator
+challenged the conflation of virtual rendering with data loading and requested a
+new analysis. A read-only logical-data adapter is now the direction to investigate;
+no filter implementation is authorized by this analysis request alone.
 
 ## Requested outcome
 
@@ -39,7 +44,7 @@ were exported. No conversations were opened or archive/account settings changed.
 - Guessing native search operators, accessing private WhatsApp model/store APIs,
   harvesting IDs, or copying native DOM/message previews: not part of this proposal.
 
-## Proposed fallback — requires Navigator alignment before implementation
+## Initial proposed fallback — superseded after reanalysis
 
 A local, explicit-refresh Archived unread view rather than a supposedly native/live
 filter: boundedly scroll the native archive under an activity/blocking layer, collect
@@ -61,8 +66,52 @@ transient names on exit, and exact unique fail-closed native navigation on an ex
 result click. Do not reopen based on a stale row or title; duplicate titles must not
 silently select a different chat. Archived membership must remain untouched.
 
+## Reanalysis: runtime data versus rendered rows
+
+Reopened only the retained dedicated profile, navigated to the public WhatsApp root
+and then the exact native Archived navigation control. No chat was selected/opened,
+no filter/model state was mutated, and no scrolling was needed for these findings.
+Inspection returned structural schema, aggregate counts and reference-equality
+booleans only; never names, model identifiers or message fields.
+
+- A React ancestor of archived-chatlist supplies a `data` array to the native list
+  renderer. It held hundreds of logical entries despite only 16 mounted DOM rows.
+- In the aggregate verification sample: 389 entries, 389 `entry.chat` models, all
+  with `archive === true`. Their numeric `unreadCount` values included 2 positive,
+  2 negative and 385 zero. Do not assume `> 0` is the entire unread predicate; manual
+  unread/negative-counter semantics need explicit tests.
+- Read-only reference matching inside each mounted row found its corresponding
+  model in that logical array: 16 matches. Comparing `unreadCount !== 0` against
+  native icon-unread-count presence yielded zero mismatches in this mounted sample.
+  This is sample validation, not full filter/runtime acceptance for every edge case.
+- Array sizes changed during startup (383 then 389), so adapters must respect live
+  native updates/current committed React state, not cache a presumed fixed total.
+- Main-world inspection can access React expando metadata; the installed extension's
+  isolated world was separately tested: the DOM list exists, but the React Fiber
+  property is NOT accessible there. A normal content-script DOM helper alone cannot
+  directly consume this source.
+
+Correct conclusion: virtualization does NOT require enumerating all rows by scroll.
+The native logical list already contains metadata usable for an in-memory unread
+selection. The earlier assumption that a full traversal/static snapshot was required
+was premature. Main Unread still demonstrably does not filter Archived; absence of
+an exposed UI toggle is not proof that client-side filtering requires scrolling.
+
+Recommended next prototype: a minimal MAIN-world, READ-ONLY adapter, communicating
+only the minimum transient list metadata locally to an isolated extension-owned view.
+Never replace/splice the native data array, dispatch React hook setters, mutate chat
+models or call unknown account/store methods. No names in CDP/tool output, logs,
+backend, storage or telemetry. This introduces private-UI coupling that must fail
+closed on missing/changed schema; it is a tradeoff, not a stable official API.
+
+Before shipping: verify current committed fiber selection, live freshness, title
+extraction without previews/IDs, duplicate-name handling, bounded bridge payloads,
+mode/auth/deadline cleanup, and explicit-click native navigation. Reusing/mutating
+the native renderer is NOT yet established safe; an independent local view may be
+safer. Do not force the old slow scan/Refresh-only UX without new evidence.
+
 ## Status
 
-Investigation only; design decision pending. No extension implementation or manifest
+Investigation only; corrected approach needs prototype validation. No extension implementation or manifest
 change yet. Existing accepted implementation has 275 passing Node tests; those tests
 do not establish an Archived filter. DS6 remains isolated, no release/distribution.
