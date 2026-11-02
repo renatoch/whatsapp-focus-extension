@@ -1,6 +1,40 @@
 # Resume checkpoint — Archived unread filter
 
-## Resume progress after token-limit reset
+## Latest checkpoint — installed toggle validated, user acceptance pending
+
+Current total: 321 tests passing. Installed activation exposed an asynchronous off
+race: immediate rediscovery before React restoration commit hid the button. Fixed
+by retaining the validated inactive adapter on off while restoring current source.
+Also added bounded retries for quiet initial unavailable replies during mount.
+Regression tests cover delayed commits, negative retries and exhausted retry bounds.
+
+Actual installed trusted clicks passed two on/off cycles (3 unread native rows/full
+17 mounted rows), later on with 4 unread rows. Header pill retained and busy cleared,
+no errors. Native Back while active removed control; re-entry unfiltered. Focus
+shortcut while active hid controls and restored full native 389-entry source verified
+read-only. #main absent throughout; no chat rows opened, marks or membership changes.
+Natural no-match, opening/sticky retention and live account changes still need user-
+selected validation, not fake native events. Do not call those cases accepted.
+
+Navigator asked about automating diagnostic setup. Demonstrated routine extension
+reload via existing chrome://extensions own card dev-reload-button, then Page.reload;
+no private install APIs. Foreground the WA target before geometry/input, because
+background native transitions are throttled. Normal entry for technical tests used
+Other, NO note, actual visible UI flow + eight-second wait/explicit recent confirmation.
+Do not attribute a personal motive, bypass countdown, force root flags or click hidden
+controls. Personal choices/account actions still require user involvement.
+
+Temporary helpers added: /tmp/archive-extension-cdp.ps1, archive-extension-reload.js,
+archive-installed-version.ps1 (safe source markers), archive-enter-normal-for-test.js,
+archive-navigation-geometry.js. archive-send-input.ps1 now supports reload/foreground/
+focus as well as existing input. Context IDs change after every reload. Do not reuse.
+
+CURRENT diagnostic browser CLOSED gracefully and port 9222 verified closed. Profile
+retained, normal Chrome untouched. Earlier 'currently OPEN' paragraph below is history.
+Next: get Navigator's visual acceptance; optional explicitly user-selected live/empty/
+opening tests. Do not redo basic renderer research or ask for routine reload repeatedly.
+
+## Resume progress after token-limit reset (historical)
 
 Navigator resumed and prepared normal Archived with #main absent. Both actual installed
 scripts loaded (fresh context IDs were 3 MAIN, 5 UI; never reuse). Missing button was

@@ -3,8 +3,9 @@
 ## State
 
 Navigator authorized implementation after a reversible native-renderer proof.
-Implemented, awaiting final installed interactive validation. 318 Node tests pass
-(275 previous + 43 adapter/controller/UI regressions). No DS6 changes or release.
+Implemented; installed toggle/repeated off/on/archive exit/re-entry/focus cleanup
+validated in dedicated Chrome. Navigator's visual acceptance and specific live/empty/
+opening cases remain pending. 321 Node tests pass (275 previous + 46 regressions). No DS6 changes or release.
 [Investigation, corrected assumptions and native evidence](archived-unread-filter-investigation.md).
 
 ## Use
@@ -93,7 +94,30 @@ stayed stable and restored the unfiltered list with no #main or error. Subscript
 registered/cleaned successfully. This is a real native runtime controller test, NOT
 an accepted click on the reloaded installed toggle. That remains the next step.
 
-Manual route:
+Installed validation subsequently found and fixed an off-toggle race: restoring the
+native React array is asynchronous. Immediately rediscovering saw the previous filtered
+input and hid the button. Off now preserves the validated queue/adapter while restoring
+source and removing listeners; asynchronous-commit regression added. Also corrected
+initial quiet-negative availability retries (three bounded attempts, 400ms apart), so
+transient mounting does not suppress the contextual control after a single response.
+
+Trusted clicks on the actual installed control then passed repeated on/off cycles:
+3 unread rows -> full 17-row mounted window -> 3 unread -> full, button retained,
+pressed/busy correct, no errors. Another activation showed 4 unread rows, all with
+badges. Native Back while active removed the control; re-entry started unfiltered.
+Alt+Shift+F while active immediately hid controls, returned blind, and restored the
+native full source (389 entries verified read-only). No conversation was opened by
+agent and #main stayed absent throughout these tests. Ordinary normal expiry was also
+observed returning blind during the session, but was not an isolated timed test.
+
+Routine reload was automated using only the dedicated profile's existing Chrome
+extensions-page Reload button and Page.reload, not private extension installation
+APIs. The WA tab must be foreground for reliable transitions/geometry. A technical
+entry used the existing Other category, no free-text note, and waited the normal
+flow/confirmation; no hidden normal-now clicks, forced classes or timer bypass.
+Owned debug Chrome was gracefully closed afterward, port 9222 confirmed closed.
+
+Remaining manual route:
 1. Reload extension and tab once, enter normal mode normally, open Archived without
    selecting a conversation. Enable Não lidas; all native results should be unread,
    compactly laid out, or the explicit no-match status should appear.
@@ -104,8 +128,8 @@ Manual route:
 5. Naturally occurring login/expiry should clean up; never log out/link devices to
    test. Existing focus deadline must remain unchanged.
 
-Limits: exact installed opening/retention and live-account change acceptance remain
-pending. Private React/native module changes can make the filter unavailable. Empty
+Limits: Navigator visual acceptance, natural no-match display, exact installed
+opening/retention and live-account change acceptance remain pending. Private React/native module changes can make the filter unavailable. Empty
 archive with no native list has no filter control. Narrow panels hide rather than
 collide with native header controls. Browser back-forward-cache may require reload
 for a stopped script; it must remain unfiltered rather than retain abandoned ownership.

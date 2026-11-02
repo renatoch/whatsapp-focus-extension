@@ -40,7 +40,7 @@
       if(next!==drawer) { if(drawer) send('release'); epoch++;clearPending();drawer=next;received=false;attempts=0;state={available:false,active:false,empty:false,error:false};lastError=false; }
       if(hasList&&!hadList&&!state.active) {received=false;attempts=0;}
       hadList=hasList;
-      if(!received&&attempts<3) { attempts++; send('probe'); if(attempts<3&&retry===null) retry=window.setTimeout(()=>{retry=null;schedule();},250); }
+      if(!received&&attempts<3) { attempts++; send('probe'); if(attempts<3&&retry===null) retry=window.setTimeout(()=>{retry=null;if(!state.available&&!state.error) received=false;schedule();},400); }
       if(!state.available) { removeControls();return; }
       const rect=drawer.getBoundingClientRect();
       if(rect.width<280 || rect.height<100) { removeControls();return; }
@@ -69,7 +69,7 @@
       const m=event.data;
       if(disposed||event.source!==window||event.origin!=='https://web.whatsapp.com'||!m||m.channel!==CHANNEL||m.direction!=='status'||m.epoch!==epoch||!['available','active','empty','error'].every(k=>typeof m[k]==='boolean')) return;
       if(acknowledgement!==null) window.clearTimeout(acknowledgement);acknowledgement=null;
-      if(retry!==null) window.clearTimeout(retry);retry=null;
+      if((m.available||m.error)&&retry!==null) { window.clearTimeout(retry);retry=null; }
       received=true;busy=false;state={available:m.available,active:m.active,empty:m.empty,error:m.error};
       if(state.error&&!lastError) reportError();lastError=state.error;schedule();
     }

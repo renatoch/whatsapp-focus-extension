@@ -41,6 +41,14 @@ test('wrong origin/source and nonboolean status values are rejected',()=>{
 test('unanswered activation is bounded and releases state instead of leaving a disabled button',()=>{
  const h=harness();h.status();h.click();h.advance(1840);assert.equal(h.nodes.has(BUTTON),false);assert.ok(h.nodes.has(ERROR));assert.equal(h.messages.at(-1).command,'release');
 });
+test('initial unavailable reply is retried after native mounting instead of permanently hiding the toggle',()=>{
+ const h=harness();h.status({available:false});assert.equal(h.nodes.has(BUTTON),false);h.advance(400);
+ assert.equal(h.messages.filter(m=>m.command==='probe').length,2);h.status({available:true});assert.ok(h.nodes.has(BUTTON));h.advance(1500);assert.equal(h.messages.filter(m=>m.command==='probe').length,2);
+});
+test('repeated negative availability replies remain bounded and quiet',()=>{
+ const h=harness();h.status({available:false});h.advance(400);h.status({available:false});h.advance(400);h.status({available:false});h.advance(2000);
+ assert.equal(h.messages.filter(m=>m.command==='probe').length,3);assert.equal(h.nodes.has(ERROR),false);assert.equal(h.nodes.has(BUTTON),false);
+});
 test('unsupported/empty archive stops probing after a bounded number of attempts',()=>{
  const h=harness();h.advance(2000);assert.equal(h.messages.filter(m=>m.command==='probe').length,3);assert.equal(h.nodes.has(BUTTON),false);assert.equal(h.timers.size,0);
 });

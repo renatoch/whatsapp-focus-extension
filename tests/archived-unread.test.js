@@ -21,6 +21,14 @@ test('native source refresh cannot permanently replace the filter; equal reconci
 test('off restores latest eligible source, not a stale saved snapshot; listeners are removed',()=>{
  const h=harness();h.on();const added={archive:true,unreadCount:0};h.source([...h.models,added]);h.off();assert.deepEqual(h.rows(),[...h.models,added]);assert.equal(h.stops(),1);assert.equal(h.controller.status().active,false);
 });
+test('off keeps the validated adapter available while React restoration has not committed',()=>{
+ const h=harness();let current=h.models.slice(),pending=null;
+ h.adapter.current=()=>current;h.adapter.set=rows=>{pending=rows;};
+ h.on();current=pending;assert.equal(current.length,2);
+ h.off();assert.equal(current.length,2);assert.equal(pending.length,3);
+ assert.equal(h.controller.status().available,true);assert.equal(h.controller.status().active,false);
+ current=pending;h.run();assert.equal(h.controller.status().available,true);h.on();current=pending;assert.equal(current.length,2);
+});
 test('current conversation can remain like native unread sticky behavior; no IDs are collected',()=>{
  const h=harness();h.on();h.selected(h.models[1]);h.models[1].unreadCount=0;h.event();assert.ok(h.rows().includes(h.models[1]));h.selected(null);h.run();assert.ok(h.rows().includes(h.models[1]));h.off();h.on();assert.equal(h.rows().includes(h.models[1]),false);
 });

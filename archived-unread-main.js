@@ -99,13 +99,18 @@
     let adapter=null, active=false, stop=null, error=false, empty=false, previous=[], sticky=new Set(), writes=[];
     function status() { return {available:!!adapter,active,empty,error}; }
     function emit() { notify(status()); }
-    function release(failed=false) {
+    function release(failed=false, keepAvailable=false) {
       const old=adapter; adapter=null; active=false; empty=false; error=failed; previous=[]; sticky.clear(); writes=[];
       const off=stop; stop=null;
       try { off?.(); } catch (_) { error=true; }
       // Restore through the exact captured source/setter, never search for a new owner.
       try { if(old?.attached()) { const all=old.source(); if(!same(old.current(),all)) old.set(all); } }
       catch (_) { error=true; try { old?.reset?.(); } catch (_) {} }
+      // React may not have committed restoration yet. Keep the validated owner,
+      // rather than rediscover against the previous filtered renderer input.
+      if(keepAvailable && !error) {
+        try { if(inScope() && old?.attached()) adapter=old; } catch (_) { error=true; }
+      }
       emit();
     }
     function reconcile() {
@@ -132,7 +137,7 @@
       try { adapter=getAdapter(); error=false; emit(); } catch (_) { adapter=null; error=false; emit(); }
     }
     function toggle(value, onChange) {
-      if(!value) { release(); probe(); return; }
+      if(!value) { release(false,true); return; }
       if(!adapter) probe();
       if(!adapter || !inScope()) return;
       if(active) { emit(); return; }
