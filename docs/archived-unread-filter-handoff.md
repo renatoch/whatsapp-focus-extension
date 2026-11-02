@@ -1,4 +1,12 @@
-# Resume checkpoint — Archived unread filter
+# Archived unread filter — accepted and closed
+
+Navigator confirmed “Funcionou perfeito, Pode concluir” after the contrast correction.
+Item closed; 322 passing tests at the accepted checkpoint. No further implementation
+is requested. Runtime edge coverage limits remain documented, not invented. Owned
+diagnostic Chrome was already closed and port 9222 verified closed. Historical
+checkpoint instructions below are not a request to resume pending validation.
+
+# Historical resume checkpoint — Archived unread filter
 
 ## Latest visual correction
 

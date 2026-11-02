@@ -67,7 +67,7 @@ No modo normal ou com a lateral aberta, Arquivadas ganha o botão **Não lidas**
 no cabeçalho. O filtro usa os modelos e o painel nativos, sem varrer a lista por
 rolagem ou alterar marcações/arquivamento. Desativar restaura a lista atual completa.
 Implementado com 322 testes; ativação/desativação, saída/retorno e foco validados
-no Chrome de diagnóstico. Aceitação visual do usuário e casos específicos pendentes. Recarregue
+no Chrome de diagnóstico. O usuário validou o resultado e autorizou encerrar o item. Recarregue
 extensão e aba antes de testar. [Detalhes](docs/archived-unread-filter.md).
 
 ## Como documentar o MVP
