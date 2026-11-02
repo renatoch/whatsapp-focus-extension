@@ -98,10 +98,11 @@ selection. The earlier assumption that a full traversal/static snapshot was requ
 was premature. Main Unread still demonstrably does not filter Archived; absence of
 an exposed UI toggle is not proof that client-side filtering requires scrolling.
 
-Recommended next prototype: a minimal MAIN-world, READ-ONLY adapter, communicating
-only the minimum transient list metadata locally to an isolated extension-owned view.
-Never replace/splice the native data array, dispatch React hook setters, mutate chat
-models or call unknown account/store methods. No names in CDP/tool output, logs,
+At this stage the proposed prototype was a MAIN-world READ-ONLY data adapter and
+an isolated-owned result view. This was not proof that a separate view was needed.
+Subsequent explicitly requested native-renderer investigation below instead tested
+reversible presentation-state updates. Chat models/collection remain read-only;
+production must never splice native source arrays or invoke account/store mutators. No names in CDP/tool output, logs,
 backend, storage or telemetry. This introduces private-UI coupling that must fail
 closed on missing/changed schema; it is a tradeoff, not a stable official API.
 
@@ -150,8 +151,76 @@ schema/version guards, transient output, live updates, active-row behavior, owne
 and exact explicit-click navigation still require implementation/testing. No setters,
 splicing of native arrays or modifying React session/hook state are proposed.
 
+## Native panel connection: bounded presentation proof succeeded
+
+Navigator explicitly requested investigation of the missing native-renderer connection.
+No extension implementation was added. The dedicated profile ran a temporary guarded
+presentation experiment, then restored the current native source and closed CDP.
+
+### Native contract established
+
+- Archived owner component has only onClose/ref inputs: no exposed filter prop found.
+- It has a memoized native source getter selecting archived/eligible collection models
+  (and optionally channel models), a local state array, a stable flat-list controller,
+  native single-selection controller and a mapping from state models to native entries.
+- Its original row renderer creates the native Chat component with the original model,
+  selection controller and native onClick handler. Thus changing its PRESENTATION array
+  can reuse the actual native panel, not an extension-made conversation list.
+- Located the current committed owner by walking root.current, not trusting stale DOM
+  fiber/alternate pointers. Identified the local setter by unique array/model-reference
+  correspondence and its native source getter by a narrowly reviewed callback contract;
+  no hard-coded hook index was used. Abort on nonunique/missing shape.
+- The source getter was invoked read-only and verified to return the same complete,
+  ordered model references as the original renderer input before any UI update.
+
+### Bounded reversible experiment
+
+A temporary input shield prevented clicking chats during the proof. Native unread
+predicate selected a NEW local array. Invoked only the matched local React setter
+for panel presentation; did NOT change chat/archive/unread model fields, the backing
+collection, filter session, React component code or the source array.
+
+- First run: 389 entries -> 3 entries, 3 actual native DOM rows, 3 native unread badges.
+- Expanded run: 389 -> 4 rows, all 4 with native badges. Counts can change between runs
+  due live activity; no changes to unread values were observed within either proof.
+- Same native flat-list component and controller, original model references, same
+  native Chat component type, same single-selection controller, native click-handler
+  functions present with the same static implementation. Clicks were NOT invoked;
+  installed navigation acceptance still requires an explicit user-selected test.
+- Native scroll area compacted to its viewport (562px), not a long canvas with gaps.
+- An empty presentation-array fixture removed the native list and rendered its empty
+  branch while the Archived owner stayed mounted. The generic Archived empty copy
+  is NOT yet an appropriate 'no unread matches' message; this needs explicit UI work.
+- Restored using the FRESH native source getter: 389 entries and full native scroll
+  extent (29902px in expanded run). Archive flags unchanged, zero model unread changes
+  observed; #main absent throughout. Temporary input shield/listeners removed.
+- Original collection stayed complete during filtering; no names, previews, IDs, HTML,
+  source-model values or screenshots exported, only counts/reference booleans/schema.
+
+### Remaining implementation and limits
+
+This resolves the missing link experimentally: no separate chat panel or scroll scan
+is necessary for this observed native version. It is NOT a stable supported API or
+installed extension feature. A production adapter will control PRESENTATION state,
+not be entirely read-only; only the conversation models/source stay read-only.
+
+Native refresh P() does setRows(nativeSource()) and overwrites a one-shot filter.
+Observed archive listeners include sort, change:archive, add/remove, and other native
+eligibility changes; explicit change:unreadCount was not among this archive owner's
+listener keys. Native main Unread does listen for unread updates. Production needs
+owned, bounded subscriptions/reconciliation for both, without fake collection events,
+UI write feedback loops, idle full-tree polling or dropping offscreen new unread chats.
+Collection on/off methods exist, but listener integration has not been exercised yet.
+
+Still to implement/test: contextual toggle, live reconciliation/order, current-committed
+fiber/schema guards, ownership and cleanup on archive exit/auth/focus/deadline/unmount,
+restoration from the latest native source, no-unread copy, optional native-like active
+chat retention, unsupported channel/schema fallback, input/observer stability, and
+explicit user-selected native opening. No account/client changes should be simulated
+to test unread events; use fixtures or separately authorized actual user actions.
+
 ## Status
 
-Investigation only; native unread-predicate reuse is demonstrated, UI/adapter not implemented. No extension implementation or manifest
+Investigation only; native panel filtering/restoration has been demonstrated, extension toggle/live adapter not implemented. No extension implementation or manifest
 change yet. Existing accepted implementation has 275 passing Node tests; those tests
 do not establish an Archived filter. DS6 remains isolated, no release/distribution.
