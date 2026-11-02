@@ -5,6 +5,15 @@ normal-sidebar blocker refinement. This activity is accepted and closed; final
 implementation checkpoint has 275 passing tests. No new implementation, DS6 work
 or release is authorized by closure. Archived-specific coverage is not inferred.
 
+## Subsequent investigation — selected-first order
+
+Navigator subsequently authorized investigating their manual order: mark while still
+selected, then close. That sequence succeeded on the chosen target without title
+search. Native Cmd marking received the exact canonical selected model and true;
+targeted close left native unread state/badge present. No implementation change:
+[full evidence, direct-call and focused-mode limits](selected-chat-unread-investigation.md).
+The existing accepted close-first/search behavior remains installed until new authority.
+
 ## State and placement
 
 Navigator confirmed the investigation's unread state synced to the mobile list,
