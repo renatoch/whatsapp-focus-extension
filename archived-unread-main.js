@@ -32,7 +32,7 @@
     }
     if(!candidate) throw Error('schema');
     let top=candidate, climbs=0; const parents=new Set();
-    while(top.return) { if(++climbs>100 || parents.has(top)) throw Error('schema'); parents.add(top);top=top.return; }
+    while(top.return) { if(++climbs>512 || parents.has(top)) throw Error('schema'); parents.add(top);top=top.return; }
     const root=top.stateNode, type=candidate.type, close=candidate.memoizedProps.onClose;
     let targetQueue=null;
     const drawer=document.querySelector('[data-testid="archived-drawer"]');

@@ -66,7 +66,7 @@ o item. O caso específico de Arquivadas ainda não foi validado. [Detalhes e te
 No modo normal ou com a lateral aberta, Arquivadas ganha o botão **Não lidas**
 no cabeçalho. O filtro usa os modelos e o painel nativos, sem varrer a lista por
 rolagem ou alterar marcações/arquivamento. Desativar restaura a lista atual completa.
-Implementado com 316 testes; validação interativa final ainda pendente. Recarregue
+Implementado com 318 testes; validação interativa final ainda pendente. Recarregue
 extensão e aba antes de testar. [Detalhes](docs/archived-unread-filter.md).
 
 ## Como documentar o MVP

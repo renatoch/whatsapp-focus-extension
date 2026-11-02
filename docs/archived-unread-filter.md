@@ -3,8 +3,8 @@
 ## State
 
 Navigator authorized implementation after a reversible native-renderer proof.
-Implemented, awaiting final installed interactive validation. 316 Node tests pass
-(275 previous + 41 adapter/controller/UI regressions). No DS6 changes or release.
+Implemented, awaiting final installed interactive validation. 318 Node tests pass
+(275 previous + 43 adapter/controller/UI regressions). No DS6 changes or release.
 [Investigation, corrected assumptions and native evidence](archived-unread-filter-investigation.md).
 
 ## Use
@@ -84,6 +84,14 @@ both files in their intended MAIN/ISOLATED worlds and displayed the contextual c
 in an eligible normal/Archived state. This is NOT yet a claim that full activation,
 live account changes or click navigation were accepted. Final interactive check is
 pending; no conversation rows were activated by the agent for this implementation.
+
+Resume validation found an actual 138-node native ancestry chain, beyond the original
+100-parent guard. Increased only that bounded guard to 512, retaining cycle detection
+and the 20000-node traversal budget; added deep-valid/over-limit regressions. A direct
+runtime invocation of the corrected controller then filtered to 3 native unread rows,
+stayed stable and restored the unfiltered list with no #main or error. Subscriptions
+registered/cleaned successfully. This is a real native runtime controller test, NOT
+an accepted click on the reloaded installed toggle. That remains the next step.
 
 Manual route:
 1. Reload extension and tab once, enter normal mode normally, open Archived without

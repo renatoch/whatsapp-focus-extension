@@ -1,5 +1,28 @@
 # Resume checkpoint — Archived unread filter
 
+## Resume progress after token-limit reset
+
+Navigator resumed and prepared normal Archived with #main absent. Both actual installed
+scripts loaded (fresh context IDs were 3 MAIN, 5 UI; never reuse). Missing button was
+traced with a read-only instrumented discovery probe: native ancestry was 138 nodes,
+not a cycle, exceeding the original 100-parent guard. Corrected guard to 512 with
+cycle detection intact; added valid-deep and over-limit tests. Current total 318 pass.
+
+Corrected controller was invoked directly against the real native adapter, without
+installing another bridge/listener copy. It subscribed successfully, filtered 16
+mounted rows to 3 actual unread rows, remained active/stable, released and restored
+16 mounted rows. #main absent and no errors throughout. No native chat rows clicked,
+no model/account mutations, no native synthetic collection events. The installed
+script still caches the prior 100 guard until extension/tab reload; do not claim its
+button was exercised. Next: ask Navigator to reload extension AND tab, then normal
+Archived with no conversation selected. Click only the owned filter button.
+
+Diagnostic Chrome is currently OPEN for this ongoing test, loopback 9222. No active
+filter/probe remains after the direct controller test. Close owned browser and verify
+port closure when validation session finishes. Previous closure below was at pause,
+not current state. See /tmp/archive-discovery-diagnostic.js, /tmp/archive-parent-depth.js,
+/tmp/archive-controller-runtime.js for reviewed structural/direct-controller probes.
+
 ## Why paused
 
 Navigator reported 91% token consumption and asked to finish this checkpoint and

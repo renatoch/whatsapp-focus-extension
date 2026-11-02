@@ -83,6 +83,14 @@ test('ambiguous presentation state hooks fail closed before subscribing or writi
 test('unsupported model types, source drift and partial snapshots are rejected',()=>{
  const f=nativeFixture();f.renderer.memoizedProps.data=[{chat:{archive:false,unreadCount:1}}];assert.throws(()=>discover(f.document,f.requireNative));assert.equal(f.writes(),0);
 });
+test('legitimate deep native provider trees remain supported within a bounded ancestry walk',()=>{
+ const f=nativeFixture();for(let i=0;i<140;i++){const child=f.root.child;const wrapper={return:f.root,child};child.return=wrapper;f.root.child=wrapper;}
+ const a=discover(f.document,f.requireNative);assert.equal(a.attached(),true);assert.deepEqual(a.source(),f.models);assert.equal(f.writes(),0);
+});
+test('ancestry deeper than the bounded limit still fails before writes',()=>{
+ const f=nativeFixture();for(let i=0;i<520;i++){const child=f.root.child;const wrapper={return:f.root,child};child.return=wrapper;f.root.child=wrapper;}
+ assert.throws(()=>discover(f.document,f.requireNative));assert.equal(f.writes(),0);
+});
 test('native parent cycles are rejected instead of hanging the renderer',()=>{
  const f=nativeFixture();f.owner.return=f.owner;assert.throws(()=>discover(f.document,f.requireNative));assert.equal(f.writes(),0);
 });
