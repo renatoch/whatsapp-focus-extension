@@ -5,9 +5,9 @@
 The original search/close-first version and its header envelope/normal-sidebar UX
 were accepted. Navigator subsequently authorized replacing its backend after the
 [direct native-command investigation](selected-chat-unread-investigation.md).
-This revision is implemented; actual installed trusted-envelope validation PASSED
-for normal origin. Focused-origin installed validation and Navigator acceptance remain
-pending; 337 Node tests pass.
+Accepted and closed by Navigator after installed normal-origin validation and
+337 passing Node tests. Navigator agreed to leave the focused-origin installed
+check to ordinary use; that specific coverage is NOT claimed as completed.
 The original [menu/search investigation](mark-unread-and-deselect-investigation.md)
 is historical, NOT a requirement for the new path.
 
@@ -96,10 +96,11 @@ mode stayed normal (not search/blind), no busy/progress/blocker residue. The dia
 selector did not find a comparable query input, so no runtime query-equality claim;
 unit/static coverage proves this implementation does not read/write it. No title/menu
 lookup or manual direct call substituted for this installed-button test. Capture/message
-listener references were cleaned. Diagnostic remains open awaiting a separately chosen
-focused test case; don't reopen the just-unread target automatically.
+listener references were cleaned. Navigator authorized closure without another chosen test case. Dedicated Chrome
+was gracefully closed and port 9222 verified closed; linked profile retained.
 
-Next: genuine envelope click in focused origin, verify native unread/deselection and
-empty focused navigation landing, then Navigator acceptance. New live tests require a user-selected authorized read conversation; do
+Optional future ordinary-use confirmation: focused-origin envelope action and empty
+focused landing. This is a retained coverage limit, not an active task or authorization
+to reopen chats or prolong investigation. New live tests require a user-selected authorized read conversation; do
 not reopen a newly unread chat or choose an unsolicited target just for coverage.
 No new mobile-sync/Archived-case acceptance is inferred. No DS6/release changes.
