@@ -5,7 +5,7 @@
 Navigator authorized implementation after a reversible native-renderer proof.
 Implemented; installed toggle/repeated off/on/archive exit/re-entry/focus cleanup
 validated in dedicated Chrome. Navigator's visual acceptance and specific live/empty/
-opening cases remain pending. 321 Node tests pass (275 previous + 46 regressions). No DS6 changes or release.
+opening cases remain pending. 322 Node tests pass (275 previous + 47 regressions). No DS6 changes or release.
 [Investigation, corrected assumptions and native evidence](archived-unread-filter-investigation.md).
 
 ## Use
@@ -21,6 +21,15 @@ The control is contextual, not another permanent lateral control. It disappears
 on leaving Archived or losing sidebar permission. No-match state explicitly says
 there are no archived unread conversations, not that the archive itself is empty.
 No filter preference or derived list is persisted.
+
+## Visual refinement pending confirmation
+
+Navigator's header screenshots showed unreadable black text over a dark inactive
+pill in light theme. The missing header-background token used a dark fallback while
+--primary resolved to black. Inactive background is now transparent over the actual
+native header, with native/inherited foreground. Active green/white is unchanged.
+Added a regression against mixed-theme fallbacks. No new live browser/account actions;
+Navigator visual confirmation remains pending.
 
 ## Native presentation adapter
 

@@ -61,6 +61,12 @@ test('dispose clears all timers, overlays and listener; delayed tasks cannot rec
 test('narrow panels fail closed rather than overlap native header controls',()=>{
  const h=harness();h.rect.width=240;h.status();assert.equal(h.nodes.has(BUTTON),false);
 });
+test('inactive pill cannot mix a dark fallback surface with light-theme black text',()=>{
+ const css=fs.readFileSync(path.join(__dirname,'../focus.css'),'utf8');
+ const inactive=css.match(/#mirror-whatsapp-focus-archive-unread\s*\{([^}]+)\}/)[1];
+ assert.match(inactive,/background: transparent;/);assert.match(inactive,/color: var\(--primary, inherit\);/);assert.doesNotMatch(inactive,/#202c33/);
+ const active=css.match(/#mirror-whatsapp-focus-archive-unread\[aria-pressed="true"\]\s*\{([^}]+)\}/)[1];assert.match(active,/color: #fff/);assert.match(active,/--button-primary-background/);
+});
 test('CSS instantly hides body-owned UI under blind/auth/marking modes and uses native-theme variables',()=>{
  const css=fs.readFileSync(path.join(__dirname,'../focus.css'),'utf8');assert.match(css,/html:not\(\.mwf-normal\):not\(\.mwf-sidebar-open\)/);assert.match(css,/\.mwf-overlay-open, \.mwf-auth-surface/);assert.match(css,/#mirror-whatsapp-focus-archive-empty[\s\S]*var\(--panel-background/);
 });

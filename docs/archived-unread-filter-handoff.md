@@ -1,6 +1,10 @@
 # Resume checkpoint — Archived unread filter
 
-## Latest checkpoint — installed toggle validated, user acceptance pending
+## Latest visual correction
+
+Navigator reported black-on-dark inactive pill text in light theme; active green was readable. Fixed inactive background to transparent over the native header with native/inherited foreground. Active green unchanged. 322 tests pass. No new browser/account action. Await visual confirmation.
+
+## Latest checkpoint — installed toggle validated, user acceptance pending (historical)
 
 Current total: 321 tests passing. Installed activation exposed an asynchronous off
 race: immediate rediscovery before React restoration commit hid the button. Fixed

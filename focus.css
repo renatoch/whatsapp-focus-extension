@@ -1100,7 +1100,7 @@ html.mwf-mark-unread #side { display: flex !important; opacity: 0 !important; po
 #mirror-whatsapp-focus-archive-unread {
   position: fixed; z-index: 2147483646; min-width: 100px; height: 34px;
   border: 1px solid var(--border-list, #667781); border-radius: 18px;
-  background: var(--panel-header-background, #202c33); color: var(--primary, #e9edef);
+  background: transparent; color: var(--primary, inherit);
   font: inherit; font-size: 13px; padding: 0 12px; cursor: pointer;
 }
 #mirror-whatsapp-focus-archive-unread[aria-pressed="true"] {
