@@ -5,7 +5,9 @@
 The original search/close-first version and its header envelope/normal-sidebar UX
 were accepted. Navigator subsequently authorized replacing its backend after the
 [direct native-command investigation](selected-chat-unread-investigation.md).
-This revision is implemented; installed trusted-click validation is pending.
+This revision is implemented; actual installed trusted-envelope validation PASSED
+for normal origin. Focused-origin installed validation and Navigator acceptance remain
+pending; 337 Node tests pass.
 The original [menu/search investigation](mark-unread-and-deselect-investigation.md)
 is historical, NOT a requirement for the new path.
 
@@ -85,8 +87,19 @@ preservation, immediate/owned accessible progress and cleanup.
 
 Real investigation proved the native direct transaction on a user-selected already-
 read target, including model/badge persistence and unchanged archive flag. This is
-NOT installed new-envelope validation. Next: genuine envelope clicks in normal and
-focused origin, verify native unread/deselection/landing/deadline and original query
-untouched. New live tests require a user-selected authorized read conversation; do
+not originally installed new-envelope validation. Subsequently Navigator selected a
+fresh read case and the actual installed envelope was clicked via trusted browser
+input. MAIN one-use-grant/isolated transport completed successfully: one run and one
+ok/closed reply about 222ms apart in this sample, no latency guarantee. #main absent,
+model unread true and exactly one canonical native row with unread badge. Normal
+mode stayed normal (not search/blind), no busy/progress/blocker residue. The diagnostic
+selector did not find a comparable query input, so no runtime query-equality claim;
+unit/static coverage proves this implementation does not read/write it. No title/menu
+lookup or manual direct call substituted for this installed-button test. Capture/message
+listener references were cleaned. Diagnostic remains open awaiting a separately chosen
+focused test case; don't reopen the just-unread target automatically.
+
+Next: genuine envelope click in focused origin, verify native unread/deselection and
+empty focused navigation landing, then Navigator acceptance. New live tests require a user-selected authorized read conversation; do
 not reopen a newly unread chat or choose an unsolicited target just for coverage.
 No new mobile-sync/Archived-case acceptance is inferred. No DS6/release changes.

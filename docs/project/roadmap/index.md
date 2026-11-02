@@ -19,7 +19,8 @@ Navigator authorized replacing unread-and-leave's legacy title search with the
 proven selected-model Cmd.markChatUnread + targeted close path. Implemented with
 337 passing tests, no new permissions or storage. A one-use trusted-envelope grant
 protects the fixed MAIN-world transaction; original modes/deadline/feedback remain.
-Installed selected-case validation is pending. [Design](../../mark-unread-and-deselect.md)
+Installed normal-origin trusted-envelope validation passed on a user-selected case;
+focused-origin installed validation and Navigator acceptance remain pending. [Design](../../mark-unread-and-deselect.md)
 and [native evidence](../../selected-chat-unread-investigation.md). Not a release.
 
 ## Active release state
