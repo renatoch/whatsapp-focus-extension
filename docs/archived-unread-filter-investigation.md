@@ -41,8 +41,9 @@ were exported. No conversations were opened or archive/account settings changed.
 - Clicking the main Unread tab: observed to affect only the underlying main view.
 - Hiding read rows in currently mounted DOM: incomplete, leaves gaps or prevents
   reaching later virtualized unread rows. Must not claim a complete filter.
-- Guessing native search operators, accessing private WhatsApp model/store APIs,
-  harvesting IDs, or copying native DOM/message previews: not part of this proposal.
+- Guessing search operators, harvesting IDs, copying native DOM/previews or writing
+  private model/store state: rejected. Read-only model/predicate access was initially
+  excluded prematurely; it was subsequently investigated below.
 
 ## Initial proposed fallback — superseded after reanalysis
 
@@ -110,8 +111,47 @@ mode/auth/deadline cleanup, and explicit-click native navigation. Reusing/mutati
 the native renderer is NOT yet established safe; an independent local view may be
 safer. Do not force the old slow scan/Refresh-only UX without new evidence.
 
+## Main-list strategy: native unread predicate reuse demonstrated
+
+Navigator asked how main-list Unread works and whether the same strategy can be
+used. A second structural/static-code investigation and bounded predicate test found:
+
+1. Main-list All supplies an already-derived array to its virtual renderer (10 chat
+   entries in this profile/sample). Switching the native Unread tab produced the
+   native empty state, not CSS-hidden rows. Original tab selection was restored.
+2. Native panel code stores `filter.kind` and derives chat results from the collection
+   before virtual rendering. Visibility/archive eligibility is separate from matching
+   the filter; the default main-list branch explicitly excludes archived models.
+3. Its matching path calls `WAWebChatMessageSearch.matchFilter(chat, filter)` using
+   `WAWebChatSearchFilters.SearchFilters.UNREAD`. The reviewed matchFilter dispatches
+   to a native predicate; it does not set the session or mark/read/open a conversation.
+4. The native panel listens for collection/archive/unread changes and recomputes
+   results. It also has active/sticky-chat behavior for Unread, so full parity is more
+   than just a one-time array selection. Do not reimplement it by guessing `> 0`.
+5. Invoked the existing predicate READ-ONLY against a new local array of archived
+   models. Observed 389 archived models, 3 native unread matches: 1 positive unread
+   counter and 2 negative. Zero discrepancies with nonzero unread in this sample.
+   The original renderer array remained length 389, no chat opened, no scan/scroll,
+   model mutation, native hook dispatch, private identity export or account command.
+   Counts differed from the earlier sample due live state; they are not a frozen total.
+
+Therefore reuse the native *criterion and logical-data pipeline*, scoped to Archived,
+not the main-list button/session as a whole. Conceptual selection (not shipped code):
+
+```js
+archivedEntries.filter(({chat}) =>
+  chat.archive && matchFilter(chat, {kind: SearchFilters.UNREAD}));
+```
+
+This experimentally removes the need to invent the unread rule or enumerate every
+DOM row. It does NOT yet prove safe native-renderer injection, live adapter lifecycle,
+committed-fiber selection or actual installed-extension behavior. MAIN-world access,
+schema/version guards, transient output, live updates, active-row behavior, ownership
+and exact explicit-click navigation still require implementation/testing. No setters,
+splicing of native arrays or modifying React session/hook state are proposed.
+
 ## Status
 
-Investigation only; corrected approach needs prototype validation. No extension implementation or manifest
+Investigation only; native unread-predicate reuse is demonstrated, UI/adapter not implemented. No extension implementation or manifest
 change yet. Existing accepted implementation has 275 passing Node tests; those tests
 do not establish an Archived filter. DS6 remains isolated, no release/distribution.
