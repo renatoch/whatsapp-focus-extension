@@ -61,6 +61,14 @@ Recarregue extensão e aba uma vez. O fluxo focado comum foi validado pelo usuá
 ícone, feedback e bloqueio visual no modo normal também foram aceitos, encerrando
 o item. O caso específico de Arquivadas ainda não foi validado. [Detalhes e teste](docs/mark-unread-and-deselect.md).
 
+## Não lidas em Arquivadas — em validação
+
+No modo normal ou com a lateral aberta, Arquivadas ganha o botão **Não lidas**
+no cabeçalho. O filtro usa os modelos e o painel nativos, sem varrer a lista por
+rolagem ou alterar marcações/arquivamento. Desativar restaura a lista atual completa.
+Implementado com 316 testes; validação interativa final ainda pendente. Recarregue
+extensão e aba antes de testar. [Detalhes](docs/archived-unread-filter.md).
+
 ## Como documentar o MVP
 
 - `README.md`: uso atual, instalação, teste e limitações práticas.

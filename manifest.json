@@ -12,6 +12,18 @@
       "js": ["awareness.js", "focus-state.js", "focused-recents.js", "fixed-collections.js", "copy-menu.js", "native-surface.js", "surface-expiry.js", "auth-surface.js", "mark-unread.js", "content.js"],
       "css": ["focus.css"],
       "run_at": "document_start"
+    },
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["archived-unread-main.js"],
+      "world": "MAIN",
+      "run_at": "document_start"
+    },
+    {
+      "matches": ["https://web.whatsapp.com/*"],
+      "js": ["archived-unread-ui.js"],
+      "world": "ISOLATED",
+      "run_at": "document_start"
     }
   ],
   "web_accessible_resources": [

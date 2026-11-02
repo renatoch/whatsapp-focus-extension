@@ -1,0 +1,110 @@
+# Resume checkpoint — Archived unread filter
+
+## Why paused
+
+Navigator reported 91% token consumption and asked to finish this checkpoint and
+record exactly where to continue. STOP new work; this is an intentional pause,
+not completed acceptance. Implementation was explicitly authorized before the pause.
+
+## Repository / boundaries
+
+Stable: E:\renato\mirror\focus-lab\whatsapp-focus-extension (WSL
+/mnt/e/renato/mirror/focus-lab/whatsapp-focus-extension), main.
+Preserve untracked .mirror/. DS6 is a separate worktree/branch; do not sync/merge.
+Ordinary checked backup commits/pushes authorized; no packaging/release/distribution.
+Journey DB context is stale; these repo documents are the current continuity.
+
+## Implemented now
+
+- archived-unread-main.js: separate MAIN-world manifest script. Discovers current
+  committed native Archived owner using root.current, unique queue/source/model
+  reference shape, bounded traversal and native getter/predicate fingerprints.
+- Reads native archive source and matchFilter/UNREAD; writes ONLY local presentation
+  state, never chat/archive/unread models or backing collection. Keeps native renderer,
+  row handlers, selection and scroll controller. Source/order restored fresh on off/exit.
+- Active native-event subscriptions plus coalesced DOM-commit reconciliation, idempotent
+  list comparison, six-writes/second loop guard, best-effort unsubscription. Native-like
+  sticky selected rows by model reference; no IDs exported or used for that set.
+- Restore only exact owned drawer/queue. If restoration schema fails, captured native
+  Back callback is fallback for that same drawer. No setters on new/replaced owners.
+- archived-unread-ui.js: isolated-world body-owned Não lidas pill at Archive header;
+  native theme, pressed/busy/keyboard accessibility; explicit no-match overlay, errors
+  with Fechar + five-second auto-close; narrow-pane and instant focus/auth CSS guards.
+- Local bridge carries only commands/epoch and boolean status (no names/models/IDs).
+  Validates window source, origin, types; drawer epochs reject late replies. Command
+  acknowledgment timeout and availability probes bounded. No new permissions/storage.
+- Original content script list/order unchanged. MAIN and isolated UI are additional
+  manifest entries. focus.css adds scoped styles. No original content.js edits needed.
+
+## Validation checkpoint
+
+316/316 Node tests pass; JS syntax and git diff --check pass. Log:
+/tmp/archive-filter-pause.txt (temporary, not durable).
+New tests: tests/archived-unread.test.js and tests/archived-unread-ui.test.js,
+41 cases covering adapter/controller/UI, including cycles, unsupported data, current
+fiber resolution, scope/deadline/auth cleanup, subscription errors, loops, latest-source
+restore, sticky/manual-negative unread, bridge epochs and missing acknowledgments.
+
+Earlier bounded presentation proofs (before integrated files) demonstrated actual
+native 389 -> 3/4 unread rows -> 389 restoration, compact native scroll extent, native
+components/handlers/controllers retained, no native row clicked/account mutation.
+An empty presentation fixture also restored correctly; its generic native empty text
+was not suitable, hence the new explanatory overlay. See investigation doc for counts.
+
+Actual dedicated Chrome startup loaded the new unpacked scripts automatically:
+Debugger metadata showed archived-unread-main.js in MAIN context 1 and UI in isolated
+context 2. Do NOT reuse context IDs. A contextual button appeared in eligible normal
+Archived state, available and unpressed. THIS DOES NOT PROVE FULL TOGGLE ACCEPTANCE.
+
+Agent attempted the existing Alt+Shift+L shortcut for setup; it is NOT a direct normal
+mode opener and only works under canToggleSidebar. Final observed state was focused
+SEARCH (mwf-searching true, normal/sidebar-open false), Archived native view present,
+#main absent, filter hidden correctly. Do not keep sending L in search: it is disabled
+there. Do NOT force root classes or click hidden normal-now to bypass the entry policy.
+No conversation rows were clicked or selected by agent in this implementation phase.
+The diagnostic browser initially had #main present; do not claim none was ever open.
+
+At pause: owned diagnostic browser gracefully CLOSED, loopback port 9222 verified
+closed, linked profile retained. Normal Chrome untouched. No active CDP/probes remain.
+
+## First next steps (no re-investigation of already proven renderer wiring)
+
+1. Read docs/archived-unread-filter.md and current files. Confirm git status/branch.
+2. Reopen only the dedicated debug profile if interactive validation is wanted:
+   tools/start-debug-browser.ps1. Ask Navigator to reload extension and WA tab once,
+   enter NORMAL mode through the usual intention/countdown flow, open Archived and
+   leave NO conversation selected. This avoids fabricating intentions/bypassing focus
+   setup or accidentally opening unread chats. Current source files need fresh loading
+   after last guard fixes. Do not infer normal mode merely from native DOM visibility.
+3. Check button availability/position, actual trusted activation, native unread rows,
+   off/full-list restoration and repeated on/off, without opening chats. Prior actual
+   unpacked runtime verified loading/availability only; no trusted toggle clicked yet.
+4. Check scope cleanup/exit/re-entry and no-match behavior. Node tests cover these;
+   installed behavior still requires runtime validation.
+5. Live unread events and exact selected-row retention/opening require separately
+   user-selected/authorized actions. Never manufacture native collection events that
+   might trigger account-side listeners. Never mark/unarchive or open an unsolicited
+   chat just to get a test case. Do not claim this coverage from pure predicates/fixtures.
+6. Investigate/fix discrepancies with scoped probes only, no private exports. If native
+   on/off subscription signature or React shape differs, fail safe; do not loosen schema
+   guards blindly. Maintain original normal deadline and hidden/unfocused expiry policy.
+7. On acceptance update docs/closure; until then keep 'implemented, interactive validation
+   pending'. Close owned Chrome and verify port 9222 after each finished investigation.
+
+## Temporary helpers (may disappear)
+
+/tmp/channel-cdp.ps1: evaluate reviewed script, optionally fresh ContextId.
+/tmp/channel-contexts.ps1: enumerate contexts without exporting origin URLs.
+/tmp/archive-debug-scripts.ps1: confirms actual file names/world context.
+/tmp/archive-feature-state.js: safe scope/button/count/geometry status.
+/tmp/archive-open-only.js: native Archive NAVIGATION only; no chat row activation.
+/tmp/archive-send-input.ps1: existing sidebar shortcut or coordinate click (only use
+ known extension control coordinates, never conversation rows); L is NOT normal entry.
+/tmp/reopen-archive-analysis.ps1: opens public WA root only if target missing.
+/tmp/close-unread-debug.ps1: owned-profile Browser.close and port closure verification.
+/tmp/archive-native-render-proof.js: MUTATES local presentation temporarily; historical
+ proof only. Do not rerun indiscriminately; integrated feature is now the test target.
+
+Git push uses Windows Git if needed:
+'C:/Program Files/Git/cmd/git.exe' -C 'E:/renato/mirror/focus-lab/whatsapp-focus-extension' push origin main
+WSL fetch may warn credential-manager-core despite success; verify actual status.

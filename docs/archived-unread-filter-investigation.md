@@ -2,8 +2,10 @@
 
 The initial scroll/snapshot proposal below is superseded, NOT approved. Navigator
 challenged the conflation of virtual rendering with data loading and requested a
-new analysis. A read-only logical-data adapter is now the direction to investigate;
-no filter implementation is authorized by this analysis request alone.
+new analysis. Subsequent native-panel presentation proofs succeeded and Navigator
+then explicitly authorized implementation. See [current implementation/status](archived-unread-filter.md)
+and [resume checkpoint](archived-unread-filter-handoff.md); the investigations below
+remain historical evidence, not the current implementation status.
 
 ## Requested outcome
 
@@ -221,6 +223,7 @@ to test unread events; use fixtures or separately authorized actual user actions
 
 ## Status
 
-Investigation only; native panel filtering/restoration has been demonstrated, extension toggle/live adapter not implemented. No extension implementation or manifest
-change yet. Existing accepted implementation has 275 passing Node tests; those tests
-do not establish an Archived filter. DS6 remains isolated, no release/distribution.
+Native-panel proof completed; Navigator subsequently authorized implementation.
+The contextual toggle/live adapter is now implemented with 316 passing Node tests;
+final installed interactive validation remains pending. See the current implementation
+and handoff linked above. DS6 remains isolated; no release/distribution.
