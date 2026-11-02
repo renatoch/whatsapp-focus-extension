@@ -43,6 +43,40 @@ conversation was opened, no messages sent, archive membership/settings unchanged
    unread true, freshly reacquired row's native unread badge present, archive flag
    unchanged. No title lookup/global search/settle interval was involved.
 
+## Subsequent direct-call test — explicitly authorized and successful
+
+Navigator explicitly authorized testing the identified direct calls, then selected an
+already-read conversation again after the prior profile/reference had been cleared.
+Dedicated profile setup was automated through the existing normal entry flow using
+Other for the technical test and no authored note; no hidden controls/forced classes.
+
+Captured a unique current header model, initially read, non-archived, with native
+composer present. Rechecked canonical selected identity and the command functions.
+Executed these two actual native calls consecutively in a single JS turn:
+
+```js
+Cmd.markChatUnread(chosenModel, true);
+Cmd.closeChat(chosenModel);
+```
+
+No row menu, title read/search, scrolling, synthetic model event or manual unreadCount
+write. Immediately after marking, the same conversation was still selected and its
+model unread flag was not yet set: marking is asynchronous. Then native close ran.
+At 100ms: #main absent, unread not yet confirmed. At cumulative 500ms and 2500ms:
+#main absent, native unread true, archive state unchanged. A separate bounded committed-
+tree reference comparison then found exactly ONE row for the same canonical model and
+its native unread badge. Final cleanup again confirmed closed/unread/non-archived.
+
+Visibility caveat captured explicitly: document.hasFocus() was true, but visibilityState
+was not visible at invocation despite Page.bringToFront. This is a successful direct
+model/command transaction, not proof of every fully visible/focused installed UI case.
+Do not reopen the newly unread chat merely to fill that coverage gap. Integration can
+now use a concrete demonstrated direct path; its real UI/mode tests still remain.
+
+Native marker operations can require a bounded async confirmation AFTER close; don't
+assume Cmd's synchronous return means persisted unread or insert an awaited title
+search. No elapsed latency guarantee is claimed from this one sample.
+
 ## Conclusion and precise validation limits
 
 The user's manual ORDER is demonstrated. A canonical model reference is a stronger
@@ -51,12 +85,11 @@ mark command and targeted native close command exist, with the marking arguments
 observed from the actual UI path. Native models stay in page memory; no identities
 need to cross a MAIN/isolated boundary.
 
-This was NOT a new installed implementation. Marking was initiated through the native
-row menu while selected; its Cmd invocation was intercepted/verified, NOT independently
-called as a replacement extension action. Direct targeted Cmd.closeChat was exercised.
-Do not claim an isolated direct mark+close implementation or native-menu-independent
-focused-mode integration has already been validated. The native menu may do additional
-UI work around its Cmd call; prove direct invocation equivalence before replacement.
+Neither test changed the installed implementation. The FIRST test initiated marking
+through the native row menu and intercepted its Cmd arguments. The SUBSEQUENT test
+above exercised both calls independently with the selected model and succeeded.
+Thus standalone direct mark+close is now demonstrated; native-menu-independent
+installed focused-mode UI integration has not yet been validated.
 Sidebar-hidden selected capture/call, cancellation, auth/navigation ownership, original
 mode/deadline/clipboard/toast interactions and mobile sync for this reordered route
 still need tests. Visibility/window-focus at the precise mark invocation was not
@@ -72,7 +105,9 @@ UI question, not a prerequisite: targeted native close already worked here.
 
 A scoped MAIN-world operation could capture/canonicalize the current conversation,
 verify trusted action/current identity, perform the native marking and targeted close,
-then confirm native model unread + native deselection. Keep model references private
+then confirm native model unread + native deselection after bounded async confirmation. The direct
+command transaction above is proven; this is now integration work, not a hypothetical
+API discovery. Keep model references private
 and transient. Do NOT expose a generic command-by-name or arbitrary-target bridge.
 Preserve existing normal/sidebar/focused landing, original deadline, cancellation and
 error-only feedback. Never silently invoke mark-read or mutate unreadCount manually.
@@ -84,5 +119,6 @@ blind second attempt after a newer human navigation. Fail closed on module/schem
 Investigation only. No content script, manifest, CSS, storage, permissions or production
 behavior changes. Accepted code checkpoint remains 322 passing tests; no new tests
 claimed for an unimplemented replacement. DS6 untouched; no release/distribution.
-Temporary selected model/probe/debugger references must be cleared, owned Chrome closed,
-port 9222 verified closed, linked profile retained. Target left unread and closed.
+Temporary selected model/probe/debugger references were cleared after each test.
+Owned Chrome gracefully closed, port 9222 verified closed, linked profile retained.
+Target left unread and closed. No production implementation was modified.
