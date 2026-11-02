@@ -42,8 +42,9 @@ Use o **ícone de envelope à esquerda da lupa**, no cabeçalho da conversa. O t
 foi removido. O principal caso é a conversa já focada, com a lista oculta: não é
 preciso abrir o modo completo. O ícone não aparece em Canais, Status ou login.
 
-A ação fecha/desseleciona a conversa antes de marcá-la nativamente como não lida,
-confirma o indicador nativo e preserva o modo de origem:
+A ação usa diretamente o modelo da conversa aberta: solicita **marcar como não lida**,
+fecha/desseleciona e aguarda confirmação nativa, sem buscar pelo nome ou abrir menus.
+Preserva o modo de origem:
 - **Modo focado:** deixa busca vazia, recentes e coleções disponíveis.
 - **Modo normal/lateral aberta:** mantém a lateral ao terminar e restaura a busca
   anterior, sem reiniciar nem prolongar o prazo original. Se o prazo vencer, a
@@ -52,14 +53,15 @@ confirma o indicador nativo e preserva o modo de origem:
 Durante os segundos de processamento, aparece **Marcando como não lida…** com um
 indicador de atividade. **No modo normal, a lateral permanece visível sob uma
 camada translúcida de bloqueio**, com leve desfoque; cliques não atingem a lista.
-No modo focado, ela continua oculta. Os menus nativos usados internamente não aparecem. Ao concluir, a extensão não duplica o aviso de sucesso nativo;
+No modo focado, ela continua oculta. A operação direta não abre menus nativos. Ao concluir, a extensão não duplica o aviso de sucesso nativo;
 exibe aviso final somente em caso de erro. **Esc** ou **Alt+Shift+F** cancela.
 
 É uma marcação do próprio WhatsApp, não um lembrete da extensão; abrir a conversa
 em outro cliente pode marcá-la como lida novamente. Não desfaz recibos enviados.
 Recarregue extensão e aba uma vez. O fluxo focado comum foi validado pelo usuário;
 ícone, feedback e bloqueio visual no modo normal também foram aceitos, encerrando
-o item. O caso específico de Arquivadas ainda não foi validado. [Detalhes e teste](docs/mark-unread-and-deselect.md).
+o item original. A revisão direta foi implementada após teste nativo e aguarda
+validação do botão instalado (337 testes); o caso específico de Arquivadas não é inferido. [Detalhes e teste](docs/mark-unread-and-deselect.md).
 
 ## Não lidas em Arquivadas — em validação
 

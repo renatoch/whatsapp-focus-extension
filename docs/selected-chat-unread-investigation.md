@@ -1,4 +1,9 @@
-# Selected chat → native unread → close — investigation only
+# Selected chat → native unread → close — native evidence
+
+Navigator subsequently authorized implementation. The direct MAIN-world transaction
+and isolated controller now replace the old title-search backend; 337 Node tests pass,
+installed trusted-envelope validation is pending. See [current implementation](mark-unread-and-deselect.md).
+The investigation-only statuses below describe their respective historical checkpoints.
 
 ## Request / scope
 

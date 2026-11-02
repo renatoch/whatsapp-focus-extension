@@ -3,7 +3,7 @@ const root=path.join(__dirname,'..'),source=fs.readFileSync(path.join(root,'cont
 function extract(name){const start=source.indexOf(`  function ${name}(`);assert.notEqual(start,-1);return source.slice(start,source.indexOf('\n  function ',start+1));}
 test('button is available for a known conversation with hidden sidebar, never Channel/Status/login',()=>{
  let surface='conversation',auth=false,busy=false;const flags=new Set(['mwf-active','mwf-sidebar-hidden']);
- const context=vm.createContext({authSurface:{isActive:()=>auth},markUnread:{isBusy:()=>busy},isSearching:()=>false,
+ const context=vm.createContext({document:{querySelector:()=>({})},authSurface:{isActive:()=>auth},markUnread:{isBusy:()=>busy},isSearching:()=>false,
   ROOT_NORMAL:'normal',ROOT_OPENING_RECENT:'opening',root:()=>({classList:{contains:name=>flags.has(name)}}),getOverlay:()=>({hidden:true}),hasNativeTransientSurface:()=>false,
   nativeSurface:{inspect:()=>surface},readActiveConversationTitle:()=> 'Private title'});
  vm.runInContext(extract('canMarkUnread'),context);assert.equal(context.canMarkUnread(),true);
@@ -20,23 +20,17 @@ test('header refresh never replaces the envelope children and creates no lateral
 });
 test('actual result composition lands in empty focused search rather than the initial overlay',()=>{
  let options;const events=[];
- const context=vm.createContext({globalThis:{MirrorMarkUnread:{createUnreadDom:()=>({}),createMarkUnreadAction:value=>(options=value,{})},MirrorFocusedRecents:{normalizeTitle:v=>v}},
+ const context=vm.createContext({globalThis:{MirrorMarkUnread:{createTransport:()=>({}),createMarkUnreadAction:value=>(options=value,{})},MirrorFocusedRecents:{normalizeTitle:v=>v}},
   document:{},window:{},unreadOrigin:null,isVisibleElement(){},readActiveConversationTitle(){},canMarkUnread(){},updateMarkUnreadButton(){},
   setSearchMode:()=>events.push('search'),showToast:()=>events.push('toast'),setActive:()=>events.push('overlay'),hasOpenConversation:()=>false});
- const start=source.indexOf('  const unreadDom ='),end=source.indexOf('  function unreadContextKey()',start);vm.runInContext(source.slice(start,end),context);
+ const start=source.indexOf('  const unreadTransport ='),end=source.indexOf('  function unreadContextKey()',start);vm.runInContext(source.slice(start,end),context);
  options.onResult({ok:true,closed:true});assert.deepEqual(events,['search']);
 });
-test('hidden lookup waits for native search settle instead of trusting results from a previous query',()=>{
- let options,time=100,field={value:''};
- const context=vm.createContext({globalThis:{MirrorMarkUnread:{createUnreadDom:()=>({}),createMarkUnreadAction:value=>(options=value,{})},MirrorFocusedRecents:{normalizeTitle:v=>v}},
-  document:{},window:{},Date:{now:()=>time},unreadLookupReadyAt:0,SEARCH_SETTLE_MS:1000,
-  isVisibleElement(){},readActiveConversationTitle(){},canMarkUnread(){},updateMarkUnreadButton(){},
-  goToMainChatsThen:(_route,callback)=>callback(),findNativeSearchField:()=>field,setNativeSearchText:(node,title)=>{node.value=title;},
-  getSearchText:node=>node.value,focusedSearchCandidates:()=>({candidates:[]})});
- const start=source.indexOf('  const unreadDom ='),end=source.indexOf('  function unreadContextKey()',start);vm.runInContext(source.slice(start,end),context);
- options.prepareLookup('Chosen',()=>true);assert.equal(options.lookup('Chosen').accepted,false);
- time+=999;assert.equal(options.lookup('Chosen').accepted,false);time++;assert.equal(options.lookup('Chosen').accepted,true);
- options.prepareLookup('Chosen',()=>false);assert.equal(options.lookup('Chosen').accepted,false);
+test('direct composition never touches native search, title lookup or restore settling',()=>{
+ const start=source.indexOf('  const unreadTransport ='),end=source.indexOf('  function unreadContextKey()',start),block=source.slice(start,end);
+ assert.doesNotMatch(block,/prepareLookup|focusedSearchCandidates|findNativeSearchField|setNativeSearchText|readActiveConversationTitle|SEARCH_SETTLE_MS/);
+ const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json')));
+ assert.ok(manifest.content_scripts.some(c=>c.world==='MAIN'&&c.js.includes('selected-unread-main.js')));
 });
 test('busy transaction blocks native typing and can be cancelled with Escape without starting full mode',()=>{
  let listener,busy=true;const calls=[];
@@ -51,6 +45,6 @@ test('new native action is trusted-click-only and masked list/popups do not gran
  assert.match(extract('ensureMarkUnreadButton'),/if \(event.isTrusted\) void markUnread.run\(\)/);
  assert.match(css,/html\.mwf-mark-unread #side\s*\{[^}]*display: flex !important;[^}]*opacity: 0 !important;[^}]*pointer-events: none !important/);
  assert.match(css,/html\.mwf-mark-unread \[role="menu"\]\s*\{[^}]*filter: opacity\(0\)/);
- assert.doesNotMatch(source.slice(source.indexOf('  const unreadDom ='),source.indexOf('  function unreadContextKey()')),/setNormal\(|setNormalTemporarily\(/);
+ assert.doesNotMatch(source.slice(source.indexOf('  const unreadTransport ='),source.indexOf('  function unreadContextKey()')),/setNormal\(|setNormalTemporarily\(/);
  const manifest=JSON.parse(fs.readFileSync(path.join(root,'manifest.json')));assert.ok(manifest.content_scripts[0].js.indexOf('mark-unread.js')<manifest.content_scripts[0].js.indexOf('content.js'));
 });

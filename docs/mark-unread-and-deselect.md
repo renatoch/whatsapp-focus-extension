@@ -1,194 +1,92 @@
-# Mark unread and leave the conversation — accepted
+# Mark unread and leave — direct selected-model revision
 
-Navigator confirmed “Ficou ótimo. Pode concluir esse item” after validating the
-normal-sidebar blocker refinement. This activity is accepted and closed; final
-implementation checkpoint has 275 passing tests. No new implementation, DS6 work
-or release is authorized by closure. Archived-specific coverage is not inferred.
+## State
 
-## Subsequent investigation — selected-first order
+The original search/close-first version and its header envelope/normal-sidebar UX
+were accepted. Navigator subsequently authorized replacing its backend after the
+[direct native-command investigation](selected-chat-unread-investigation.md).
+This revision is implemented; installed trusted-click validation is pending.
+The original [menu/search investigation](mark-unread-and-deselect-investigation.md)
+is historical, NOT a requirement for the new path.
 
-Navigator subsequently authorized investigating their manual order: mark while still
-selected, then close. That sequence succeeded on the chosen target without title
-search. Native Cmd marking received the exact canonical selected model and true;
-targeted close left native unread state/badge present. A subsequent explicitly
-authorized direct Cmd.markChatUnread(model,true) + Cmd.closeChat(model) test also
-succeeded without any row menu/search; bounded async confirmation is necessary.
-No implementation change:
-[full evidence, direct-call and focused-mode limits](selected-chat-unread-investigation.md).
-The existing accepted close-first/search behavior remains installed until new authority.
+## Behavior retained
 
-## State and placement
+Use the envelope immediately LEFT OF SEARCH in the conversation header, tooltip
+“Marcar como não lida e sair da conversa”. No lateral control added. Trusted clicks
+only; no Channel/Status/login/search/modal action. WhatsApp stays open.
 
-Navigator confirmed the investigation's unread state synced to the mobile list,
-then explicitly authorized implementation. The principal case is ALREADY FOCUSED:
-only the conversation visible, #side hidden. The new trusted-click action is
-an envelope to the LEFT OF SEARCH in the conversation header, with tooltip and
-accessible name “Marcar como não lida e sair da conversa”. The previous lateral
-button was removed after Navigator accepted the action but found the column noisy.
-It is available only for a known conversation, not Channel/Status/login, search or
-a native modal. The action/controller/native mutation sequence is unchanged.
+- Focused origin: finish in existing empty focused search/recents/collections.
+- Normal/explicit-sidebar origin: keep that mode and sidebar, no new normal bypass
+  or deadline reset. The operation does not read/write the native search query.
+- Immediate polite “Marcando como não lida…”/reduced-motion spinner. Normal sidebar
+  remains recognizable under the existing translucent blocker; focused list stays
+  hidden. Native pointer/typing blocked while busy; Escape/Alt+Shift+F cancels waiting.
+- No extension success toast; native success feedback is not duplicated. Errors never
+  claim a failed partial mark was not sent. Closing can succeed before mark is confirmed.
 
-Implementation is on main; 275 Node tests pass at this checkpoint. Navigator
-accepted both the installed common focused flow and header placement. Subsequent
-feedback: several seconds felt stalled, native/extension success notices duplicated,
-and normal-mode use wrongly hid the sidebar. Activity/error-only feedback and
-origin-mode preservation are now implemented. Navigator then requested that normal
-mode keep the panel visible DURING processing, not merely restore it afterward.
-A translucent blocking layer now replaces normal-origin concealment and was
-accepted by Navigator. Archived-specific coverage remains a separate unvalidated edge. No DS6 work/release.
-[Initial native investigation](mark-unread-and-deselect-investigation.md).
+## New backend: no title lookup, no menus, no search settle
 
-## End state
+`selected-unread-main.js` is a fixed MAIN-world transaction. It canonicalizes the
+current committed header's unique chat model with WAWebStateUtils.unproxy. It requires
+one conversation search control, bounded/cycle-checked ancestry (512) and traversal
+(20000), unique host/model correspondence, finite unread metadata and reviewed
+native Cmd function shape. No hard-coded hook index, title/phone/JID lookup or DOM row.
 
-WhatsApp remains open. The conversation is natively unread AND deselected. From
-focused mode the user lands in EMPTY focused search/recents/collections; from normal
-mode or an explicitly visible sidebar, that mode remains, with its previous native
-main-list query restored. No new normal-mode bypass, mandatory confirmation, new
-shortcut or extension-only reminder. Mark unread does not reverse read receipts or override reading elsewhere.
-Opening the chat on another client can mark it read again, as normal WhatsApp behavior.
+A genuine trusted click on the exact extension envelope captures a one-use model grant
+for at most 1500ms. A window message alone cannot mark anything. Recheck model identity
+and mode, then execute without yielding between native commands:
 
-## Implementation
+```js
+if (!targetIsAlreadyUnread) Cmd.markChatUnread(model, true);
+Cmd.closeChat(model);
+```
 
-`mark-unread.js` owns a bounded single-flight transaction and a narrow native DOM
-adapter. The title is operation-local, case-sensitive after the existing NFKC title
-normalization, and cleared on completion/cancellation. No title/state history,
-clipboard, telemetry events, storage keys, permissions or backend were added.
+The close is targeted and skipped if marking already removed #main. Never close a
+newly selected conversation. Native marking is async: AFTER close, check native model
+unread plus #main absence twice, 100ms samples, at most 5 seconds. No wait for a search
+or query restoration. Already-unread state is idempotent, never toggled to read.
 
-1. Snapshot the origin mode and, only for a visible sidebar, its current search
-   query transiently. Preserve an existing normal-mode deadline; cancel old bypass
-   only for focused origin. Cancel countdown/capture/navigation work and close menus.
-   Add mwf-mark-unread and, only for a visible origin, mwf-unread-visible-sidebar;
-   do not enter normal mode or reuse another operation's opening-recent class. Ignore typing/duplicate clicks during the short transaction.
-   Escape or Alt+Shift+F can cancel; auth/new navigation invalidates the operation.
-2. Keep #side rendered/pointer-events=none. Focused origin remains opacity=0;
-   normal/explicit-sidebar origin is opacity=1 beneath a fixed, translucent blocker
-   following #side bounds, with mild 1px backdrop blur. This is the live panel, not
-   a cloned/frozen DOM or screenshot; internal search can update beneath the layer.
-   Native command menus still use filter:opacity(0), preserving opacity animations.
-   Trusted pointer actions on the blocker are stopped at window capture; synthetic
-   native actions are not intercepted. Wheel blocking is local to the temporary
-   blocker (no permanent nonpassive global wheel listener). Block native interaction
-   while busy. The header envelope becomes disabled with aria-busy;
-   it disappears when its conversation header closes. A separate polite status
-   “Marcando como não lida…” and reduced-motion-aware spinner persists until cleanup.
-   No lateral button is added; no unrelated toast is hidden by progress cleanup.
-3. Use the existing hidden native-search route, scoped strictly to Conversas/Chats.
-   Wait the existing 1000ms settle interval AFTER input dispatch, then require a
-   unique exact-title result stable over two samples. Never trust old query results,
-   duplicate display names, a stale connected node or a Groups/Messages result.
-4. Open the evidenced header menu and invoke only Fechar conversa. Confirm #main is
-   absent before any mark-unread command. Wait for native action popup dismissal.
-5. Repeat lookup after close/normalization because search/row nodes may be replaced.
-   If the native icon-unread-count is already present, do not toggle it. Otherwise
-   mouseover the revalidated row and click its context-btn. Invoke the exact native
-   Mark unread command, never the opposite Mark read command.
-6. Reacquire the unique result after marking and confirm a visible native
-   icon-unread-count on a stable row, twice, while #main remains absent. Native
-   badge confirmation avoids reopening a verification popup solely to dismiss it.
-7. Before unmasking a still-valid visible-sidebar origin, restore its previous
-   main-list query and wait for the usual search settle interval. A bounded final
-   hook keeps cancellation/deadline guards active throughout this restoration.
-   Focused origin uses setSearchMode; visible origin does NOT call setNormal,
-   setSearchMode, start or cancel the original deadline. A read-only hasDeadline
-   getter detects expiry even before delayed native normalization changes classes.
-8. Remove progress/mask/blocker/visible-origin class on success, failure,
-   cancellation or auth loss. Success
-   relies on WhatsApp's own notice; no extension success toast. Errors distinguish
-   unconfirmed marking from confirmed marking with failed query restoration. Normal
-   origin keeps its lateral on errors too; focused errors use the protective focus
-   surface. Secondary field-restoration exceptions cannot strand the mask/progress.
-   Cancelled/superseded work never restores an old query, forces a late landing or
-   unmasks a newer run. Origin/query snapshots are discarded, never persisted.
+`mark-unread.js` is now the isolated transport/action controller. Its local bridge
+carries only run/cancel, numeric request ID, booleans and allowlisted error codes;
+no models/titles/IDs/messages cross worlds. Requests are single-flight; timeout 6.5s,
+late/foreign/malformed replies ignored. Source/origin checks are not an authentication
+boundary against WhatsApp's page JS; the trusted, single-use, current-model grant and
+fixed capabilities prevent message-only arbitrary-account commands. No generic Cmd,
+arbitrary target, mark-read, send or unarchive interface is exposed.
 
-## Normal-origin blocking layer refinement
+`content.js` retains eligibility/geometry/progress/origin-mode ownership, but no longer
+captures a title for this operation or touches native search. Removed prepareLookup,
+hover/menu routing, restoration hooks and their 1000ms settle waits. Focused success
+still opens the existing EMPTY user navigation surface afterward; that is not a
+lookup of the target conversation.
 
-Navigator approved keeping the normal panel visible instead of blanking it. A
-higher-specificity rule overrides only the normal-origin sidebar opacity; focused
-concealment and native popup hiding are unchanged. The extension-owned decorative
-blocker uses native geometry only, never copies/reads list content, stays out of the
-accessibility tree and cannot affect the query/deadline/controller lifecycle. It
-updates on DOM commits/resize, with idempotent styles and bounded ownership.
-Pointer capture is restricted to trusted input targeting this owned layer while the
-transaction is busy, so internal mouseover/click automation still works. Removal
-restores normal interaction; the existing polite progress status remains the single
-activity message. Mode-key comparison deliberately excludes the visual-only flag.
-Six new tests cover geometry/no clone, idempotence/resize, focused absence/cleanup,
-trusted vs synthetic input, scoped wheel handling and normal/focused CSS cascade.
-Existing mode/deadline/error/cancellation tests also verify blocker cleanup: 275 pass.
-No new live account mutation or browser session was needed for this cosmetic change.
+## Cancellation and failure
 
-## Feedback and mode-preservation checks
+Mode/auth/overlay/search/navigation/deadline changes invalidate ownership. Waiting
+can be cancelled; already issued native commands cannot be rolled back and must not
+be undone with mark-read. Captured model/grant/verification timer is released. No late
+landing may seize a newer view. Native membership changes cancel confirmation rather
+than silently claiming archive preservation. Schema failures stop with an error;
+there is deliberately NO legacy-search fallback after a partial native action.
 
-New tests exercise actual composition callbacks with the real surface-expiry
-controller: the original zero-valued timer handle survives normal completion and
-expires at the original deadline, never at a fresh five minutes. Covered focused
-landing without success toast, explicit side-open without a deadline, normal errors,
-query restoration/settle, cancellation and expiry during work, accessible/idempotent
-progress, independent toast ownership, missing/replaced fields, bounded finalization
-and cleanup exceptions. That checkpoint passed 269 tests (current total 275); no new live browser/account
-actions were used for these feedback fixes. Processing is not claimed instantaneous;
-visible progress explains native lookup/confirmation/restoration waits.
+The native command may take time to acknowledge or be overwritten by another client
+reading the chat. A timeout means unconfirmed, not a promise that marking did not
+happen. Does not undo read receipts. Keep the target closed on other devices for
+synchronization tests. No new storage, permissions, backend or telemetry.
 
-Nested/Archived views and all native list-filter/scroll state are NOT claimed as
-restored by this patch; the verified scope is mode/visibility and main-list query.
+## Validation
 
-## Header placement (accepted by Navigator)
+Unit/controller/VM coverage replaces obsolete menu/lookup fixtures: canonical current
+model/proxy and stale-fiber guards, deep/cyclic/ambiguous schema, native API drift,
+trusted one-shot gesture, expiry and wrong-origin/source, fixed payload, async native
+mark/close, two-sample confirmation, idempotence, timeout/cancel, newer navigation,
+partial errors, no search fallback, original zero-valued deadline and normal/sidebar
+preservation, immediate/owned accessible progress and cleanup.
 
-The button remains extension-owned under body, NOT a foreign child of React's
-native toolbar or menu. Require exactly one visible native Search button in
-#main conversation-header (observed Pesquisar, supported Search/Buscar labels).
-A reversible mwf-unread-header-slot CSS rule reserves 44px at Search's inline start;
-position the 40px envelope in that slot, using native color and direction. Missing
-anchor or insufficient header space hides the icon and removes the margin. Refresh
-on native DOM replacement and resize; do not repeatedly write SVG/text/styles.
-Explicit hidden/overlay/native-transient/channel CSS guards protect native surfaces.
-Busy state disables the icon and exposes aria-busy; no new shortcut/storage/API.
-The three-button lateral controls return to their original geometry.
-
-A live layout-only probe used the actual UI functions/CSS under a temporary distinct
-ID, with a no-op action. The existing protective focus overlay was NOT removed;
-only the temporary probe icon's conditional display guard was overridden to measure
-its rectangle underneath it. It reserved the slot, remained body-owned with native
-header children untouched, retained its SVG, and fit completely inside the native
-header immediately left of Search. All probe nodes/styles/resize listeners/classes
-were removed. This is geometry evidence, not installed new-header acceptance.
-Dedicated debug Chrome was closed gracefully; port 9222 verified closed, linked
-profile retained. No new unread mutation occurred during this placement check.
-
-## Evidence executed
-
-The initial investigation established close → mark → native-menu verification and
-Navigator confirmed mobile sync. Navigator subsequently accepted the installed
-common focused action, then requested and approved this less intrusive placement. A subsequent live probe started from focused mode
-(#side display:none), kept the native sidebar opacity=0 and popups concealed, closed
-the chosen read chat, invoked Mark unread through row hover/context-btn, and ended
-with #main absent, zero remaining native menuitems, the exact row reacquired and
-native icon-unread-count present. No message was sent or another chat opened.
-
-That probe exercised native primitives against the chosen row already in DOM, not
-the new integrated hidden-global-search button. This is NOT final installed-runtime
-acceptance. Probe classes/styles were restored. Synthetic Escape/outside events did
-not establish a reliable dismissal route; successful native commands dismissed their
-own popups. The implementation does not depend on synthetic Escape for success.
-
-Node coverage includes exact/ambiguous/case-mismatched/missing results, search settle,
-replaced rows, hover recycling, close failure, missing menu controls, no unread badge,
-already-unread idempotence, single-flight, cancellation, supersession/disposal, auth
-reset, native/extension menu separation, disabled/duplicate native commands, masked
-CSS, trusted-click-only UI, eligibility, observer-stable labels and empty-search
-result composition. JS syntax, manifest file/load order and diff checks pass.
-
-## Short user acceptance route
-
-1. Reload extension and WhatsApp tab once (new manifest script).
-2. Choose an already-read conversation you are willing to mark unread; keep it
-   closed in other clients. Enter focused view with the native list hidden.
-3. Click the envelope to the left of Search (tooltip: Marcar como não lida e sair da conversa). Activity should appear immediately and persist even after
-   the chat closes; it disappears at completion. Focused origin lands in empty
-   focused search/recents/collections. No extension success toast should duplicate WA.
-4. Check mobile unread state from the list without opening the chat. Then search or
-   open another recent to verify the landing is usable. Do not open an unread chat
-   merely for validation unless the user chooses to do so.
-5. Archived still requires a user-selected test: no unarchive, archive-state loss,
-   other chat opening or false success is acceptable. Missing native support must
-   fail closed. No automatic archive-membership changes are implemented.
+Real investigation proved the native direct transaction on a user-selected already-
+read target, including model/badge persistence and unchanged archive flag. This is
+NOT installed new-envelope validation. Next: genuine envelope clicks in normal and
+focused origin, verify native unread/deselection/landing/deadline and original query
+untouched. New live tests require a user-selected authorized read conversation; do
+not reopen a newly unread chat or choose an unsolicited target just for coverage.
+No new mobile-sync/Archived-case acceptance is inferred. No DS6/release changes.

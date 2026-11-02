@@ -13,6 +13,15 @@ Ariad-governed roadmap for the WhatsApp Focus Mode prototype.
 - Friction should interrupt automatic behavior without becoming punitive or blocking legitimate use.
 - Prototype speed is acceptable, but distribution requires privacy/security hardening.
 
+## Current direct-unread revision
+
+Navigator authorized replacing unread-and-leave's legacy title search with the
+proven selected-model Cmd.markChatUnread + targeted close path. Implemented with
+337 passing tests, no new permissions or storage. A one-use trusted-envelope grant
+protects the fixed MAIN-world transaction; original modes/deadline/feedback remain.
+Installed selected-case validation is pending. [Design](../../mark-unread-and-deselect.md)
+and [native evidence](../../selected-chat-unread-investigation.md). Not a release.
+
 ## Active release state
 
 - Latest release tag: `v10`

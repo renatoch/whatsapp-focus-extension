@@ -1,87 +1,44 @@
 const test=require('node:test'),assert=require('node:assert/strict');
-const {createMarkUnreadAction}=require('../mark-unread.js');
-function harness(options={}){
- const events=[],results=[],endings=[],jobs=new Map();let id=0,main=true,title='Private chosen title',menu=null,unread=!!options.alreadyUnread,allowed=true;
- let row={isConnected:true};let candidates=[{title,clickTarget:row}];let controller;
- const scheduler={setTimeout(fn){const key=++id;jobs.set(key,fn);queueMicrotask(()=>{if(jobs.delete(key))fn();});return key;},clearTimeout:key=>jobs.delete(key)};
- const dom={readHeader:()=>main?title:'',hasMain:()=>main,menus:()=>menu?[{}]:[],
-  action:kind=>menu==='header'&&kind==='close'||menu==='row'&&kind===(unread?'read':'unread')?{}:null,
-  openHeader(){events.push('header');if(options.noHeader)return false;menu='header';return true;},
-  hover(){events.push('hover');if(options.recycleOnHover){candidates=[{title,clickTarget:{isConnected:true}}];}return true;},
-  rowButton:()=>options.noRowButton?null:{},openRow(){menu='row';events.push('row-menu');if(options.navigateOnMenu){main=true;title='Different';}return true;},
-  invoke(kind){events.push(kind);if(kind==='close'){if(!options.closeFails)main=false;menu=null;if(options.afterClose)options.afterClose(controller);}
-   if(kind==='unread'){assert.equal(main,false,'Never mark while still selected');unread=true;menu=null;if(options.replaceAfterMark){row.isConnected=false;row={isConnected:true};candidates=[{title,clickTarget:row}];}}return true;},
-  dismiss(){menu=null;events.push('dismiss');},unread:()=>unread&&!options.noBadge};
- controller=createMarkUnreadAction({dom,scheduler,normalize:value=>String(value||'').trim(),
-  prepareLookup(){events.push('lookup');},lookup:()=>({accepted:!options.rejectedSearch,candidates}),canStart:()=>!options.ineligible,stillAllowed:()=>allowed,
-  onBegin:()=>events.push('mask'),onEnd:result=>{endings.push(result);events.push('unmask');},onBusy:value=>events.push(value?'busy':'idle'),onResult:result=>results.push(result),
-  prepareFinish:options.prepareFinish?()=>options.prepareFinish(controller):undefined,finishReady:options.finishReady});
- return {controller,events,results,endings,setCandidates:value=>{candidates=value;},row:()=>row,setAllowed:value=>{allowed=value;},setTitle:value=>{title=value;},main:()=>main};
-}
-test('masked native route closes first, marks once and verifies a newly rendered row',async()=>{
- const h=harness({replaceAfterMark:true});const result=await h.controller.run();assert.deepEqual(result,{ok:true,closed:true});assert.equal(h.main(),false);
- assert.ok(h.events.indexOf('mask')<h.events.indexOf('header'));assert.ok(h.events.indexOf('close')<h.events.indexOf('unread'));
- assert.equal(h.events.filter(x=>x==='unread').length,1);assert.equal(h.events.at(-1),'idle');assert.equal(h.results.length,1);
- assert.ok(!JSON.stringify(result).includes('Private'));assert.equal(h.controller.isBusy(),false);
+const {createTransport,createMarkUnreadAction}=require('../mark-unread.js');
+function clock(){let time=0,id=0;const tasks=new Map();return {tasks,setTimeout(fn,ms){const n=id++;tasks.set(n,{fn,at:time+ms});return n;},clearTimeout:n=>tasks.delete(n),advance(ms){const end=time+ms;while(true){const next=[...tasks].filter(([,v])=>v.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!next)break;tasks.delete(next[0]);time=next[1].at;next[1].fn();}time=end;}};}
+function wire(){const scheduler=clock(),listeners=new Map(),sent=[];let main=true;const window={postMessage:m=>sent.push(m),addEventListener:(k,fn)=>listeners.set(k,fn),removeEventListener:k=>listeners.delete(k)};const transport=createTransport({window,scheduler,hasMain:()=>main});return {transport,scheduler,sent,listeners,window,main:v=>{main=v;},reply:(data,source=window,origin='https://web.whatsapp.com')=>listeners.get('message')?.({source,origin,data:{channel:'mwf-selected-unread-v1',direction:'result',id:sent[0]?.id,...data}})};}
+test('transport sends fixed commands with numeric IDs only, and validates native completion',async()=>{
+ const h=wire(),p=h.transport.run();assert.deepEqual(Object.keys(h.sent[0]).sort(),['channel','command','direction','id']);h.main(false);h.reply({ok:true,closed:true});assert.deepEqual(await p,{ok:true,closed:true});assert.equal(h.scheduler.tasks.size,0);
 });
-test('already-unread native state is idempotent and never invokes Mark as read',async()=>{
- const h=harness({alreadyUnread:true});assert.equal((await h.controller.run()).ok,true);assert.equal(h.events.includes('unread'),false);assert.equal(h.events.includes('read'),false);assert.equal(h.events.includes('row-menu'),false);
+test('wrong source, origin, ID, result shape and impossible success are ignored',async()=>{
+ const h=wire(),p=h.transport.run();h.reply({ok:true,closed:true},{},'https://web.whatsapp.com');h.reply({ok:true,closed:true},h.window,'https://evil.invalid');h.reply({ok:true,closed:true,id:999});h.reply({ok:true,closed:false});h.reply({ok:'yes',closed:true});assert.equal(h.scheduler.tasks.size,1);h.reply({ok:false,closed:false,error:'unavailable'});assert.equal((await p).error,'unavailable');
 });
-test('ineligible surfaces cannot start a mask or touch native state',async()=>{
- const h=harness({ineligible:true});assert.equal((await h.controller.run()).ok,false);assert.deepEqual(h.events,[]);
+test('contradictory success/error payloads cannot carry arbitrary text across the bridge',async()=>{
+ const h=wire(),p=h.transport.run();h.reply({ok:true,closed:true,error:'private payload'});h.reply({ok:true,closed:true,cancelled:true});assert.equal(h.scheduler.tasks.size,1);h.reply({ok:true,closed:true});assert.equal((await p).ok,true);
 });
-test('duplicate, case-mismatched, missing and search-rejected targets stop before closing',async()=>{
- for(const candidates of [[],[{title:'PRIVATE CHOSEN TITLE',clickTarget:{isConnected:true}}],[{title:'Private chosen title',clickTarget:{isConnected:true}},{title:'Private chosen title',clickTarget:{isConnected:true}}]]){
-  const h=harness();h.setCandidates(candidates);assert.equal((await h.controller.run()).ok,false);assert.equal(h.events.includes('close'),false);assert.equal(h.events.includes('unread'),false);
- }
- const h=harness({rejectedSearch:true});assert.equal((await h.controller.run()).ok,false);assert.equal(h.events.includes('close'),false);
+test('a lost message context fails boundedly without stranding a pending request',async()=>{
+ const h=wire();h.window.postMessage=()=>{throw Error('context lost');};assert.equal((await h.transport.run()).error,'unavailable');assert.equal(h.scheduler.tasks.size,0);
 });
-test('failed native close cannot mark an open conversation',async()=>{
- const h=harness({closeFails:true});const result=await h.controller.run();assert.equal(result.error,'close');assert.equal(h.events.includes('unread'),false);assert.equal(h.main(),true);
+test('single flight, timeout and cancellation never retry marking or search',async()=>{
+ const h=wire(),p=h.transport.run();assert.equal((await h.transport.run()).error,'unavailable');h.main(false);h.scheduler.advance(6500);assert.deepEqual(await p,{ok:false,error:'verify',closed:true});assert.deepEqual(h.sent.map(m=>m.command),['run','cancel']);assert.equal(h.scheduler.tasks.size,0);
 });
-test('missing hover control fails after close without pretending marking succeeded',async()=>{
- const h=harness({noRowButton:true});const result=await h.controller.run();assert.equal(result.ok,false);assert.equal(result.closed,true);assert.equal(h.events.includes('unread'),false);
+test('cancel resolves pending work and rejects late native replies',async()=>{
+ const h=wire(),p=h.transport.run();h.transport.cancel();h.reply({ok:true,closed:true});assert.equal((await p).cancelled,true);assert.equal(h.scheduler.tasks.size,0);
 });
-test('hover recycling a connected target stops before row action',async()=>{
- const h=harness({recycleOnHover:true});assert.equal((await h.controller.run()).ok,false);assert.equal(h.events.includes('unread'),false);
+test('pagehide/disposal clears listeners and stops future requests',async()=>{
+ const h=wire(),p=h.transport.run();h.listeners.get('pagehide')();assert.equal((await p).cancelled,true);assert.equal(h.listeners.has('message'),false);assert.equal((await h.transport.run()).error,'unavailable');
 });
-test('a native click without an unread badge is never reported as success',async()=>{
- const h=harness({noBadge:true});const result=await h.controller.run();assert.equal(result.error,'verify');assert.equal(result.closed,true);assert.equal(result.ok,false);
+function action(){let resolve,busy=false,allowed=true,starts=0,cancels=0;const events=[];const transport={run:()=>{starts++;return new Promise(r=>{resolve=r;});},cancel:()=>{cancels++;resolve?.({ok:false,cancelled:true});},dispose(){}};const c=createMarkUnreadAction({transport,canStart:()=>true,stillAllowed:()=>allowed,onBegin:()=>events.push('begin'),onEnd:r=>events.push(r.cancelled?'cancelled':'end'),onBusy:v=>{busy=v;events.push(v?'busy':'idle');},onResult:r=>events.push(r.ok?'success':'error')});return {c,events,resolve:r=>resolve(r),allowed:v=>{allowed=v;},busy:()=>busy,starts:()=>starts,cancels:()=>cancels};}
+test('activity starts synchronously; native success is delivered only after completion',async()=>{
+ const h=action(),p=h.c.run();assert.deepEqual(h.events,['begin','busy']);h.resolve({ok:true,closed:true});await p;assert.deepEqual(h.events,['begin','busy','end','idle','success']);
 });
-test('double clicks are single-flight and do not create a second mask/action',async()=>{
- const h=harness();const pending=h.controller.run();assert.equal((await h.controller.run()).ok,false);assert.equal((await pending).ok,true);assert.equal(h.events.filter(x=>x==='mask').length,1);
+test('controller is single-flight and does not run another transport request',async()=>{
+ const h=action(),p=h.c.run();assert.equal((await h.c.run()).error,'unavailable');assert.equal(h.starts(),1);h.resolve({ok:true,closed:true});await p;
 });
-test('cancellation releases waits, clears the mask and prevents late native effects or landing',async()=>{
- const h=harness();const pending=h.controller.run();await Promise.resolve();h.controller.cancel();const result=await pending;
- assert.equal(result.cancelled,true);assert.equal(h.events.includes('close'),false);assert.deepEqual(h.results,[]);assert.equal(h.events.filter(x=>x==='unmask').length,1);
+test('scope loss cancels and never delivers a late success/landing',async()=>{
+ const h=action(),p=h.c.run();h.allowed(false);h.c.reconcile();h.resolve({ok:true,closed:true});await p;assert.equal(h.cancels(),1);assert.equal(h.busy(),false);assert.equal(h.events.includes('success'),false);
 });
-test('new navigation/auth state cancels without seizing the newer view',async()=>{
- const h=harness();const pending=h.controller.run();await Promise.resolve();h.setAllowed(false);h.controller.reconcile();await pending;
- assert.equal(h.events.includes('unread'),false);assert.deepEqual(h.results,[]);assert.equal(h.controller.isBusy(),false);
+test('scope change between native completion and continuation cannot seize a newer view',async()=>{
+ const h=action(),p=h.c.run();h.resolve({ok:true,closed:true});h.allowed(false);await p;assert.equal(h.events.includes('success'),false);
 });
-test('a conversation opened during a later stage cannot be marked or force-landed',async()=>{
- const h=harness({navigateOnMenu:true});const result=await h.controller.run();assert.equal(result.cancelled,true);assert.equal(h.events.includes('unread'),false);assert.deepEqual(h.results,[]);
+test('backend failure is shown as failure and cleans busy state',async()=>{
+ const h=action(),p=h.c.run();h.resolve({ok:false,error:'close',closed:false});await p;assert.equal(h.events.at(-1),'error');assert.equal(h.busy(),false);
 });
-test('a superseded run cannot clear a newer run mask or finish its navigation',async()=>{
- const h=harness();const old=h.controller.run();await Promise.resolve();h.controller.cancel();const fresh=h.controller.run();
- assert.equal((await old).cancelled,true);assert.equal((await fresh).ok,true);assert.equal(h.results.length,1);
- assert.equal(h.events.filter(x=>x==='unmask').length,2);assert.equal(h.events.filter(x=>x==='unread').length,1);
-});
-test('final context restoration finishes before unmasking or notifying the caller',async()=>{
- let checks=0,h;h=harness({prepareFinish:()=>h.events.push('restore-context'),finishReady:()=>{checks++;assert.equal(h.results.length,0);return checks>1;}});
- assert.equal((await h.controller.run()).ok,true);assert.ok(h.events.indexOf('restore-context')<h.events.indexOf('unmask'));assert.equal(h.results.length,1);
-});
-test('cancellation during final restoration cleans progress ownership and cannot announce success',async()=>{
- const h=harness({prepareFinish:controller=>controller.cancel()});const result=await h.controller.run();
- assert.equal(result.cancelled,true);assert.equal(h.endings[0].cancelled,true);assert.equal(h.events.filter(x=>x==='unmask').length,1);assert.deepEqual(h.results,[]);
-});
-test('failure to restore context is reported separately from native marking',async()=>{
- const h=harness({finishReady:()=>false});const result=await h.controller.run();assert.equal(result.error,'restore');assert.equal(result.closed,true);assert.equal(h.events.includes('unread'),true);assert.equal(result.ok,false);
-});
-test('a thrown restoration hook is bounded as restoration failure after marking, not success',async()=>{
- const h=harness({prepareFinish:()=>{throw Error('Unavailable field');}});const result=await h.controller.run();
- assert.equal(result.error,'restore');assert.equal(result.closed,true);assert.equal(h.controller.isBusy(),false);assert.equal(h.events.at(-1),'idle');
-});
-test('disposal forbids restart and leaves no native action in flight',async()=>{
- const h=harness();const pending=h.controller.run();h.controller.dispose();await pending;assert.equal((await h.controller.run()).ok,false);assert.equal(h.events.includes('unread'),false);
+test('disposal forbids a future action and clears a pending transaction',async()=>{
+ const h=action(),p=h.c.run();h.c.dispose();await p;assert.equal((await h.c.run()).error,'unavailable');assert.equal(h.busy(),false);
 });

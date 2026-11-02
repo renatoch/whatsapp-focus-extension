@@ -85,9 +85,7 @@
   const fixedCollectionRenderCache = new WeakMap();
   let pendingCollectionTitle = "";
   let unreadContext = null;
-  let unreadLookupReadyAt = 0;
   let unreadOrigin = null;
-  let unreadRestoreReadyAt = 0;
 
   const copyMenu = globalThis.MirrorCopyMenu.createCopyMenu({
     document, window,
@@ -120,35 +118,17 @@
     onTransition: resetForAuthTransition,
   });
 
-  const unreadDom = globalThis.MirrorMarkUnread.createUnreadDom({
-    document, window, isVisible: isVisibleElement, readHeader: readActiveConversationTitle,
+  const unreadTransport = globalThis.MirrorMarkUnread.createTransport({
+    window, scheduler:window, hasMain:hasOpenConversation,
   });
   const markUnread = globalThis.MirrorMarkUnread.createMarkUnreadAction({
-    dom: unreadDom, scheduler: window, normalize: globalThis.MirrorFocusedRecents.normalizeTitle,
+    transport: unreadTransport,
     canStart: canMarkUnread, stillAllowed: () => !authSurface.isActive() &&
       Boolean(document.querySelector("#side")) && !hasNativeTransientSurface() && unreadContext === unreadContextKey() &&
       (!unreadOrigin?.hadDeadline || surfaceExpiry.hasDeadline()),
-    prepareLookup: (title, alive) => {
-      unreadLookupReadyAt = 0;
-      goToMainChatsThen("mark-unread", () => {
-        if (!alive()) return;
-        const field = findNativeSearchField({allowHidden:true});
-        if (field) {
-          setNativeSearchText(field, title);
-          unreadLookupReadyAt = Date.now() + SEARCH_SETTLE_MS;
-        }
-      });
-    },
-    lookup: (title) => {
-      const field = findNativeSearchField({allowHidden:true});
-      return {accepted:Boolean(field && unreadLookupReadyAt > 0 && Date.now() >= unreadLookupReadyAt &&
-        globalThis.MirrorFocusedRecents.normalizeTitle(getSearchText(field)) === title),
-        candidates:focusedSearchCandidates().candidates};
-    },
     onBegin: () => {
       const preserveSidebar = root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN);
-      const field = preserveSidebar ? findNativeSearchField({allowHidden:true}) : null;
-      unreadOrigin = {preserveSidebar, search:field ? getSearchText(field) : "", hadDeadline:preserveSidebar && surfaceExpiry.hasDeadline()};
+      unreadOrigin = {preserveSidebar, hadDeadline:preserveSidebar && surfaceExpiry.hasDeadline()};
       if (!preserveSidebar) surfaceExpiry.cancel();
       clearNormalDelay(); copyMenu.close(); closeFixedCollectionChooser();
       recentCaptureToken += 1; recentNavigationToken += 1;
@@ -158,18 +138,11 @@
       showMarkUnreadProgress(true);
       updateUnreadSidebarBlock();
     },
-    prepareFinish: prepareMarkUnreadFinish,
-    finishReady: markUnreadFinishReady,
     onEnd: (result) => {
-      try {
-        if (!result?.ok && !result?.cancelled) restoreUnreadSearch();
-      } catch (_error) {
-        // A replaced native field must never strand the transaction mask/progress.
-      }
       showMarkUnreadProgress(false);
       root().classList.remove(ROOT_MARK_UNREAD, ROOT_UNREAD_VISIBLE_SIDEBAR);
       document.getElementById(UNREAD_SIDEBAR_BLOCK_ID)?.remove();
-      unreadContext = null; unreadLookupReadyAt = 0; unreadRestoreReadyAt = 0;
+      unreadContext = null;
       if (result?.cancelled) unreadOrigin = null;
     },
     onBusy: updateMarkUnreadButton,
@@ -181,9 +154,9 @@
         if (!preserveSidebar) setSearchMode();
       } else {
         if (!preserveSidebar) setActive({showOverlay:true});
-        showToast(result.error === "restore" ? "Marcação confirmada, mas não consegui restaurar a busca da lateral." :
+        showToast(result.error === "close" ? "Marcação solicitada, mas não consegui fechar a conversa. Confira no WhatsApp." :
           result.closed ? "Conversa fechada, mas não consegui confirmar a marcação como não lida." :
-          "Não consegui marcar com segurança. A conversa não foi marcada como não lida.");
+          "Não consegui concluir a ação com segurança. Confira o estado da conversa no WhatsApp.");
       }
     },
   });
@@ -235,27 +208,6 @@
     status.append(spinner, text); document.body.appendChild(status);
   }
 
-  function restoreUnreadSearch() {
-    if (!unreadOrigin?.preserveSidebar || unreadOrigin.key !== unreadContextKey() ||
-        (unreadOrigin.hadDeadline && !surfaceExpiry.hasDeadline())) return false;
-    const field = findNativeSearchField({allowHidden:true});
-    if (!field) return false;
-    if (getSearchText(field) !== unreadOrigin.search) setNativeSearchText(field, unreadOrigin.search);
-    return true;
-  }
-
-  function prepareMarkUnreadFinish() {
-    unreadRestoreReadyAt = 0;
-    if (unreadOrigin?.preserveSidebar && restoreUnreadSearch()) unreadRestoreReadyAt = Date.now() + SEARCH_SETTLE_MS;
-  }
-
-  function markUnreadFinishReady() {
-    if (!unreadOrigin?.preserveSidebar) return true;
-    const field = findNativeSearchField({allowHidden:true});
-    return Boolean(field && unreadRestoreReadyAt > 0 && Date.now() >= unreadRestoreReadyAt &&
-      getSearchText(field) === unreadOrigin.search);
-  }
-
   function unreadContextKey() {
     return [recentNavigationToken, ...[ROOT_ACTIVE, ROOT_NORMAL, ROOT_SEARCHING, ROOT_SEARCH_FOCUSED,
       ROOT_SIDEBAR_OPEN, ROOT_SIDEBAR_HIDDEN, ROOT_OVERLAY_OPEN, ROOT_OPENING_RECENT]
@@ -267,7 +219,7 @@
       (!root().classList.contains(ROOT_NORMAL) || surfaceExpiry.hasDeadline()) &&
       !root().classList.contains(ROOT_OPENING_RECENT) && getOverlay()?.hidden === true &&
       !hasNativeTransientSurface() && nativeSurface.inspect() === "conversation" &&
-      Boolean(readActiveConversationTitle());
+      Boolean(document.querySelector('#main [data-testid="conversation-header"]'));
   }
 
   function findUnreadHeaderAnchor() {

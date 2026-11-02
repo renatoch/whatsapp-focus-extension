@@ -15,7 +15,7 @@
     },
     {
       "matches": ["https://web.whatsapp.com/*"],
-      "js": ["archived-unread-main.js"],
+      "js": ["archived-unread-main.js", "selected-unread-main.js"],
       "world": "MAIN",
       "run_at": "document_start"
     },
