@@ -493,8 +493,32 @@
   }
 
   function readTitle(element) {
-    if (!element) return "";
-    return String(element.getAttribute?.("title") || element.textContent || "").trim().replace(/\s+/g, " ");
+    if (!element || String(element.tagName).toUpperCase() === 'IMG') return '';
+    const clean = value => String(value || '').trim().replace(/\s+/g, ' ');
+    const title = element.getAttribute?.('title');
+    if (title) return clean(title);
+    if (!element.childNodes) return clean(element.textContent);
+    // Native emoji images contribute no textContent. Reconstruct ONLY the title
+    // slot in DOM order, not tooltips, image URLs or the conversation preview.
+    const parts = [], stack = [element];
+    let visited = 0;
+    while (stack.length) {
+      if (++visited > 2048) return '';
+      const node = stack.pop(), tag = String(node.tagName).toUpperCase();
+      if (node.nodeType === 3) { parts.push(node.nodeValue ?? node.textContent ?? ''); continue; }
+      if (tag === 'IMG') {
+        const emoji = node.getAttribute?.('data-plain-text') || node.getAttribute?.('alt') || '';
+        const glyph = /[\p{Extended_Pictographic}\p{Regional_Indicator}\u20e3]/u;
+        const sequence = /^(?:\p{Emoji}|\p{Emoji_Modifier}|\uFE0F|\uFE0E|\u200D|\u20E3|[\u{E0020}-\u{E007F}])+$/u;
+        if (!glyph.test(emoji) || !sequence.test(emoji)) return ''; // Never silently omit an unknown image.
+        parts.push(emoji); continue;
+      }
+      if (tag === 'SVG') continue;
+      const children = node.childNodes || [];
+      if (stack.length + children.length > 2048) return '';
+      for (let i = children.length - 1; i >= 0; i--) stack.push(children[i]);
+    }
+    return clean(parts.join(''));
   }
 
   function readActiveConversationTitle() {
@@ -532,14 +556,21 @@
       ['span[title]', "spanTitle"],
     ];
     const normalize = (value) => String(value || "").trim().replace(/\s+/g, " ").normalize("NFKC");
+    const container = row.querySelector?.('[data-testid="cell-frame-title"]');
+    const evidence = (selected, titleSource) => {
+      const title = readTitle(selected);
+      return title ? { title, titleSource,
+        selectedTextDifferent: normalize(selected.textContent) !== normalize(title),
+        containerTextRelation: !container ? "missing" : normalize(container.textContent) === normalize(title) ? "same" : "different" } : empty;
+    };
+    // A descendant [title] may be only an emoji tooltip. Use the full native
+    // title slot when it owns a title or renders images; never fall back to a fragment.
+    if (container && (container.getAttribute?.('title') || container.querySelector?.('img'))) {
+      return evidence(container, 'frameTitle');
+    }
     for (const [selector, titleSource] of selectors) {
       const selected = Array.from(row.querySelectorAll(selector)).find((element) => readTitle(element));
-      if (!selected) continue;
-      const title = readTitle(selected);
-      const container = row.querySelector?.('[data-testid="cell-frame-title"]');
-      return { title, titleSource,
-        selectedTextDifferent: normalize(selected.textContent) !== normalize(title),
-        containerTextRelation: !container ? "missing" : normalize(container.textContent) === normalize(title) ? "same" : "different" };
+      if (selected) return evidence(selected, titleSource);
     }
     return empty;
   }
