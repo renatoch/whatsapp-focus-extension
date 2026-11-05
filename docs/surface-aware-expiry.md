@@ -35,7 +35,14 @@ is NOT end-to-end Chrome acceptance of the channel deadline correction. The temp
 factory namespace was restored; re-entry trace observer/listeners were removed.
 Navigator subsequently accepted the missing-selection fallback and authorized closure.
 
-## Immediate channel fallback investigation — unresolved
+## Diagnostic notice retired
+
+Navigator requested removal of the temporary expiry diagnostic toast/JSON after
+ordinary use. Destination selection is now silent in both duration modes; focus
+policy is unchanged. Alt+Shift+T, the 10-second test duration and its short
+10s/5min selection notice remain available. The investigation below is historical.
+
+## Immediate channel fallback investigation — historical
 
 Navigator reports a channel returns directly to the blind focus card despite the
 screen being active, rather than briefly preserving the channel then falling back.
