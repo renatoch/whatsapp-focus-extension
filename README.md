@@ -35,6 +35,18 @@ conta funcionando só para testar. QR/entrada de telefone foram verificados num
 perfil desvinculado; etapas posteriores de código e vínculo real ainda não foram
 exercitadas. [Evidência e limites](docs/login-surface-plan.md).
 
+## Voltar ao overlay de foco
+
+Entrar na tela cega agora solicita **fechar/desselecionar a conversa nativamente**,
+sem alterar sua marcação de leitura. Retome pelos recentes, busca ou coleções.
+“Continuar conversa” foi retirado do card principal e das duas confirmações;
+**canais e “Continuar no canal” permanecem como antes**. Se o fechamento falhar,
+um aviso persistente informa que a conversa pode continuar ativa por trás.
+
+Conversa focada visível e expiração visível dos cinco minutos continuam preservadas.
+Recarregue extensão e aba. 354 testes passaram; confirmação de recebimento real
+no overlay fica para o teste do usuário. [Escopo e teste curto](docs/blind-overlay-conversation-close.md).
+
 ## Marcar como não lida e sair da conversa
 
 Use o **ícone de envelope à esquerda da lupa**, no cabeçalho da conversa. O tooltip
@@ -93,8 +105,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 10 conversas, recolhidas por padrão na própria tela de conversa focada para alternância direta; somente nomes de coleção e títulos escolhidos ficam no armazenamento isolado da extensão;
 - ao entrar em **Buscar** com campo vazio, oferece recentes e coleções recolhidas para escolha direta, mesmo sem conversa aberta; oculta os ramos nativos concorrentes abaixo da busca sem mover a seção, que tem fundo opaco; ao digitar, esconde essas opções, e ao limpar o campo volta a mostrá-las;
 - na reabertura por recentes/coleções, aguarda um alvo exato único em duas sondagens consecutivas; duplicidade persistente falha fechada, com diagnóstico estrutural copiável sem nomes;
-- permite continuar apenas na conversa aberta, ocultando o overlay e mantendo a lateral escondida;
-- oculta a ação **Continuar na conversa aberta** quando não detecta conversa aberta;
+- ao voltar ao overlay cego, solicita desseleção nativa da conversa sem alterar leitura e oferece retomada pelos recentes; canais mantêm **Continuar no canal aberto**;
 - durante o carregamento inicial do WhatsApp Web, mantém a tela cega e substitui o aviso textual por uma barra de carregamento sem ações clicáveis;
 - mostra há quanto tempo o WhatsApp normal não é aberto, para aumentar consciência de reaberturas impulsivas;
 - oferece **Ver padrão de uso**, uma síntese voluntária e local da coreografia de abertura do modo normal, com retenção máxima de 14 dias e controles para pausar/apagar;
@@ -236,8 +247,8 @@ Para ajustes de ruído visual, prefira editar `dev-config.json`.
 7. Selecione uma conversa; a lateral deve sumir automaticamente depois da seleção.
 8. Clique em **Voltar ao modo foco** para retornar à tela neutra.
 9. Teste `Alt+Shift+F` para voltar ao modo foco e `Alt+Shift+L` para mostrar/ocultar a lateral no modo full/manual.
-10. Clique em **Continuar na conversa aberta**.
-11. A conversa, se houver uma aberta, fica visível; a lateral continua escondida.
+10. Volte ao overlay cego por **Foco**; a conversa deve ser desselecionada nativamente.
+11. Reabra pelos recentes; **Continuar conversa** não deve aparecer, nem nas confirmações do modo normal.
 12. Clique em **Ver WhatsApp normal por 5 min** e valide a pausa consciente com opções **Continuar na conversa**, **Cancelar** e **Abrir agora**.
 13. Durante o modo normal, clique em **Voltar ao modo foco** para encerrar a liberação antes dos 5 minutos.
 14. Confirme que a tela de foco mostra há quanto tempo o WhatsApp normal não é aberto.

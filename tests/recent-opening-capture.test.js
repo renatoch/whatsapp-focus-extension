@@ -80,7 +80,7 @@ test('internal hidden navigation is not captured as a native full-mode opening',
   assert.deepEqual(h.added, []);
 });
 
-test('continue normalizes and enters the shared focused surface before capturing without search telemetry', () => {
+test('obsolete conversation Continue cannot resume a chat or reorder recents', () => {
   const h = harness();
   const transitions = [];
   Object.assign(h.context, {
@@ -94,8 +94,8 @@ test('continue normalizes and enters the shared focused surface before capturing
   });
   h.setTitle('Continued');
   vm.runInContext(functionSource('continueOpenConversation') + '\ncontinueOpenConversation();', h.context);
-  assert.deepEqual(transitions, ['normalize', 'clear-overlay-and-pending-confirmation', 'focused-surface']);
-  assert.deepEqual(h.added, ['Continued']);
+  assert.deepEqual(transitions, []);
+  assert.deepEqual(h.added, []);
   assert.deepEqual(h.events, []);
 });
 

@@ -13,11 +13,11 @@ function harness(confirmation=false){
 }
 test('stable overlay updates do not replace owned text nodes repeatedly',()=>{
   const h=harness();h.update();assert.equal(h.writes(),1);h.update();h.update();assert.equal(h.writes(),1);
-  h.setSurface('conversation');h.update();assert.equal(h.writes(),2);h.update();assert.equal(h.writes(),2);
+  h.setSurface('conversation');h.update();assert.equal(h.writes(),1);h.update();assert.equal(h.writes(),1);
 });
 test('short confirmation labels also settle without observer feedback',()=>{
   const h=harness(true);h.update();assert.equal(h.button.textContent,'Continuar no canal');assert.equal(h.flush().queued,0);
-  h.setSurface('conversation');h.update();assert.equal(h.button.textContent,'Continuar na conversa');assert.equal(h.flush().queued,0);
+  h.setSurface('conversation');h.update();assert.equal(h.button.textContent,'Continuar no canal');assert.equal(h.flush().queued,0);
 });
 test('child-list observer feedback settles instead of starving the event loop',()=>{
   const h=harness();h.update();const first=h.flush();assert.equal(first.queued,0);assert.ok(first.turns<=2);

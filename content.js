@@ -86,6 +86,8 @@
   let pendingCollectionTitle = "";
   let unreadContext = null;
   let unreadOrigin = null;
+  let overlayCloseEpoch = 0;
+  let overlayCloseAttempts = new WeakSet();
 
   const copyMenu = globalThis.MirrorCopyMenu.createCopyMenu({
     document, window,
@@ -120,6 +122,9 @@
 
   const unreadTransport = globalThis.MirrorMarkUnread.createTransport({
     window, scheduler:window, hasMain:hasOpenConversation,
+  });
+  const overlayCloseTransport = globalThis.MirrorMarkUnread.createTransport({
+    window, scheduler:window, hasMain:hasOpenConversation, channel:'mwf-overlay-close-v1',
   });
   const markUnread = globalThis.MirrorMarkUnread.createMarkUnreadAction({
     transport: unreadTransport,
@@ -296,7 +301,35 @@
     return document.documentElement;
   }
 
+  function closeConversationForOverlay() {
+    const main = document.querySelector('#main');
+    if (main) overlayCloseAttempts.add(main);
+    const epoch = ++overlayCloseEpoch;
+    overlayCloseTransport.cancel();
+    overlayCloseTransport.run().then((result) => {
+      if (epoch !== overlayCloseEpoch || getOverlay()?.hidden !== false ||
+          !root().classList.contains(ROOT_OVERLAY_OPEN)) return;
+      if (!result.ok && !result.cancelled) {
+        const warning = document.createElement('p');
+        warning.id = 'mirror-whatsapp-focus-overlay-close-warning';
+        warning.setAttribute('role', 'alert');
+        warning.textContent = 'A tela está protegida, mas não consegui confirmar o fechamento da conversa. Ela pode continuar ativa por trás. Tente voltar ao foco novamente.';
+        getOverlay().querySelector('.mwf-card')?.prepend(warning);
+      }
+    });
+  }
+
   function setActive({ showOverlay }) {
+    overlayCloseEpoch += 1;
+    overlayCloseTransport.cancel();
+    document.getElementById('mirror-whatsapp-focus-overlay-close-warning')?.remove();
+    const closeConversation = Boolean(showOverlay && !authSurface.isActive() && nativeSurface.inspect() === 'conversation');
+    if (closeConversation) {
+      const title = readActiveConversationTitle();
+      // Retain a just-opened conversation if its scheduled capture has not run yet.
+      // Closing is not another opening: never reorder an already captured recent.
+      if (title && !focusedRecents.includes(title)) addFocusedRecent(title);
+    }
     surfaceExpiry.cancel();
     recentCaptureToken += 1;
     closeFixedCollectionChooser();
@@ -319,6 +352,8 @@
     renderFocusedRecents();
     renderFixedCollections();
     getOverlay().hidden = !showOverlay;
+    if (showOverlay) overlayCloseAttempts = new WeakSet();
+    if (closeConversation) closeConversationForOverlay();
   }
 
   function setNormal() {
@@ -1158,28 +1193,8 @@
   }
 
   function continueOpenConversation() {
-    if (nativeSurface.inspect() === "channel") {
-      surfaceExpiry.continueChannel();
-      return;
-    }
-    debugLog("continueOpenConversation:start", {
-      ready: isWhatsAppReady(),
-      rootClass: root().className,
-      hasOpenConversation: hasOpenConversation(),
-      nativeSearchField: describeElement(findNativeSearchField()),
-      nested: isNestedListView(),
-    });
-
-    goToMainChatsThen("continue", () => {
-      debugLog("continueOpenConversation:after-main-chats", {
-        rootClass: root().className,
-        nativeSearchField: describeElement(findNativeSearchField()),
-        nested: isNestedListView(),
-      });
-      setActive({ showOverlay: false });
-      setSearchFocusedConversation();
-      captureFocusedConversation(readActiveConversationTitle(), 0, null);
-    });
+    // Channels are intentionally unchanged in this conversation-only revision.
+    if (nativeSurface.inspect() === "channel") surfaceExpiry.continueChannel();
   }
 
   function goToMainChatsThen(source, callback) {
@@ -1524,13 +1539,17 @@
     const ready = isWhatsAppReady();
     overlay.classList.toggle("mwf-ready", ready);
     const surface = nativeSurface.inspect();
-    const canContinue = hasOpenConversation() && (surface === "conversation" || surface === "channel");
+    // Also cover native chat restoration arriving AFTER the blind boot overlay.
+    // One attempt per mounted main/overlay entry; an error never creates a retry loop.
+    if (overlay.hidden === false && surface === 'conversation' && root().classList.contains(ROOT_OVERLAY_OPEN)) {
+      const main = document.querySelector('#main');
+      if (main && !overlayCloseAttempts.has(main)) closeConversationForOverlay();
+    }
+    const canContinue = hasOpenConversation() && surface === "channel";
     overlay.classList.toggle("mwf-has-conversation", canContinue);
     overlay.querySelectorAll('[data-mwf-action="continue"]').forEach((button) => {
       const confirmation = Boolean(button.closest(".mwf-normal-confirm"));
-      const continueLabel = surface === "channel"
-        ? (confirmation ? "Continuar no canal" : "Continuar no canal aberto")
-        : (confirmation ? "Continuar na conversa" : "Continuar na conversa aberta");
+      const continueLabel = confirmation ? "Continuar no canal" : "Continuar no canal aberto";
       // Replacing equal text still emits childList mutations and re-enters this observer.
       if (button.textContent !== continueLabel) button.textContent = continueLabel;
     });
@@ -1905,7 +1924,7 @@
         </div>
         <div class="mwf-actions">
           <button class="mwf-button mwf-button-primary" data-mwf-action="search">Buscar conversa</button>
-          <button class="mwf-button mwf-button-secondary" data-mwf-action="continue">Continuar na conversa aberta</button>
+          <button class="mwf-button mwf-button-secondary" data-mwf-action="continue">Continuar no canal aberto</button>
           <button class="mwf-button mwf-button-secondary" data-mwf-action="normal">${normalExpiryTestMode ? "Ver WhatsApp normal por 10s (teste)" : "Ver WhatsApp normal por 5 min"}</button>
         </div>
         <button class="mwf-awareness-link" data-mwf-action="awareness">Ver padrão de uso</button>
@@ -1995,12 +2014,12 @@
         </section>
         <div class="mwf-normal-confirm" aria-live="polite">
           <h2>Abrir WhatsApp normal?</h2>
-          <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+          <p class="mwf-normal-has-conversation">Se você só quer seguir no canal aberto, dá para continuar sem ver a lista.</p>
           <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
           <p class="mwf-normal-recent-warning" data-mwf-normal-recent-warning></p>
           <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>8</strong>s…</p>
           <div class="mwf-actions">
-            <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
+            <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar no canal</button>
             <button class="mwf-button mwf-button-secondary" data-mwf-action="normal-cancel">Cancelar</button>
             <button class="mwf-button mwf-button-quiet" data-mwf-action="normal-now">Abrir agora</button>
           </div>
@@ -2505,12 +2524,12 @@
     confirm.setAttribute("aria-live", "polite");
     confirm.innerHTML = `
       <h2>Abrir WhatsApp normal?</h2>
-      <p class="mwf-normal-has-conversation">Se você só quer seguir na conversa aberta, dá para continuar sem ver a lista.</p>
+      <p class="mwf-normal-has-conversation">Se você só quer seguir no canal aberto, dá para continuar sem ver a lista.</p>
       <p class="mwf-normal-no-conversation">Isso vai abrir a lista completa de conversas. Use só se for essa a intenção.</p>
       <p class="mwf-normal-recent-warning" data-mwf-normal-recent-warning></p>
       <p class="mwf-normal-countdown">Liberando em <strong data-mwf-normal-countdown>8</strong>s…</p>
       <div class="mwf-actions">
-        <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar na conversa</button>
+        <button class="mwf-button mwf-button-primary" data-mwf-action="continue">Continuar no canal</button>
         <button class="mwf-button mwf-button-secondary" data-mwf-action="normal-cancel">Cancelar</button>
         <button class="mwf-button mwf-button-quiet" data-mwf-action="normal-now">Abrir agora</button>
       </div>

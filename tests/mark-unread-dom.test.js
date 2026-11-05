@@ -36,7 +36,7 @@ test('focus conversation with hidden sidebar is allowed, blind/search/auth/trans
 });
 function clock(){let time=0,id=0;const tasks=new Map();return {setTimeout(fn,ms){const key=id++;tasks.set(key,{fn,at:time+ms});return key;},clearTimeout:id=>tasks.delete(id),advance(ms){const end=time+ms;let n=0;while(true){const next=[...tasks].filter(([,v])=>v.at<=end).sort((a,b)=>a[1].at-b[1].at)[0];if(!next)break;if(++n>1000)throw Error('loop');time=next[1].at;tasks.delete(next[0]);next[1].fn();}time=end;}};}
 function bootstrap(){const f=fixture(),c=clock(),listeners=new Map(),sent=[];const ctx=vm.createContext({document:f.document,require:f.requireNative,setTimeout:c.setTimeout,clearTimeout:c.clearTimeout,addEventListener:(k,fn)=>listeners.set(k,fn),postMessage:m=>sent.push(m)});vm.runInContext('window=globalThis',ctx);vm.runInContext(fs.readFileSync(path.join(__dirname,'../selected-unread-main.js'),'utf8'),ctx);
- const click=trusted=>listeners.get('click')({isTrusted:trusted,target:f.button});const request=(id=1,source=ctx.window,origin='https://web.whatsapp.com')=>listeners.get('message')({source,origin,data:{channel:'mwf-selected-unread-v1',direction:'command',command:'run',id}});return {f,c,ctx,listeners,sent,click,request};}
+ const click=trusted=>listeners.get('click')({isTrusted:trusted,target:f.button});const request=(id=1,source=ctx.window,origin='https://web.whatsapp.com',channel='mwf-selected-unread-v1')=>listeners.get('message')({source,origin,data:{channel,direction:'command',command:'run',id}});return {f,c,ctx,listeners,sent,click,request};}
 test('MAIN bridge refuses message-only/untrusted actions without invoking native commands',()=>{
  const h=bootstrap();h.request();h.click(false);h.request(2);assert.equal(h.f.calls.length,0);assert.equal(h.sent.at(-1).error,'unavailable');
 });
@@ -49,3 +49,10 @@ test('expired grants, changed modes, foreign origins and wrong window source can
 test('busy presentation flag does not invalidate a legitimate captured click',()=>{
  const h=bootstrap();h.click(true);h.f.flags.add('mwf-mark-unread');h.request();assert.equal(h.f.calls.length,2);
 });
+
+function blind(h){h.f.flags.delete('mwf-normal');h.f.flags.add('mwf-active');h.f.flags.add('mwf-overlay-open');h.f.overlay.hidden=false;}
+test('automatic overlay bridge only closes, with no mark API or trusted unread grant',()=>{const h=bootstrap();blind(h);h.f.cmd.markChatUnread=undefined;h.request(1,h.ctx.window,'https://web.whatsapp.com','mwf-overlay-close-v1');h.c.advance(300);assert.deepEqual(h.f.calls.map(c=>c.kind),['close_chat']);assert.equal(h.f.chat.unreadCount,0);assert.ok(h.sent.some(m=>m.channel==='mwf-overlay-close-v1'&&m.ok));});
+test('overlay close rejects normal, visible focused, auth and channel contexts',()=>{for(const scope of ['normal','focused','auth','channel']){const h=bootstrap();if(scope!=='normal')blind(h);if(scope==='focused')h.f.overlay.hidden=true;if(scope==='auth')h.f.flags.add('mwf-auth-surface');if(scope==='channel')h.f.flags.add('mwf-channel-surface');h.request(1,h.ctx.window,'https://web.whatsapp.com','mwf-overlay-close-v1');assert.equal(h.f.calls.length,0,scope);}});
+test('overlay close rejects a channel-like header even without its classifier flag',()=>{const h=bootstrap();blind(h);h.f.header.querySelectorAll=()=>[];h.request(1,h.ctx.window,'https://web.whatsapp.com','mwf-overlay-close-v1');assert.equal(h.f.calls.length,0);assert.equal(h.sent.at(-1).error,'unavailable');});
+test('empty overlay acknowledges closure without touching native commands',()=>{const h=bootstrap();blind(h);h.f.state.main=false;h.request(1,h.ctx.window,'https://web.whatsapp.com','mwf-overlay-close-v1');assert.equal(h.f.calls.length,0);assert.equal(h.sent.at(-1).ok,true);});
+test('automatic close capability does not grant unread capability',()=>{const h=bootstrap();blind(h);h.request();assert.equal(h.f.calls.length,0);assert.equal(h.sent.at(-1).error,'unavailable');});

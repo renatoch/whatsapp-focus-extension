@@ -1,16 +1,16 @@
 (function(scope) {
   'use strict';
   const CHANNEL='mwf-selected-unread-v1', ERRORS=['unavailable','mark','close','verify'];
-  function createTransport({window,scheduler,hasMain}) {
+  function createTransport({window,scheduler,hasMain,channel=CHANNEL}) {
     let pending=null,sequence=0,running=true;
-    const send=(command,id)=>{try {window.postMessage({channel:CHANNEL,direction:'command',command,id},'https://web.whatsapp.com');return true;}catch(_){return false;}};
+    const send=(command,id)=>{try {window.postMessage({channel,direction:'command',command,id},'https://web.whatsapp.com');return true;}catch(_){return false;}};
     function finish(result) {
       const op=pending;if(!op)return;pending=null;scheduler.clearTimeout(op.timer);op.resolve(result);
     }
     function cancel() { if(!pending)return;send('cancel',pending.id);finish({ok:false,cancelled:true,closed:!hasMain()}); }
     function receive(event) {
       const m=event.data;
-      if(event.source!==window||event.origin!=='https://web.whatsapp.com'||!pending||!m||m.channel!==CHANNEL||m.direction!=='result'||m.id!==pending.id||typeof m.ok!=='boolean'||typeof m.closed!=='boolean')return;
+      if(event.source!==window||event.origin!=='https://web.whatsapp.com'||!pending||!m||m.channel!==channel||m.direction!=='result'||m.id!==pending.id||typeof m.ok!=='boolean'||typeof m.closed!=='boolean')return;
       if(m.ok&&(!m.closed||m.cancelled||m.error!==undefined))return;
       if(m.error!==undefined&&!ERRORS.includes(m.error))return;
       if(m.cancelled!==undefined&&typeof m.cancelled!=='boolean')return;

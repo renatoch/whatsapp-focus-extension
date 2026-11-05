@@ -88,6 +88,8 @@ See: [`DS6-modular-extension-architecture/index.md`](DS6-modular-extension-archi
 
 ### Later candidates
 
+- **Implemented — user validation pending: deselect conversation behind blind overlay.** Native close only, no mark/read mutation; conversation Continue removed from main card and both confirmation templates. Recents retain existing order; channels/Continue channel and visible-expiry policy unchanged. 354 automated tests pass; Navigator chose self-testing, no Chrome investigation. [Scope and short test](../../blind-overlay-conversation-close.md). No DS6 execution.
+
 - **Backlog — on-demand temporary collection unread check:** before contacting someone, explicitly reveal native unread counts/manual markers per member and a qualitative collection header, then hide them again. No permanent badges, live updates, message totals, chat opening, read-state mutation or new persistence. Existing product backlog item refined, not duplicated; identity matching and reveal duration remain open. [Definitions for later implementation](../explorations/on-demand-collection-unread/index.md). Documentation only; no DS5/DS6 execution or priority change.
 
 - **Implemented; installed-runtime acceptance pending — login/QR protection:** [evidence and limits](../../login-surface-plan.md). Hide extension UI only on evidenced native QR/phone-entry surfaces; retain blind state and cancel obsolete work. Unknown loading and authenticated DOM remain protected. 223 tests pass; real Chrome source-composition checks passed in a fresh unlinked profile, without linking/logout or QR/input capture. Later code-entry stages were not observed. No DS6 work or release.

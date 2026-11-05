@@ -55,15 +55,13 @@ test('Continue labels stay concise in confirmation and descriptive on the focus 
     const context=vm.createContext({markUnread:{reconcile(){}},updateUnreadSidebarBlock(){},updateMarkUnreadButton(){},surfaceExpiry:{refresh(){}},updateFocusedNavigationShelfVisibility(){},isSearching:()=>false,
       getOverlay:()=>overlay,isWhatsAppReady:()=>true,hasOpenConversation:()=>true,nativeSurface:{inspect:()=>surface}});
     vm.runInContext(extract('updateOverlayState')+'\nupdateOverlayState();',context);
-    assert.equal(classes.has('mwf-has-conversation'),surface!=='channel-list');
-    assert.equal(button.textContent,surface==='channel'
-      ? (confirmation?'Continuar no canal':'Continuar no canal aberto')
-      : (confirmation?'Continuar na conversa':'Continuar na conversa aberta'));
+    assert.equal(classes.has('mwf-has-conversation'),surface==='channel');
+    assert.equal(button.textContent,confirmation?'Continuar no canal':'Continuar no canal aberto');
   }
 });
 
 test('composition cancels continuation for explicit transitions and refreshes it through existing observer',()=>{
   for(const method of ['setActive','setNormal','setSearchMode','setSidebarOpen','setSidebarHiddenManually','setSearchFocusedConversation'])assert.match(extract(method),/surfaceExpiry\.cancel(?:Continuation)?\(\)/,method);
   assert.match(extract('updateOverlayState'),/surfaceExpiry\.refresh\(\)/);
-  assert.match(extract('updateOverlayState'),/surface === "conversation" \|\| surface === "channel"/);
+  assert.match(extract('updateOverlayState'),/const canContinue = hasOpenConversation\(\) && surface === "channel"/);
 });
