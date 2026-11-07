@@ -56,3 +56,10 @@ test('overlay close rejects normal, visible focused, auth and channel contexts',
 test('overlay close rejects a channel-like header even without its classifier flag',()=>{const h=bootstrap();blind(h);h.f.header.querySelectorAll=()=>[];h.request(1,h.ctx.window,'https://web.whatsapp.com','mwf-overlay-close-v1');assert.equal(h.f.calls.length,0);assert.equal(h.sent.at(-1).error,'unavailable');});
 test('empty overlay acknowledges closure without touching native commands',()=>{const h=bootstrap();blind(h);h.f.state.main=false;h.request(1,h.ctx.window,'https://web.whatsapp.com','mwf-overlay-close-v1');assert.equal(h.f.calls.length,0);assert.equal(h.sent.at(-1).ok,true);});
 test('automatic close capability does not grant unread capability',()=>{const h=bootstrap();blind(h);h.request();assert.equal(h.f.calls.length,0);assert.equal(h.sent.at(-1).error,'unavailable');});
+
+test('LID reads accept native optional archive flag without loosening mutating actions',()=>{
+ const f=fixture();f.chat.id={server:'lid',_serialized:'101010101010101@lid'};Object.defineProperty(f.proxy,'id',{get:()=>f.chat.id});delete f.chat.archive;
+ assert.equal(capture(f.document,f.requireNative,'identity').chat,f.chat);
+ assert.throws(()=>capture(f.document,f.requireNative,true));assert.equal(f.calls.length,0);
+ const api=require('../selected-unread-main.js');assert.equal(api.identityReply(f.document,f.requireNative,f.document,{command:'selected'}),f.chat.id._serialized);
+});

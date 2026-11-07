@@ -13,7 +13,7 @@ Protótipo local de extensão Chrome para abrir o WhatsApp Web em modo cego.
 - A extensão roda localmente no navegador e não possui backend.
 - O código atual não envia mensagens, contatos ou dados de uso para servidores externos.
 - O experimento **Padrão de uso** registra horários, ações na barreira e somente a intenção/nota que o usuário decide escrever. Esses dados ficam em `chrome.storage.local`, isolados dos scripts da página do WhatsApp, e podem ser pausados ou apagados pela interface.
-- As **Coleções** persistem somente os nomes escritos pelo usuário e os títulos exibidos das conversas adicionadas explicitamente. Não guardam mensagens, previews, termos de busca, telefones, JIDs, URLs, estado de não lida ou outros dados derivados.
+- As **Coleções** persistem nomes escritos pelo usuário, títulos escolhidos e, quando disponível, **LID opaco da conta** para distinguir números com o mesmo nome. LID é dado pessoal, mas não é telefone; não se guardam identificadores baseados em telefone, mensagens, previews, termos de busca, URLs ou estado de não lida. Recentes mantêm título/LID somente na memória da aba. [Formato e limites](docs/lid-conversation-identity.md).
 - Fora dessa seleção explícita, a extensão não extrai ou persiste pessoas, conversas ou buscas do WhatsApp. A ferramenta **Extrair Markdown** processa somente o ZIP que você seleciona voluntariamente: lê seu `chat.md` em memória e oferece um arquivo local; não lê mensagens da página, não envia nem guarda conteúdo no armazenamento da extensão.
 - Por ser uma extensão que roda em `web.whatsapp.com`, ela tem acesso técnico ao DOM visível do WhatsApp Web. Isso inclui elementos da interface, nomes de conversas e conteúdo exibido na tela.
 - Esse acesso é necessário para ocultar a lateral, limpar previews e controlar o modo foco, mas significa que qualquer pessoa instalando a extensão precisa confiar no código.
@@ -34,6 +34,16 @@ Recarregue extensão e aba uma vez para instalar o novo script. Não deslogue um
 conta funcionando só para testar. QR/entrada de telefone foram verificados num
 perfil desvinculado; etapas posteriores de código e vínculo real ainda não foram
 exercitadas. [Evidência e limites](docs/login-surface-plan.md).
+
+## Conversas com o mesmo nome
+
+Novos recentes e membros de coleção podem guardar o **LID opaco**, sem telefone.
+A busca continua pelo nome, mas exige a chave correta antes de abrir e ao confirmar
+o cabeçalho. Dois números com o mesmo título não são fundidos. Itens antigos não
+recebem chave por aproximação; para vinculá-los, remova/reinclua a partir da conversa
+certa. Recarregue extensão e aba, abra o número desejado e teste o recente.
+378 testes passaram; reabertura real aguarda confirmação do usuário.
+[Privacidade e teste](docs/lid-conversation-identity.md).
 
 ## Voltar ao overlay de foco
 
@@ -102,7 +112,7 @@ Reduzir captura atencional ao abrir `web.whatsapp.com`:
 - ao escolher uma conversa no modo busca, volta automaticamente para conversa focada com a lateral escondida;
 - nesse estado pós-busca, mostra um botão contextual **Buscar** no topo da área lateral ocultada para buscar outra conversa sem voltar ao overlay;
 - mantém na memória da aba até 10 **Conversas em andamento**, ordenadas pela última abertura: mostra 5 por padrão e permite revelar as outras 5 explicitamente, mantendo a escolha de expansão durante a sessão; seleção no modo completo, busca focada, coleção, recentes ou **Continuar conversa** atualiza a lista; receber mensagens ou aparecer na lateral não adiciona conversas; os títulos não são persistidos nem entram no awareness;
-- permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 10 conversas, recolhidas por padrão na própria tela de conversa focada para alternância direta; somente nomes de coleção e títulos escolhidos ficam no armazenamento isolado da extensão;
+- permite adicionar uma conversa focada a até 5 **Coleções** persistentes de até 10 conversas, recolhidas por padrão na própria tela de conversa focada para alternância direta; nomes de coleção, títulos escolhidos e LID opaco opcional ficam no armazenamento isolado da extensão;
 - ao entrar em **Buscar** com campo vazio, oferece recentes e coleções recolhidas para escolha direta, mesmo sem conversa aberta; oculta os ramos nativos concorrentes abaixo da busca sem mover a seção, que tem fundo opaco; ao digitar, esconde essas opções, e ao limpar o campo volta a mostrá-las;
 - na reabertura por recentes/coleções, aguarda um alvo exato único em duas sondagens consecutivas; duplicidade persistente falha fechada, com diagnóstico estrutural copiável sem nomes;
 - ao voltar ao overlay cego, solicita desseleção nativa da conversa sem alterar leitura e oferece retomada pelos recentes; canais mantêm **Continuar no canal aberto**;

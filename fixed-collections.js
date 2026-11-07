@@ -1,6 +1,7 @@
 (function exposeFixedCollections(globalScope) {
   "use strict";
 
+  const identities = globalScope.MirrorFocusedRecents || (typeof require === 'function' ? require('./focused-recents.js') : null);
   const VERSION = 1;
   const MAX_COLLECTIONS = 5;
   const MAX_MEMBERS = 10;
@@ -18,7 +19,10 @@
   }
 
   function cleanTitle(value) {
-    return cleanText(value, MAX_TITLE_LENGTH);
+    const entry = identities.sanitizeEntry(value);
+    if (!entry) return null;
+    const title = cleanText(identities.entryTitle(entry), MAX_TITLE_LENGTH);
+    return title ? (typeof entry === 'string' ? title : {title, lid:entry.lid}) : null;
   }
 
   // Collection names remain case-insensitive; conversation titles use cleanTitle
@@ -49,7 +53,7 @@
       for (const rawTitle of rawCollection.members) {
         if (members.length >= MAX_MEMBERS) break;
         const title = cleanTitle(rawTitle);
-        const titleKey = title;
+        const titleKey = title && identities.entryKey(title);
         if (!titleKey || seenMembers.has(titleKey)) continue;
         seenMembers.add(titleKey);
         members.push(title);
@@ -85,7 +89,7 @@
     );
     if (index < 0) return result(state, "collection-not-found");
     const collection = state.collections[index];
-    if (collection.members.some((member) => member === title)) {
+    if (collection.members.some((member) => identities.entryKey(member) === identities.entryKey(title))) {
       return result(state, "exists");
     }
     if (collection.members.length >= MAX_MEMBERS) return result(state, "member-limit");
@@ -98,11 +102,13 @@
   function removeMember(current, collectionName, memberTitle) {
     const state = sanitizeState(current);
     const collectionKey = normalize(cleanName(collectionName));
-    const titleKey = cleanTitle(memberTitle);
+    const member = cleanTitle(memberTitle);
+    if (!member) return result(state, 'member-not-found');
+    const titleKey = identities.entryKey(member);
     const index = state.collections.findIndex((collection) => normalize(collection.name) === collectionKey);
     if (index < 0) return result(state, "collection-not-found");
     const collection = state.collections[index];
-    const members = collection.members.filter((member) => member !== titleKey);
+    const members = collection.members.filter((member) => identities.entryKey(member) !== titleKey);
     if (members.length === collection.members.length) return result(state, "member-not-found");
 
     const collections = state.collections.slice();

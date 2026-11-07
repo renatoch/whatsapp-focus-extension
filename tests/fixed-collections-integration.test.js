@@ -44,7 +44,7 @@ test('renders collapsed collections on the focused conversation shelf as plain t
   assert.match(css, /html\.mwf-search-focused \.mwf-focused-navigation-floating:not\(\[hidden\]\)/);
   assert.match(content, /expandedFixedCollectionName/);
   assert.match(content, /heading\.textContent = collection\.name/);
-  assert.match(content, /memberButton\.textContent = memberTitle/);
+  assert.match(content, /memberButton\.textContent = typeof memberTitle === 'string' \? memberTitle : memberTitle\.title/);
   assert.doesNotMatch(content, /innerHTML\s*=\s*collection\.|innerHTML\s*=\s*memberTitle/);
 });
 

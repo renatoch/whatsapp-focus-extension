@@ -73,7 +73,9 @@
   let normalAttemptRecent = false;
   let intentPromptStartedAt = null;
   let pendingIntent = null;
+  const identityAccess = globalThis.MirrorFocusedRecents.createIdentityAccess({window, document});
   let focusedRecents = [];
+  let pendingNativeCaptureToken = 0;
   let focusedRecentsExpanded = false;
   let recentCaptureToken = 0;
   let recentNavigationToken = 0;
@@ -328,7 +330,13 @@
       const title = readActiveConversationTitle();
       // Retain a just-opened conversation if its scheduled capture has not run yet.
       // Closing is not another opening: never reorder an already captured recent.
-      if (title && !focusedRecents.includes(title)) addFocusedRecent(title);
+      if (title) {
+        const entry = selectedConversationEntry(title);
+        const key = globalThis.MirrorFocusedRecents.entryKey(entry);
+        const pendingOpening = pendingNativeCaptureToken !== 0 && pendingNativeCaptureToken === recentCaptureToken;
+        if (pendingOpening || !focusedRecents.some(item => globalThis.MirrorFocusedRecents.entryKey(item) === key)) addFocusedRecent(entry);
+      }
+      pendingNativeCaptureToken = 0;
     }
     surfaceExpiry.cancel();
     recentCaptureToken += 1;
@@ -580,9 +588,11 @@
     const activeTitle = readActiveConversationTitle();
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const expectedMatches = !expectedTitle || (
-      normalize && normalize(activeTitle) === normalize(expectedTitle)
+      normalize && normalize(activeTitle) === normalize(expectedTitle) &&
+      (!expectedTitle.lid || identityAccess.selected() === expectedTitle.lid)
     );
     if (activeTitle && expectedMatches) {
+      if (pendingNativeCaptureToken === token) pendingNativeCaptureToken = 0;
       addFocusedRecent(activeTitle);
       if (route === "search") recordAwareness("focused_conversation_opened", { route: "search" });
       return;
@@ -592,8 +602,14 @@
     }
   }
 
+  function selectedConversationEntry(title) {
+    const lid = identityAccess.selected();
+    return lid ? {title, lid} : title;
+  }
+
   function addFocusedRecent(title) {
-    focusedRecents = globalThis.MirrorFocusedRecents?.addRecent(focusedRecents, title) || focusedRecents;
+    const entry = typeof title === 'string' ? selectedConversationEntry(title) : title;
+    focusedRecents = globalThis.MirrorFocusedRecents?.addRecent(focusedRecents, entry) || focusedRecents;
     renderFocusedRecents();
   }
 
@@ -656,7 +672,7 @@
       const open = document.createElement("button");
       open.type = "button";
       open.className = "mwf-focused-recent-open";
-      open.textContent = title;
+      open.textContent = typeof title === 'string' ? title : title.title;
       open.addEventListener("click", () => openFocusedRecent(title));
       const remove = document.createElement("button");
       remove.type = "button";
@@ -888,7 +904,7 @@
           const memberButton = document.createElement("button");
           memberButton.type = "button";
           memberButton.className = "mwf-fixed-collection-open";
-          memberButton.textContent = memberTitle;
+          memberButton.textContent = typeof memberTitle === 'string' ? memberTitle : memberTitle.title;
           memberButton.addEventListener("click", () => openFixedCollectionMember(memberTitle));
           const remove = document.createElement("button");
           remove.type = "button";
@@ -935,7 +951,7 @@
       showToast("Não consegui identificar esta conversa com segurança.");
       return;
     }
-    pendingCollectionTitle = title;
+    pendingCollectionTitle = selectedConversationEntry(title);
     ensureFixedCollectionChooser();
     renderFixedCollectionChooser();
     const chooser = document.getElementById(COLLECTION_CHOOSER_ID);
@@ -1058,7 +1074,7 @@
       failFocusedRecentNavigation("title-unavailable", token);
       return;
     }
-    setNativeSearchText(field, title);
+    setNativeSearchText(field, typeof title === 'string' ? title : title.title);
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     updateRecentNavigationDiagnostic({
       stage: "search-text-dispatched",
@@ -1134,10 +1150,16 @@
     if (token !== recentNavigationToken) return;
     const resultSet = focusedSearchCandidates();
     const candidates = resultSet.candidates;
-    const classification = globalThis.MirrorFocusedRecents?.classifyExactTitleMatches(
+    let classification = globalThis.MirrorFocusedRecents?.classifyExactTitleMatches(
       title,
       candidates.map((candidate) => candidate.title)
     ) || { status: "not-found", index: null };
+    if (title.lid) {
+      const indexes = candidates.map((candidate, index) =>
+        globalThis.MirrorFocusedRecents.normalizeTitle(candidate.title) === globalThis.MirrorFocusedRecents.normalizeTitle(title) &&
+        identityAccess.matches(candidate.clickTarget, title.lid) ? index : null).filter(index => index !== null);
+      classification = {status:indexes.length === 1 ? 'match' : indexes.length > 1 ? 'ambiguous' : 'not-found', index:indexes.length === 1 ? indexes[0] : null};
+    }
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const field = findNativeSearchField({ allowHidden: true });
     const searchTextAccepted = Boolean(normalize && field && normalize(getSearchText(field)) === normalize(title));
@@ -1169,6 +1191,10 @@
       }
       return;
     }
+    if (title.lid && !identityAccess.matches(uniqueTarget, title.lid)) {
+      failFocusedRecentNavigation('not-found', token);
+      return;
+    }
     activateFocusedResult(candidates[classification.index].clickTarget);
     updateRecentNavigationDiagnostic({
       stage: "exact-result-clicked",
@@ -1181,7 +1207,8 @@
     if (token !== recentNavigationToken) return;
     const normalize = globalThis.MirrorFocusedRecents?.normalizeTitle;
     const activeTitle = readActiveConversationTitle();
-    const headerMatched = Boolean(normalize && normalize(activeTitle) === normalize(title));
+    const headerMatched = Boolean(normalize && normalize(activeTitle) === normalize(title) &&
+      (!title.lid || identityAccess.selected() === title.lid));
     updateRecentNavigationDiagnostic({
       stage: "confirming-header",
       headerMatched,
@@ -2475,7 +2502,11 @@
         const title = readConversationRowTitle(conversationRow(event.target));
         if (isSearching()) enterFocusedConversationSoon(title);
         else if (title && (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN))) {
-          captureFocusedConversation(title, 0, null);
+          const lid = identityAccess.chosen(focusedResultClickTarget(conversationRow(event.target)));
+          const expected = lid ? {title, lid} : title;
+          const token = ++recentCaptureToken;
+          pendingNativeCaptureToken = token;
+          window.setTimeout(() => captureFocusedConversation(expected, 0, null, token), 350);
         }
       },
       true
@@ -2488,7 +2519,13 @@
       if (isSearching()) enterFocusedConversationSoon();
       else if (root().classList.contains(ROOT_NORMAL) || root().classList.contains(ROOT_SIDEBAR_OPEN)) {
         const title = readConversationRowTitle(conversationRow(event.target));
-        if (title) captureFocusedConversation(title, 0, null);
+        if (title) {
+          const lid = identityAccess.chosen(focusedResultClickTarget(conversationRow(event.target)));
+          const expected = lid ? {title, lid} : title;
+          const token = ++recentCaptureToken;
+          pendingNativeCaptureToken = token;
+          window.setTimeout(() => captureFocusedConversation(expected, 0, null, token), 350);
+        }
       }
     });
   }

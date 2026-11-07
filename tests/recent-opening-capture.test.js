@@ -24,12 +24,13 @@ function harness() {
     MirrorFocusedRecents: require('../focused-recents.js'),
     ROOT_OPENING_RECENT: 'mwf-opening-recent', ROOT_NORMAL: 'mwf-normal',
     ROOT_SIDEBAR_OPEN: 'mwf-sidebar-open', ROOT_SIDEBAR_HIDDEN: 'mwf-sidebar-hidden',
-    FOCUSED_CAPTURE_RETRIES: 5, recentCaptureToken: 0,
+    FOCUSED_CAPTURE_RETRIES: 5, recentCaptureToken: 0, pendingNativeCaptureToken:0,
     root: () => ({ classList: { contains: (name) => classes.has(name) } }),
     isSearching: () => classes.has('mwf-searching'),
     isMirrorControl: () => false,
     isConversationListClick: (target) => Boolean(target?.rowTitle),
     conversationRow: (target) => target?.rowTitle ? target : null,
+    focusedResultClickTarget: row => row, identityAccess: {chosen:()=>'',selected:()=>''},
     readConversationRowTitle: (row) => row?.rowTitle || '',
     readActiveConversationTitle: () => activeTitle,
     addFocusedRecent: (title) => added.push(title),
@@ -112,4 +113,11 @@ test('collection and recent navigation both update recency on header confirmatio
     vm.runInContext(functionSource('confirmFocusedRecentOpened') + '\nconfirmFocusedRecentOpened("Selected", 1, 0);', context);
     assert.deepEqual(added, ['Selected']);
   }
+});
+
+test('same-name native opening cannot capture the old number before selected LID matches',()=>{
+ const h=harness();let selected='101010101010101@lid';
+ h.context.identityAccess={chosen:()=> '202020202020202@lid',selected:()=>selected};h.setTitle('Same name');
+ h.listeners.click({target:{rowTitle:'Same name'}});h.flush();assert.deepEqual(h.added,[]);
+ selected='202020202020202@lid';h.listeners.click({target:{rowTitle:'Same name'}});h.flush();assert.deepEqual(h.added,['Same name']);
 });

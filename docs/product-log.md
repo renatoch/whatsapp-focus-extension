@@ -138,6 +138,10 @@ A validação agregada de 27/08 a 10/09 reuniu 418 eventos permitidos: 103 de 10
 
 ## Backlog de produto
 
+- **[Implementado — validação em uso pendente] Desambiguar contas de mesmo nome com LID opaco**
+  - Autorizado guardar LID, não telefone: recentes em memória; membros escolhidos de coleções em armazenamento isolado. Busca pelo título + conferência obrigatória da chave antes do clique e no cabeçalho, inclusive com um único resultado. Itens antigos permanecem por título, sem migração por semelhança; inválidos não caem silenciosamente em fallback. Sem dados reais exportados, mensagens, nova permissão ou DS6. 378 testes passam. Investigação de linhas e ponte foi somente leitura, sem reabrir conversas; captura/seleção de cada número e persistência nativa entre sessões aguardam o usuário. [Decisão, formato, privacidade e teste curto](lid-conversation-identity.md).
+
+
 Formato: título descritivo no item principal; detalhe curto em subitem; linha em branco entre itens para facilitar leitura em dark mode.
 
 - **[Validado e encerrado] Preservar Status e canal ao expirar o modo normal**

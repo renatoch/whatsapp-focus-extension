@@ -17,21 +17,54 @@
   const FAILURE_REASONS = Object.freeze(["not-found", "ambiguous", "title-unavailable"]);
 
   function cleanDisplayTitle(value) {
-    return typeof value === "string" ? value.trim().replace(/\s+/g, " ") : "";
+    const title = typeof value === 'string' ? value : value?.title;
+    return typeof title === "string" ? title.trim().replace(/\s+/g, " ") : "";
   }
 
   function normalizeTitle(value) {
     return cleanDisplayTitle(value).normalize("NFKC");
   }
 
-  function addRecent(recents, title, limit = MAX_RECENTS) {
-    const displayTitle = cleanDisplayTitle(title);
-    const key = normalizeTitle(displayTitle);
-    if (!key) return Array.isArray(recents) ? recents.slice() : [];
+  function cleanLid(value) {
+    return typeof value === 'string' && /^[0-9]{1,32}@lid$/.test(value) ? value : '';
+  }
 
-    const remaining = (Array.isArray(recents) ? recents : [])
-      .filter((item) => normalizeTitle(item) !== key);
-    return [displayTitle, ...remaining].slice(0, Math.max(1, limit));
+  function sanitizeEntry(value) {
+    const title = cleanDisplayTitle(value);
+    if (!title || title.length > 512) return null;
+    if (typeof value === 'string') return title;
+    const lid = cleanLid(value?.lid);
+    return lid ? {title, lid} : null;
+  }
+
+  function entryKey(value) {
+    const lid = cleanLid(value?.lid);
+    return lid ? 'lid:' + lid : 'title:' + normalizeTitle(value);
+  }
+
+  function createIdentityAccess({window, document}) {
+    let sequence = 0;
+    function exchange(target, command, lid = '') {
+      if (!target?.addEventListener || sequence >= Number.MAX_SAFE_INTEGER) return null;
+      const id = ++sequence;
+      let value = null;
+      const receive = event => {
+        if (event.target !== target || event.detail?.id !== id) return;
+        value = command !== 'match' ? cleanLid(event.detail.value) : event.detail.value === true;
+      };
+      target.addEventListener('mwf-lid-response-v1', receive);
+      try { target.dispatchEvent(new window.CustomEvent('mwf-lid-request-v1', {bubbles:true, detail:{id,command,...(lid?{lid}:{})}})); }
+      catch (_) {} finally { target.removeEventListener('mwf-lid-response-v1', receive); }
+      return value;
+    }
+    return {selected:()=>exchange(document, 'selected') || '', chosen:target=>exchange(target, 'chosen') || '', matches:(target,lid)=>Boolean(cleanLid(lid) && exchange(target, 'match', lid))};
+  }
+
+  function addRecent(recents, title, limit = MAX_RECENTS) {
+    const entry = sanitizeEntry(title);
+    if (!entry) return Array.isArray(recents) ? recents.slice() : [];
+    const remaining = (Array.isArray(recents) ? recents : []).filter(item => entryKey(item) !== entryKey(entry));
+    return [entry, ...remaining].slice(0, Math.max(1, limit));
   }
 
   function visibleRecents(recents, expanded) {
@@ -45,10 +78,9 @@
   }
 
   function removeRecent(recents, title) {
-    const key = normalizeTitle(title);
-    if (!key) return Array.isArray(recents) ? recents.slice() : [];
-    return (Array.isArray(recents) ? recents : [])
-      .filter((item) => normalizeTitle(item) !== key);
+    if (!normalizeTitle(title)) return Array.isArray(recents) ? recents.slice() : [];
+    const key = entryKey(title);
+    return (Array.isArray(recents) ? recents : []).filter(item => entryKey(item) !== key);
   }
 
   function clearRecents() {
@@ -140,6 +172,11 @@
   const api = Object.freeze({
     INITIAL_VISIBLE_RECENTS,
     MAX_RECENTS,
+    entryTitle: cleanDisplayTitle,
+    cleanLid,
+    sanitizeEntry,
+    entryKey,
+    createIdentityAccess,
     normalizeTitle,
     addRecent,
     visibleRecents,

@@ -5,7 +5,7 @@ function harness({surface='conversation',recents=['Current','Other'],auth=false}
  const flags=new Set(),events=[],pending=[],nodes=new Map();let main={};
  const classList={contains:k=>flags.has(k),add:(...ks)=>ks.forEach(k=>flags.add(k)),remove:(...ks)=>ks.forEach(k=>flags.delete(k)),toggle:(k,on)=>on?flags.add(k):flags.delete(k)};
  const overlay={hidden:true,classList:{remove(){},toggle(){}},querySelectorAll:()=>[],querySelector:()=>({prepend:n=>nodes.set(n.id,n)})};
- const context=vm.createContext({overlayCloseEpoch:0,overlayCloseAttempts:new WeakSet(),overlayCloseTransport:{cancel(){},run(){assert.equal(overlay.hidden,false);assert.ok(flags.has('ROOT_OVERLAY_OPEN'));events.push('close-request');return new Promise(resolve=>pending.push(resolve));}},
+ const context=vm.createContext({MirrorFocusedRecents:require('../focused-recents.js'),selectedConversationEntry:title=>title,pendingNativeCaptureToken:0,overlayCloseEpoch:0,overlayCloseAttempts:new WeakSet(),overlayCloseTransport:{cancel(){},run(){assert.equal(overlay.hidden,false);assert.ok(flags.has('ROOT_OVERLAY_OPEN'));events.push('close-request');return new Promise(resolve=>pending.push(resolve));}},
   document:{querySelector:()=>main,getElementById:id=>nodes.get(id),createElement:()=>({setAttribute(){},remove(){nodes.delete(this.id);}})},
   root:()=>({classList}),getOverlay:()=>overlay,authSurface:{isActive:()=>auth},nativeSurface:{inspect:()=>surface},readActiveConversationTitle:()=>{events.push('read-title');return 'Current';},focusedRecents:[...recents],
   surfaceExpiry:{cancel(){events.push('cancel-expiry');},refresh(){}},recentCaptureToken:0,normalAttemptStartedAt:null,intentPromptStartedAt:null,
@@ -26,3 +26,9 @@ test('late error cannot contaminate a newer overlay entry or a resumed view',asy
 test('restoration after blind boot closes once, without mutation-observer retries',()=>{const h=harness({surface:'unknown'});h.enter();h.surface('conversation');h.update();h.update();h.update();assert.equal(h.pending.length,1);});
 test('all three Continue locations are now channel-only; no conversation fallback remains',()=>{assert.doesNotMatch(source,/data-mwf-action="continue">Continuar na conversa/);assert.equal((source.match(/data-mwf-action="continue">Continuar no canal/g)||[]).length,3);assert.doesNotMatch(extract('continueOpenConversation'),/setActive|setSearchFocusedConversation|captureFocusedConversation|goToMainChatsThen/);});
 test('visible expiry destination is unchanged and does not call blind-close helper',()=>{assert.doesNotMatch(extract('setSearchFocusedConversation'),/closeConversationForOverlay/);assert.match(source,/onConversation: setSearchFocusedConversation/);assert.match(source,/onBlind: \(\) => setActive\(\{showOverlay:true\}\)/);});
+
+test('fast blind return retains a second same-name account with its own LID',()=>{
+ const first={title:'Current',lid:'101010101010101@lid'},second={title:'Current',lid:'202020202020202@lid'};
+ const h=harness();h.context.focusedRecents=[first];h.context.selectedConversationEntry=()=>second;h.context.pendingNativeCaptureToken=7;h.context.recentCaptureToken=7;
+ h.enter();assert.equal(h.context.focusedRecents[0].lid,second.lid);assert.equal(h.context.focusedRecents[1].lid,first.lid);
+});
