@@ -42,7 +42,7 @@ A busca continua pelo nome, mas exige a chave correta antes de abrir e ao confir
 o cabeçalho. Dois números com o mesmo título não são fundidos. Itens antigos não
 recebem chave por aproximação; para vinculá-los, remova/reinclua a partir da conversa
 certa. Recarregue extensão e aba, abra o número desejado e teste o recente.
-378 testes passaram; reabertura real aguarda confirmação do usuário.
+378 testes passaram; o usuário confirmou a reabertura real e autorizou concluir.
 [Privacidade e teste](docs/lid-conversation-identity.md).
 
 ## Voltar ao overlay de foco

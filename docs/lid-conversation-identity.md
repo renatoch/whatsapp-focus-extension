@@ -1,6 +1,6 @@
 # Identidade LID para recentes e coleções
 
-**Status:** integrado; 378 testes passam, reabertura real aguarda confirmação do usuário.
+**Status:** validado e concluído — usuário confirmou a reabertura real (“Funcionou. Pode marcar concluído”); 378 testes passaram. Não inferir validação independente de coleções antigas ou estabilidade nativa entre sessões.
 
 ## Decisão autorizada
 
@@ -75,7 +75,7 @@ página WhatsApp, que já controla seus dados, nem expõe comando mutável/arbit
   rejeição de telefone/chave inválida, falta de correspondência mesmo com nome único,
   confirmação de cabeçalho, captura do número antigo, escopo e ancestral de grid.
 - Não foi realizado clique de reabertura de conversa pelo agente, nem teste de
-  persistência de chave nativa entre sessões. Validação dessa rota pertence ao usuário.
+  persistência de chave nativa entre sessões. O usuário posteriormente confirmou a reabertura real e autorizou concluir. Isso não comprova estabilidade de chave nativa entre sessões.
 - Chrome de diagnóstico fechado, porta 9222 verificada fechada; perfil vinculado retido.
 - Sem nova permissão, backend, mudanças na DS6 ou release.
 
