@@ -35,6 +35,34 @@ is NOT end-to-end Chrome acceptance of the channel deadline correction. The temp
 factory namespace was restored; re-entry trace observer/listeners were removed.
 Navigator subsequently accepted the missing-selection fallback and authorized closure.
 
+## Last-return diagnostic — silent and transient
+
+Navigator reported a first unexpected blind return while actively reading/scrolling
+in normal mode and authorized a small diagnostic, not a policy change.
+
+- Keeps only the last return in tab memory; reload clears it. No storage/awareness
+  event, message, name, LID/phone, DOM snapshot, key text or pointer coordinates.
+- Captures fixed origin (expiry/button/shortcut/auth/navigation/etc.), mode, surface,
+  visibility, document focus, open-content/deadline booleans, chosen duration and
+  elapsed time since normal entry/last genuine wheel, pointerdown, keydown or touch.
+  Input listeners retain one timestamp, not an interaction history.
+- Expiry includes bounded deadline and after-normalization checks, allowing a focus
+  loss or classification change in the 260ms normalization gap to be distinguished.
+- Copy voluntarily in **Ver padrão de uso → Copiar diagnóstico do último retorno**.
+  No automatic notice; clipboard changes only on trusted explicit click.
+- Values describe the transition BEFORE applying the overlay/native close;
+  hasOpenContent true is not evidence closure failed. At expiry, hasDeadline false
+  is expected because the timer has already fired. Interaction age is evidence,
+  never an override of the focus policy or an inference of intent/inactivity.
+- Normal entry retains the previous report until a new return. Opening the panel
+  and copying do not replace it; another actual return does. Copy before reload
+  or another focus return after an incident.
+- 384 Node tests pass, including recheck focus loss, frozen samples, payload filtering,
+  no synthetic input, bounded/reset state and explicit copy. No live account test.
+
+10s/5min, blind fallback and visible-conversation preservation remain unchanged.
+The incident's cause is not claimed resolved; next unexpected return needs its report.
+
 ## Diagnostic notice retired
 
 Navigator requested removal of the temporary expiry diagnostic toast/JSON after

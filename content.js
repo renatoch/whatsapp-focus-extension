@@ -62,6 +62,7 @@
     ? globalThis.MirrorAwareness?.createChromeStorageAdapter(globalThis.chrome.storage.local)
     : null;
   let normalExpiryTestMode = false;
+  globalThis.MirrorFocusDiagnostic = globalThis.MirrorFocusState.createReturnDiagnostic({now:()=>performance.now()});
   let normalDelayTimer = null;
   let normalDelayInterval = null;
   let searchSettleTimer = null;
@@ -112,8 +113,11 @@
     onConversation: setSearchFocusedConversation,
     onChannel: () => continueNativeSurface("channel"),
     onStatus: () => continueNativeSurface("status"),
-    onBlind: () => setActive({showOverlay:true}),
-    onReturned: (expiryDestination) => recordAwareness("focus_returned", {reason:"expiry", expiryDestination}),
+    onBlind: () => setActive({showOverlay:true, reason:'expiry'}),
+    onReturned: (expiryDestination) => {
+      globalThis.MirrorFocusDiagnostic?.returned('expiry', expiryDestination, diagnosticSample());
+      recordAwareness("focus_returned", {reason:"expiry", expiryDestination});
+    },
     clearContinuation: () => root().classList.remove(ROOT_CHANNEL_FOCUSED, ROOT_EXPIRED_STATUS),
   });
 
@@ -160,7 +164,7 @@
       if (result.ok && !hasOpenConversation()) {
         if (!preserveSidebar) setSearchMode();
       } else {
-        if (!preserveSidebar) setActive({showOverlay:true});
+        if (!preserveSidebar) setActive({showOverlay:true, reason:'unread-error'});
         showToast(result.error === "close" ? "Marcação solicitada, mas não consegui fechar a conversa. Confira no WhatsApp." :
           result.closed ? "Conversa fechada, mas não consegui confirmar a marcação como não lida." :
           "Não consegui concluir a ação com segurança. Confira o estado da conversa no WhatsApp.");
@@ -264,7 +268,7 @@
   function resetForAuthTransition() {
     markUnread.cancel();
     recentNavigationToken += 1;
-    setActive({showOverlay:true});
+    setActive({showOverlay:true, reason:'auth-transition'});
   }
 
   function continueNativeSurface(kind) {
@@ -321,7 +325,10 @@
     });
   }
 
-  function setActive({ showOverlay }) {
+  function setActive({ showOverlay, reason = 'other' }) {
+    if (showOverlay && reason !== 'expiry' && reason !== 'boot') {
+      globalThis.MirrorFocusDiagnostic?.returned(reason, 'blind-overlay', diagnosticSample());
+    }
     overlayCloseEpoch += 1;
     overlayCloseTransport.cancel();
     document.getElementById('mirror-whatsapp-focus-overlay-close-warning')?.remove();
@@ -386,7 +393,7 @@
 
     if (!isWhatsAppReady()) {
       debugLog("setSearchMode:not-ready -> overlay");
-      setActive({ showOverlay: true });
+      setActive({ showOverlay: true, reason:'not-ready' });
       return;
     }
 
@@ -1238,7 +1245,7 @@
     recentNavigationToken += 1;
     resetSearchGate();
     root().classList.remove(ROOT_OPENING_RECENT);
-    setActive({ showOverlay: true });
+    setActive({ showOverlay: true, reason:'navigation-failed' });
     if (recentNavigationSource === "recent") {
       recordAwareness("focused_recent_navigation_failed", { reason });
     }
@@ -1776,7 +1783,7 @@
     pendingIntent = null;
     intentPromptStartedAt = null;
     getOverlay()?.classList.remove("mwf-intent-pending");
-    setActive({ showOverlay: true });
+    setActive({ showOverlay: true, reason:'intent-return' });
   }
 
   function renderIntentNotes(panel, notes) {
@@ -2045,6 +2052,7 @@
           <div class="mwf-awareness-controls">
             <button class="mwf-button mwf-button-secondary" data-mwf-action="awareness-toggle">Pausar coleta</button>
             <button class="mwf-button mwf-button-quiet" data-mwf-action="awareness-clear">Apagar dados</button>
+            <button class="mwf-button mwf-button-quiet" data-mwf-action="return-diagnostic">Copiar diagnóstico do último retorno</button>
           </div>
           <p class="mwf-awareness-privacy">Somente horários e ações da extensão ficam neste navegador. Nenhuma mensagem, pessoa ou conversa é registrada.</p>
         </section>
@@ -2129,7 +2137,14 @@
         setNormalTemporarily(normalAttemptRecent ? "recent-explicit" : "immediate");
       }
       if (action === "awareness") {
+        const diagnosticButton = overlay.querySelector('[data-mwf-action="return-diagnostic"]');
+        if (diagnosticButton) diagnosticButton.textContent = 'Copiar diagnóstico do último retorno';
         openAwarenessSummary();
+      }
+      if (action === 'return-diagnostic' && event.isTrusted) {
+        const diagnostic = globalThis.MirrorFocusDiagnostic?.snapshot();
+        if (diagnostic) await copyDiagnostic(diagnostic, button);
+        else button.textContent = 'Nenhum retorno registrado nesta aba';
       }
       if (action === "awareness-close") {
         closeAwarenessSummary();
@@ -2167,7 +2182,7 @@
     button.title = "Voltar ao modo foco (Alt+Shift+F)";
     button.addEventListener("click", () => {
       if (root().classList.contains(ROOT_NORMAL) || surfaceExpiry.isContinuing()) recordAwareness("focus_returned", { reason: "manual" });
-      setActive({ showOverlay: true });
+      setActive({ showOverlay: true, reason:'button' });
     });
 
     getControlsContainer().appendChild(button);
@@ -2442,7 +2457,7 @@
           const focusShortcut = event.altKey && event.shiftKey && !event.ctrlKey && !event.metaKey && event.key.toLowerCase() === "f";
           if (!focusShortcut) {
             event.preventDefault(); event.stopImmediatePropagation();
-            if (event.key === "Escape") { markUnread.cancel(); setActive({showOverlay:true}); }
+            if (event.key === "Escape") { markUnread.cancel(); setActive({showOverlay:true, reason:'cancel-unread'}); }
             return;
           }
           markUnread.cancel();
@@ -2460,7 +2475,7 @@
           event.preventDefault();
           event.stopImmediatePropagation();
           if (root().classList.contains(ROOT_NORMAL) || surfaceExpiry.isContinuing()) recordAwareness("focus_returned", { reason: "manual" });
-          setActive({ showOverlay: true });
+          setActive({ showOverlay: true, reason:'shortcut' });
         }
         if (event.key.toLowerCase() === "l") {
           event.preventDefault();
@@ -2625,13 +2640,23 @@
     }
   }
 
-  function chooseNormalExpiryDestination(surface = nativeSurface.inspect()) {
+  function diagnosticSample(surface = nativeSurface.inspect()) {
+    const classes = root().classList;
+    const mode = classes.contains(ROOT_NORMAL) ? 'normal' : classes.contains(ROOT_SEARCH_FOCUSED) ? 'focused'
+      : classes.contains(ROOT_SEARCHING) ? 'search' : classes.contains(ROOT_OVERLAY_OPEN) ? 'blind' : 'other';
+    return {surface, mode, tabVisible:document.visibilityState === 'visible', documentHasFocus:document.hasFocus(),
+      hasOpenContent:hasOpenConversation(), hasDeadline:surfaceExpiry.hasDeadline()};
+  }
+
+  function chooseNormalExpiryDestination(surface = nativeSurface.inspect(), phase = 'deadline') {
     const visibilityState = document.visibilityState;
     const documentHasFocus = document.hasFocus();
     const hasOpenContent = hasOpenConversation();
     const destination = globalThis.MirrorFocusState?.chooseExpiryDestination({
       visibilityState, documentHasFocus, hasOpenConversation: hasOpenContent, surface,
     }) || "blind-overlay";
+    globalThis.MirrorFocusDiagnostic?.decision({...diagnosticSample(surface), phase, destination,
+      tabVisible:visibilityState === 'visible', documentHasFocus, hasOpenContent});
     return destination;
   }
 
@@ -2641,11 +2666,16 @@
     surfaceExpiry.cancel();
     recordNormalOpenedAt();
     setNormal();
+    globalThis.MirrorFocusDiagnostic?.start(normalExpiryTestMode ? TEST_BYPASS_MS : BYPASS_MS);
     surfaceExpiry.start();
   }
 
   function boot() {
     authSurface.start();
+    // Capture only the time of genuine input, never keys, text, targets or coordinates.
+    for (const type of ['wheel','pointerdown','keydown','touchstart']) {
+      document.addEventListener(type, event => globalThis.MirrorFocusDiagnostic?.activity(event), {capture:true, passive:true});
+    }
     installUnreadSidebarPointerGuard();
     startDevRefresh();
     installKeyboardShortcuts();
@@ -2661,7 +2691,7 @@
       }
       await loadFixedCollections();
       ensureControls();
-      setActive({ showOverlay: true });
+      setActive({ showOverlay: true, reason:'boot' });
     });
   }
 

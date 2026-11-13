@@ -22,7 +22,7 @@
     function expire(token) {
       if (!valid(token)) return;
       const surface = inspect();
-      const destination = chooseDestination(surface);
+      const destination = chooseDestination(surface, 'deadline');
       if (!valid(token)) return;
       if (destination === 'status-player') {
         pending = 'status-player'; onStatus();
@@ -34,7 +34,7 @@
           if (!valid(token) || !completionPending) return;
           completionPending = false;
           // A late native-normalization completion must not seize a newer surface.
-          if (chooseDestination(inspect()) !== 'focused-conversation') { expire(token); return; }
+          if (chooseDestination(inspect(), 'after-normalization') !== 'focused-conversation') { expire(token); return; }
           onReturned('focused-conversation');
           if (valid(token)) onConversation();
         });

@@ -158,6 +158,16 @@ A regra antiga de foco foi confirmada pelo Navigator: documento sem foco ou aba
 oculta ao expirar retorna ao Modo foco, mesmo em canal/Status. Falsos negativos
 são preferidos à distração prolongada; não ampliar a exceção para outra janela.
 
+## Diagnóstico de retorno inesperado
+
+Após recarregar extensão e aba, o último retorno ao foco fica registrado **somente
+na memória da aba**, sem aviso automático, nomes, mensagens ou identificadores.
+Se fechar inesperadamente, use **Ver padrão de uso → Copiar diagnóstico do último
+retorno** e envie o JSON antes de recarregar ou provocar outro retorno. Inclui as
+checagens de foco/visibilidade antes e depois da normalização, motivo e idade da
+última interação capturada. Não muda a regra de expiração nem os testes de 10s.
+[Detalhes](docs/surface-aware-expiry.md#last-return-diagnostic--silent-and-transient).
+
 ## Ajustar trecho de conversa no clipboard
 
 Com **um único participante** no trecho, os rótulos (`Eu:` / `Pessoa 1:`) são omitidos,
