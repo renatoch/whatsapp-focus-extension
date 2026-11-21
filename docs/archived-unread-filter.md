@@ -9,6 +9,15 @@ exit/re-entry/focus cleanup were validated in dedicated Chrome. Specific live/em
 opening edge coverage is not inferred from this acceptance. 322 Node tests pass (275 previous + 47 regressions). No DS6 changes or release.
 [Investigation, corrected assumptions and native evidence](archived-unread-filter-investigation.md).
 
+## Compatibility fix
+
+A newer WhatsApp Web drawer retains its source in a module closure rather than
+in a React hook. The adapter recognizes this drawer and reproduces the native
+read-only collection query, including channel gating. It still requires the full
+source to match the committed native list by model identity and order before
+enabling the button. Read-only parity and the native unread predicate were
+verified in the diagnostic profile; installed toggle validation is separate.
+
 ## Use
 
 Open Archived while in normal mode or with the sidebar explicitly open. The

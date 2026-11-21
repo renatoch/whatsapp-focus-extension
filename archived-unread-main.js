@@ -67,13 +67,30 @@
       const t=Function.prototype.toString.call(s[0]);
       return t.includes('ChatCollection.filter') && t.includes('getShouldAppearInList') && t.includes('.archive') && !/\.(?:setVal|set|unset|dispatch|send|markRead|openChat)\(/.test(t);
     });
-    if(states.length!==1 || getters.length!==1) throw Error('schema');
-    const queue=states[0].queue, get=getters[0].memoizedState[0]; targetQueue=queue;
+    if(states.length!==1 || getters.length>1) throw Error('schema');
+    const collection=requireNative('WAWebChatCollection').ChatCollection;
+    const queue=states[0].queue;
+    let get=getters[0]?.memoizedState[0];
+    if(!get) {
+      // The compiler-based drawer keeps its source in a module closure, not a hook.
+      // Reproduce its read-only collection query; still require exact native parity.
+      const text=Function.prototype.toString.call(type);
+      if(!['react-compiler-runtime','WAWebArchivedDrawer','WAWebNewsletterChatListUtils','archived-chatlist'].every(m=>text.includes(m))) throw Error('schema');
+      const {getShouldAppearInList}=requireNative('WAWebFrontendChatGetters');
+      const {isChannelsInChatListEnabled}=requireNative('WAWebNewsletterGatingUtils');
+      get=()=>{
+        const chats=collection.filter(chat=>chat.archive && getShouldAppearInList(chat));
+        if(!isChannelsInChatListEnabled()) return chats;
+        const {isArchivedChatListChannel}=requireNative('WAWebNewsletterChatListUtils');
+        const channels=requireNative('WAWebNewsletterCollection').filter(isArchivedChatListChannel);
+        return channels.length ? [...chats,...channels].sort(requireNative('WAWebChatComparator')) : chats;
+      };
+    }
+    targetQueue=queue;
     function source() { const a=get(); if(!valid(a)) throw Error('schema'); return a; }
     if(!same(source(),models)) throw Error('schema');
     const matcher=requireNative('WAWebChatMessageSearch').matchFilter;
     const kind=requireNative('WAWebChatSearchFilters').SearchFilters?.UNREAD;
-    const collection=requireNative('WAWebChatCollection').ChatCollection;
     if(typeof matcher!=='function' || kind==null || typeof collection?.on!=='function' || typeof collection?.off!=='function') throw Error('schema');
     const element=renderer.memoizedProps.renderItem(renderer.memoizedProps.data[0],0);
     const selection=element?.props?.active;

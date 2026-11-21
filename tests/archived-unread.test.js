@@ -79,6 +79,29 @@ function nativeFixture(){
 test('adapter discovers unique native source/setter by reference shape, not fixed hook index',()=>{
  const f=nativeFixture(),a=discover(f.document,f.requireNative);assert.deepEqual(a.source(),f.models);a.set([f.models[1]]);assert.deepEqual(a.current(),[f.models[1]]);assert.equal(a.unread(f.models[1]),true);const off=a.subscribe(()=>{});assert.ok(f.events.has('change:unreadCount'));off();assert.equal(f.events.size,0);
 });
+function compiledFixture(){
+ const f=nativeFixture();
+ f.owner.type=function(){return 'react-compiler-runtime WAWebArchivedDrawer WAWebChatCollection WAWebDrawerHeader.react WAWebFlatList.react WAWebNewsletterChatListUtils archived-chatlist';};
+ f.owner.memoizedState=f.state;
+ let gate=false,channels=[];
+ const modules={WAWebFrontendChatGetters:{getShouldAppearInList:c=>c.visible!==false},WAWebNewsletterGatingUtils:{isChannelsInChatListEnabled:()=>gate},WAWebNewsletterCollection:{filter:fn=>channels.filter(fn)},WAWebNewsletterChatListUtils:{isArchivedChatListChannel:c=>c.archive},WAWebChatComparator:(a,b)=>a.order-b.order};
+ return {...f,requireNative:name=>modules[name]??f.requireNative(name),channels:value=>{gate=true;channels=value;}};
+}
+test('compiled drawer uses current native collection and keeps exact initial reference/order validation',()=>{
+ const f=compiledFixture(),a=discover(f.document,f.requireNative);assert.deepEqual(a.source(),f.models);
+ const added={archive:true,unreadCount:2};f.models.push(added,{archive:false},{archive:true,unreadCount:0,visible:false});
+ assert.deepEqual(a.source(),f.models.slice(0,3));assert.equal(f.writes(),0);
+ const mismatch=compiledFixture();mismatch.models.reverse();assert.throws(()=>discover(mismatch.document,mismatch.requireNative));assert.equal(mismatch.writes(),0);
+});
+test('compiled source preserves native channel gating and still rejects unsupported models',()=>{
+ const f=compiledFixture();f.models.forEach((c,i)=>c.order=i*2);f.channels([]);
+ const a=discover(f.document,f.requireNative);const channel={archive:true,order:1};
+ f.channels([channel]);assert.throws(()=>a.source());
+ channel.unreadCount=0;assert.deepEqual(a.source(),[f.models[0],channel,f.models[1]]);
+});
+test('missing source hook without the known compiler drawer shape stays unsupported',()=>{
+ const f=nativeFixture();f.owner.memoizedState=f.state;assert.throws(()=>discover(f.document,f.requireNative));assert.equal(f.writes(),0);
+});
 test('adapter resolves committed root rather than stale DOM-linked fiber',()=>{
  const f=nativeFixture(),old=f.root,committed={stateNode:f.rootHandle,child:f.owner};f.rootHandle.current=committed;f.owner.return=committed;const stale={...f.owner,return:old,memoizedState:null};f.host.return={return:stale};const a=discover(f.document,f.requireNative);a.set([]);assert.equal(f.writes(),1);
 });
